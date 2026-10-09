@@ -50,7 +50,7 @@ export function Hero({ lang }: { lang: Locale }) {
         {/* Luz ambiente — muito lenta, apenas atmosfera */}
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-[38%] size-[70vmax] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 motion-safe:animate-[drift_22s_ease-in-out_infinite]"
+          className="pointer-events-none absolute left-1/2 top-[38%] size-[70vmax] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 animate-[drift_22s_ease-in-out_infinite]"
           style={{ background: "radial-gradient(closest-side, rgba(198,161,91,0.10), transparent 70%)" }}
         />
       </motion.div>

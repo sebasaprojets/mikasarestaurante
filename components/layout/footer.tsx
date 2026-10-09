@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
+import { FooterWordmark } from "@/components/layout/footer-wordmark";
 import { InstagramIcon, ThreadsIcon, WhatsAppIcon } from "@/components/brand/icons";
 import { getCopy } from "@/data/copy";
 import { site } from "@/data/site";
@@ -104,6 +105,9 @@ export function Footer({ lang }: { lang: Locale }) {
           </p>
           <p className="uppercase tracking-[0.28em]">Playa Dorada · Puerto Plata</p>
         </div>
+
+        {/* MIKASA gigante revelado letra a letra no fim da página */}
+        <FooterWordmark />
       </div>
     </footer>
   );

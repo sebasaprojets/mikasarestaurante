@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Embers } from "@/components/effects/embers";
 import { OffscreenPause } from "@/components/effects/offscreen-pause";
 import { MediaFrame } from "@/components/media/media-frame";
+import { BrushKanji } from "@/components/motion/brush-kanji";
 import { MaskReveal } from "@/components/motion/mask-reveal";
 import { Reveal } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/sections/section-heading";
@@ -28,7 +29,7 @@ export function Robata({ lang }: { lang: Locale }) {
       {/* Brasa ao fundo + textura de carvão */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[70%] opacity-90 motion-safe:animate-[drift_14s_ease-in-out_infinite]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[70%] opacity-90 animate-[drift_14s_ease-in-out_infinite]"
         style={{ background: "radial-gradient(60% 55% at 50% 100%, rgba(217,119,43,0.20), rgba(168,50,42,0.06) 45%, transparent 75%)" }}
       />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 mk-washi opacity-60" />
@@ -39,6 +40,7 @@ export function Robata({ lang }: { lang: Locale }) {
         <div className="grid gap-10 lg:grid-cols-12">
           <SectionHeading index="03" eyebrow={c.robata.eyebrow} title={c.robata.title} kanji="炎" className="lg:col-span-7" />
           <Reveal className="self-end lg:col-span-4 lg:col-start-9" delay={0.2}>
+            <BrushKanji char="炎" className="mb-6 size-24 opacity-90 md:size-32" delay={0.2} />
             <p className="font-display text-xl italic text-ouro-claro md:text-2xl">{c.robata.tagline}</p>
           </Reveal>
         </div>

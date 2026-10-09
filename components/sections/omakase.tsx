@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { MediaFrame } from "@/components/media/media-frame";
+import { BrushKanji } from "@/components/motion/brush-kanji";
 import { SmartLink } from "@/components/layout/smart-link";
 import { Button } from "@/components/ui/button";
 import { getCopy } from "@/data/copy";
@@ -132,6 +133,7 @@ export function Omakase({ lang }: { lang: Locale }) {
 
   const intro = (
     <div className={cn("flex shrink-0 flex-col justify-center", pinned ? "w-full pr-10" : "w-[82vw] snap-start sm:w-[58vw]")}>
+      <BrushKanji char="匠" className="mb-6 size-20 opacity-90 xl:size-24" />
       <div className="mb-7 flex items-center gap-4">
         <span className="font-sans text-[0.65rem] tracking-[0.3em] text-washi-mute tabular-nums">02</span>
         <span aria-hidden className="h-px w-10 bg-ouro/70" />
