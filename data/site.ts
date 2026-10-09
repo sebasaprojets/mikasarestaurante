@@ -130,10 +130,11 @@ export const site = {
 
   /** Itens que ainda precisam ser fornecidos pelo restaurante. */
   pending: [
-    "Logo oficial (SVG) e kanji do logo",
+    "Logo oficial em SVG (o kanji dourado da capa do menu)",
     "Domínio de produção (NEXT_PUBLIC_SITE_URL)",
     "Fotos e vídeos oficiais (ver data/media.ts)",
-    "Transcrição completa dos menus (ver data/menu.ts e data/bar.ts)",
+    "Transcrição do menu do bar (ver data/bar.ts)",
+    "Tags dos pratos (vegetariano / picante / signature) a validar com o restaurante",
     "Avaliações reais de Google / TripAdvisor (ver data/reviews.ts)",
   ],
 } as const;

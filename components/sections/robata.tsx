@@ -6,7 +6,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/sections/section-heading";
 import { Button } from "@/components/ui/button";
 import { getCopy } from "@/data/copy";
-import { findItem, robataGroups } from "@/data/menu";
+import { findCategory, findItem, robataFeatured, robataGroups } from "@/data/menu";
 import { localePath, type Locale } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
 import { sectionIds } from "@/lib/nav";
@@ -14,7 +14,8 @@ import { sectionIds } from "@/lib/nav";
 /** Japanese Robata Steak House — mudança de atmosfera: mais quente, mais escura, âmbar. */
 export function Robata({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
-  const tomahawk = findItem("tomahawk-brangus");
+  const tomahawk = findItem(robataFeatured);
+  const sides = findCategory("robata-steak-house")?.lista?.[lang] ?? [];
   const price = tomahawk ? formatPrice(tomahawk.preco, lang) : null;
 
   return (
@@ -54,15 +55,14 @@ export function Robata({ lang }: { lang: Locale }) {
               <p className="mt-2 font-display text-[clamp(3rem,2rem+4vw,5.5rem)] font-light leading-none text-ouro">
                 {tomahawk.porcao}
               </p>
+              <p className="mt-3 font-sans text-[0.62rem] uppercase tracking-[0.28em] text-washi-mute">{c.robata.sides}</p>
               <p className="mt-6 max-w-[34ch] text-sm leading-relaxed text-washi-dim">{tomahawk.descricao?.[lang]}</p>
-              <p className="mt-5 font-sans text-[0.7rem] uppercase tracking-[0.24em] text-washi-mute">
-                {price ?? c.menuPage.pendingPrice}
-              </p>
+              <p className="mt-5 font-display text-3xl text-ouro-claro tabular-nums">{price ?? c.menuPage.pendingPrice}</p>
             </Reveal>
           </div>
         ) : null}
 
-        {/* Cortes CAB · Brangus · Acompanhamentos */}
+        {/* Cortes CAB · Brangus · Clássicos */}
         <div className="mt-24 grid gap-px border border-[rgba(217,119,43,0.18)] bg-[rgba(217,119,43,0.18)] md:grid-cols-3">
           {robataGroups.map((g, i) => (
             <Reveal key={g.id} delay={i * 0.1} className="bg-[#100906] p-8 md:p-10">
@@ -70,21 +70,35 @@ export function Robata({ lang }: { lang: Locale }) {
                 <h3 className="font-display text-display-sm text-washi">{g.nome[lang]}</h3>
                 <span className="font-sans text-[0.6rem] tracking-[0.3em] text-brasa/80 tabular-nums">0{i + 1}</span>
               </div>
-              {g.itens.length ? (
-                <ul className="mt-6 space-y-2 text-sm text-washi-dim">
-                  {g.itens.map((it) => (
-                    <li key={it}>{it}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-6 text-sm leading-relaxed text-washi-mute">{c.robata.pendingGroup}</p>
-              )}
-              {g.id === "acompanamientos" ? (
-                <p className="mt-6 font-sans text-[0.62rem] uppercase tracking-[0.28em] text-ouro">{c.robata.sides}</p>
-              ) : null}
+              <ul className="mt-7 space-y-5">
+                {g.itens.map((id) => {
+                  const it = findItem(id);
+                  if (!it) return null;
+                  return (
+                    <li key={id}>
+                      <div className="flex items-baseline">
+                        <span className="font-display text-lg leading-snug text-washi">{it.nome[lang]}</span>
+                        <span aria-hidden className="mk-leader" />
+                        <span className="shrink-0 font-display text-lg text-ouro tabular-nums">{formatPrice(it.preco, lang)}</span>
+                      </div>
+                      {it.porcao ? (
+                        <span className="mt-1 block font-sans text-[0.62rem] uppercase tracking-[0.24em] text-washi-mute">{it.porcao}</span>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
             </Reveal>
           ))}
         </div>
+
+        {/* Acompanhamentos incluídos */}
+        {sides.length ? (
+          <Reveal className="mt-10 flex flex-col gap-4 border-b border-[rgba(217,119,43,0.18)] pb-10 md:flex-row md:items-baseline md:gap-10">
+            <p className="shrink-0 font-sans text-[0.62rem] uppercase tracking-[0.28em] text-ouro">{c.robata.sides}</p>
+            <p className="font-display text-lg italic leading-relaxed text-washi-dim">{sides.join(" · ")}</p>
+          </Reveal>
+        ) : null}
 
         <div className="mt-14">
           <Button asChild variant="link" size="none">

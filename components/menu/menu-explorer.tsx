@@ -162,6 +162,28 @@ function HoverPreview({ item, lang }: { item: MenuItem | null; lang: Locale }) {
 
 /* ─────────────── Item ─────────────── */
 
+function priceLabel(item: MenuItem, lang: Locale) {
+  const p = formatPrice(item.preco, lang);
+  if (!p) return null;
+  return item.opcoes ? `${getCopy(lang).menuPage.from} ${p}` : p;
+}
+
+function Options({ item, lang }: { item: MenuItem; lang: Locale }) {
+  if (!item.opcoes) return null;
+  return (
+    <div className="mt-3">
+      <p className="font-sans text-[0.6rem] uppercase tracking-[0.24em] text-ouro">{item.opcoes.titulo[lang]}</p>
+      <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-washi-dim">
+        {item.opcoes.itens.map((o) => (
+          <li key={o.nome.en}>
+            {o.nome[lang]} <span className="font-display text-base text-ouro tabular-nums">{formatPrice(o.preco, lang)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function TagList({ tags, lang }: { tags: MenuTag[]; lang: Locale }) {
   const c = getCopy(lang);
   if (!tags.length) return null;
@@ -188,22 +210,24 @@ function ItemRow({
   onHover: (i: MenuItem | null) => void;
 }) {
   const c = getCopy(lang);
-  const price = formatPrice(item.preco, lang);
+  const price = priceLabel(item, lang);
   return (
     <li className="border-b border-line">
       <button
         type="button"
         onClick={() => onOpen(item)}
-        onPointerEnter={(e) => e.pointerType === "mouse" && onHover(item)}
+        onPointerEnter={(e) => e.pointerType === "mouse" && item.imagem && onHover(item)}
         onPointerLeave={() => onHover(null)}
         onFocus={() => onHover(null)}
         className="group grid w-full gap-5 py-7 text-left md:py-8"
         aria-label={`${item.nome[lang]}${price ? ` — ${price}` : ""}. ${c.menuPage.view}`}
       >
-        {/* Mobile: card com imagem */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden md:hidden">
-          <MediaFrame asset={item.imagem} lang={lang} fallbackLabel={item.nome[lang]} kanji="匠" sizes="100vw" />
-        </div>
+        {/* Mobile: card com imagem (quando o prato tem mídia) */}
+        {item.imagem ? (
+          <div className="relative aspect-[4/3] w-full overflow-hidden md:hidden">
+            <MediaFrame asset={item.imagem} lang={lang} fallbackLabel={item.nome[lang]} kanji="匠" sizes="100vw" />
+          </div>
+        ) : null}
 
         <div>
           <div className="flex items-baseline">
@@ -222,6 +246,8 @@ function ItemRow({
           <p className="mt-2 max-w-[60ch] text-sm leading-relaxed text-washi-dim">
             {item.descricao?.[lang] ?? <span className="text-washi-mute">{c.menuPage.pendingDescription}</span>}
           </p>
+          {item.escolha ? <p className="mt-1.5 text-sm italic text-washi-mute">{item.escolha[lang]}</p> : null}
+          <Options item={item} lang={lang} />
           {item.tags.length ? (
             <div className="mt-3">
               <TagList tags={item.tags} lang={lang} />
@@ -238,7 +264,7 @@ function ItemRow({
 function ItemDialog({ item, lang, onClose }: { item: MenuItem | null; lang: Locale; onClose: () => void }) {
   const c = getCopy(lang);
   const cat = item ? menuCategories.find((x) => x.id === item.categoria) : null;
-  const price = item ? formatPrice(item.preco, lang) : null;
+  const price = item ? priceLabel(item, lang) : null;
   return (
     <Dialog open={!!item} onOpenChange={(v) => !v && onClose()}>
       <DialogContent closeLabel={c.a11y.close} className="grid md:grid-cols-2">
@@ -268,6 +294,8 @@ function ItemDialog({ item, lang, onClose }: { item: MenuItem | null; lang: Loca
               <DialogDescription className="mt-6 text-[0.95rem] leading-relaxed text-washi-dim">
                 {item.descricao?.[lang] ?? c.menuPage.pendingDescription}
               </DialogDescription>
+              {item.escolha ? <p className="mt-3 text-sm italic text-washi-mute">{item.escolha[lang]}</p> : null}
+              <Options item={item} lang={lang} />
               <dl className="mt-8 space-y-3 border-t border-line pt-6 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-washi-mute">USD</dt>
@@ -280,9 +308,9 @@ function ItemDialog({ item, lang, onClose }: { item: MenuItem | null; lang: Loca
                   </div>
                 ) : null}
                 {cat?.nota ? (
-                  <div className="flex justify-between">
-                    <dt className="text-washi-mute">{c.menuPage.includes}</dt>
-                    <dd className="text-washi">{cat.nota[lang]}</dd>
+                  <div className="flex justify-between gap-6">
+                    <dt className="shrink-0 text-washi-mute">{c.menuPage.includes}</dt>
+                    <dd className="text-right text-washi">{cat.lista ? cat.lista[lang].join(" · ") : cat.nota[lang]}</dd>
                   </div>
                 ) : null}
               </dl>
@@ -316,6 +344,8 @@ export function MenuExplorer({ lang }: { lang: Locale }) {
   const [selected, setSelected] = useState<MenuItem | null>(null);
 
   const searching = query.trim().length > 0 || filters.length > 0;
+  // só exibe filtros que tenham ao menos um prato marcado na carta
+  const availableTags = filterTags.filter((t) => menuItems.some((i) => i.tags.includes(t)));
 
   const groups = useMemo(() => {
     const q = normalize(query.trim());
@@ -325,7 +355,9 @@ export function MenuExplorer({ lang }: { lang: Locale }) {
           if (i.categoria !== cat.id) return false;
           if (filters.length && !filters.every((f) => i.tags.includes(f))) return false;
           if (!q) return true;
-          const hay = normalize([i.nome.es, i.nome.en, i.descricao?.[lang] ?? "", ...(i.componentes ?? [])].join(" "));
+          const hay = normalize(
+            [i.nome.es, i.nome.en, i.descricao?.[lang] ?? "", i.escolha?.[lang] ?? "", ...(i.componentes ?? []), ...(i.opcoes?.itens.map((o) => o.nome[lang]) ?? [])].join(" "),
+          );
           return hay.includes(q);
         });
         return { cat, items };
@@ -372,7 +404,7 @@ export function MenuExplorer({ lang }: { lang: Locale }) {
           </div>
 
           <div role="group" aria-label={m.filters} className="flex flex-wrap items-center gap-2">
-            {filterTags.map((t) => {
+            {availableTags.map((t) => {
               const on = filters.includes(t);
               return (
                 <button
@@ -413,7 +445,15 @@ export function MenuExplorer({ lang }: { lang: Locale }) {
                 <h2 id={`${cat.id}-title`} className="mt-4 font-display text-display-md font-light text-washi">
                   {cat.nome[lang]}
                 </h2>
-                {cat.nota ? <p className="mt-4 font-sans text-[0.65rem] uppercase tracking-[0.28em] text-ouro">{cat.nota[lang]}</p> : null}
+                {cat.subtitulo ? <p className="mt-3 font-display text-lg italic text-ouro-claro/90">{cat.subtitulo[lang]}</p> : null}
+                {cat.nota ? <p className="mt-6 font-sans text-[0.65rem] uppercase tracking-[0.28em] text-ouro">{cat.nota[lang]}</p> : null}
+                {cat.lista ? (
+                  <ul className="mt-3 space-y-1 text-sm text-washi-dim">
+                    {cat.lista[lang].map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
+                  </ul>
+                ) : null}
                 {cat.status === "parcial" && !searching ? (
                   <p className="mt-6 max-w-[30ch] text-xs leading-relaxed text-washi-mute">{m.partialCategory}</p>
                 ) : null}

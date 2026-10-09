@@ -44,6 +44,7 @@ const es = {
   hero: {
     eyebrow: "Japanese Nikkei Cuisine · Puerto Plata",
     headline: "Donde la precisión japonesa encuentra el alma Nikkei",
+    subline: "Una experiencia de fuego, mar y sabor curada por los chefs",
     primary: "Reservar mesa",
     secondary: "Ver menú",
     badge: "Restaurant Guru · 2023 · 2024 · 2025 · 2026 · ",
@@ -53,9 +54,23 @@ const es = {
     eyebrow: "Filosofía",
     title: "Japón y Perú,\nen una misma barra.",
     manifesto:
-      "Nikkei nace de un encuentro. La disciplina japonesa del corte, del arroz y del silencio, frente a la intensidad y el color del Perú. En MIKASA ambas tradiciones conversan en cada plato: respeto absoluto por el producto, precisión en cada gesto y un fuego que nunca se apresura.",
-    signature: "Precisión · Producto · Fuego",
+      "Toda gran gastronomía cuenta una historia. La cocina Nikkei representa el encuentro de culturas, tradiciones y generaciones, donde la precisión japonesa abraza el vibrante espíritu del Perú.",
+    signature: "Criolla · Chifa · Nikkei",
     caption: "La barra",
+    pillars: [
+      {
+        name: "Criolla",
+        text: "Nacida durante la época colonial del Perú, la cocina Criolla reúne las tradiciones europea, africana e indígena en una de las herencias culinarias más ricas del país. Sus sabores intensos y recetas tradicionales son la base de la gastronomía peruana.",
+      },
+      {
+        name: "Chifa",
+        text: "La cocina Chifa representa la unión de ingredientes peruanos con técnicas culinarias chinas. El arte del wok se fusiona con sabores nativos como el ají amarillo, el cilantro, el jengibre, la salsa de soya y los vegetales frescos, dando origen a una de las cocinas más emblemáticas del Perú.",
+      },
+      {
+        name: "Nikkei",
+        text: "La cocina Nikkei es la elegante fusión entre la maestría japonesa y la creatividad peruana. Basada en mariscos de primera calidad, ingredientes premium y una técnica impecable, ofrece una experiencia gastronómica reconocida y celebrada en todo el mundo.",
+      },
+    ],
   },
   omakase: {
     eyebrow: "Omakase Experience",
@@ -72,12 +87,16 @@ const es = {
     featured: "Corte insignia",
     sides: "Acompañamientos incluidos",
     pendingGroup: "Selección por confirmar con la carta oficial",
+    from: "desde",
     cta: "Ver cortes en la carta",
   },
   menuPreview: {
     eyebrow: "MIKASA Menu",
     title: "La carta",
-    intro: "Ocho capítulos, de la barra de sushi al fuego de la robata.",
+    intro: "De las entradas a la barra de sushi, el omakase y el fuego de la robata.",
+    dishes: "platos",
+    dish: "plato",
+    from: "desde",
     cta: "Explorar la carta",
     original: "Ver menú original",
   },
@@ -203,8 +222,9 @@ const es = {
     includes: "Incluye",
     original: "Ver menú original",
     notice:
-      "Estamos transcribiendo la carta oficial. Para la versión vigente y completa, consulte el menú original.",
+      "Transcripción de la carta oficial de MIKASA. Para la versión impresa vigente, consulte el menú original.",
     reserve: "Reservar mesa",
+    from: "desde",
     view: "Ver detalle",
   },
   barPage: {
@@ -269,6 +289,7 @@ const en: Copy = {
   hero: {
     eyebrow: "Japanese Nikkei Cuisine · Puerto Plata",
     headline: "Where Japanese precision meets Nikkei soul",
+    subline: "An experience of fire, sea, and flavour curated by the chefs",
     primary: "Reserve a table",
     secondary: "View menu",
     badge: "Restaurant Guru · 2023 · 2024 · 2025 · 2026 · ",
@@ -278,9 +299,23 @@ const en: Copy = {
     eyebrow: "Philosophy",
     title: "Japan and Peru,\nat one counter.",
     manifesto:
-      "Nikkei is born of an encounter. The Japanese discipline of the cut, the rice and the silence, meeting the intensity and colour of Peru. At MIKASA both traditions converse in every dish: absolute respect for the product, precision in every gesture and a fire that is never rushed.",
-    signature: "Precision · Product · Fire",
+      "Every great cuisine tells a story. Nikkei cuisine is the meeting of cultures, traditions, and generations, where Japanese precision embraces the vibrant soul of Peru.",
+    signature: "Criolla · Chifa · Nikkei",
     caption: "The counter",
+    pillars: [
+      {
+        name: "Criolla",
+        text: "Born during Peru's colonial era, Criolla cuisine combines European, African, and Indigenous traditions into one of the country's richest culinary heritages. Its bold flavors and time-honored recipes remain the foundation of Peruvian gastronomy.",
+      },
+      {
+        name: "Chifa",
+        text: "Chifa represents the union of Peruvian ingredients with Chinese culinary techniques. The art of wok cooking blends seamlessly with native flavors such as ají amarillo, cilantro, ginger, soy, and fresh vegetables, creating one of Peru's most iconic cuisines.",
+      },
+      {
+        name: "Nikkei",
+        text: "Nikkei cuisine is the elegant fusion of Japanese craftsmanship and Peruvian creativity. Built on the finest seafood, premium ingredients, and meticulous technique, it delivers a culinary experience recognized and celebrated around the world.",
+      },
+    ],
   },
   omakase: {
     eyebrow: "Omakase Experience",
@@ -297,12 +332,16 @@ const en: Copy = {
     featured: "Signature cut",
     sides: "Sides included",
     pendingGroup: "Selection to be confirmed with the official menu",
+    from: "from",
     cta: "See cuts on the menu",
   },
   menuPreview: {
     eyebrow: "MIKASA Menu",
     title: "The menu",
-    intro: "Eight chapters, from the sushi counter to the robata fire.",
+    intro: "From appetizers to the sushi counter, the omakase and the robata fire.",
+    dishes: "dishes",
+    dish: "dish",
+    from: "from",
     cta: "Explore the menu",
     original: "View original menu",
   },
@@ -426,8 +465,9 @@ const en: Copy = {
     includes: "Includes",
     original: "View original menu",
     notice:
-      "We are transcribing the official menu. For the current, complete version, please see the original menu.",
+      "Transcribed from the official MIKASA menu. For the current printed version, please see the original menu.",
     reserve: "Reserve a table",
+    from: "from",
     view: "View details",
   },
   barPage: {

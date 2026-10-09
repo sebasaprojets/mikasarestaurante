@@ -44,6 +44,24 @@ export function Philosophy({ lang }: { lang: Locale }) {
           </span>
         </div>
       </div>
+
+      {/* Criolla · Chifa · Nikkei — texto oficial da carta */}
+      <div className="mx-auto mt-[clamp(5rem,10vw,9rem)] max-w-[1600px] px-[var(--spacing-gutter)]">
+        <ol className="grid gap-px border-y border-line bg-line md:grid-cols-3">
+          {c.philosophy.pillars.map((p, i) => (
+            <li key={p.name} className="bg-sumi">
+              <Reveal delay={i * 0.12} className="flex h-full flex-col p-8 md:p-10 lg:p-12">
+                <div className="flex items-baseline justify-between">
+                  <h3 className="font-display text-display-sm text-washi">{p.name}</h3>
+                  <span className="font-sans text-[0.6rem] tracking-[0.3em] text-ouro tabular-nums">0{i + 1}</span>
+                </div>
+                <span aria-hidden className={`mt-5 block h-px w-10 ${p.name === "Nikkei" ? "bg-torii" : "bg-ouro/60"}`} />
+                <p className="mt-6 text-sm leading-relaxed text-washi-dim">{p.text}</p>
+              </Reveal>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }

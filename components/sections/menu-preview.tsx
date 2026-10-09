@@ -4,7 +4,8 @@ import { Reveal } from "@/components/motion/reveal";
 import { SectionHeading } from "@/components/sections/section-heading";
 import { Button } from "@/components/ui/button";
 import { getCopy } from "@/data/copy";
-import { menuCategories } from "@/data/menu";
+import { itemsByCategory, menuCategories, minPrice } from "@/data/menu";
+import { formatPrice } from "@/lib/format";
 import { site } from "@/data/site";
 import { localePath, type Locale } from "@/lib/i18n";
 import { sectionIds } from "@/lib/nav";
@@ -48,6 +49,12 @@ export function MenuPreview({ lang }: { lang: Locale }) {
                   </span>
                   <span className="flex-1 font-display text-[clamp(1.4rem,1.1rem+1.2vw,2.25rem)] font-light text-washi transition-transform duration-1000 ease-[var(--ease-mikasa)] group-hover:translate-x-3">
                     {cat.nome[lang]}
+                  </span>
+                  <span className="hidden text-right font-sans text-[0.62rem] uppercase tracking-[0.24em] text-washi-mute sm:block">
+                    {itemsByCategory(cat.id).length} {itemsByCategory(cat.id).length === 1 ? c.menuPreview.dish : c.menuPreview.dishes}
+                    <span className="mt-1 block font-display text-base normal-case tracking-normal text-ouro/90">
+                      {c.menuPreview.from} {formatPrice(minPrice(cat.id), lang)}
+                    </span>
                   </span>
                   <ArrowUpRight
                     aria-hidden

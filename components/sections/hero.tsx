@@ -66,7 +66,14 @@ export function Hero({ lang }: { lang: Locale }) {
           className="max-w-[20ch] font-display text-display-xl font-light text-washi"
         />
 
-        <motion.div className="mt-11 flex flex-wrap items-center gap-x-9 gap-y-5" {...fadeUp(0.9)}>
+        <motion.p
+          className="mt-6 max-w-[40ch] font-display text-[clamp(1.1rem,0.95rem+0.6vw,1.5rem)] italic text-ouro-claro/90"
+          {...fadeUp(0.75)}
+        >
+          {c.hero.subline}
+        </motion.p>
+
+        <motion.div className="mt-10 flex flex-wrap items-center gap-x-9 gap-y-5" {...fadeUp(1)}>
           <Button asChild size="lg">
             <SmartLink href={homeAnchor(lang, sectionIds.reservation)}>{c.hero.primary}</SmartLink>
           </Button>

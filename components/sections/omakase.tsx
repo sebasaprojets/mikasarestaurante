@@ -1,34 +1,62 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { MediaFrame } from "@/components/media/media-frame";
 import { SmartLink } from "@/components/layout/smart-link";
 import { Button } from "@/components/ui/button";
 import { getCopy } from "@/data/copy";
-import { findItem, omakaseFeatured, type MenuItem } from "@/data/menu";
-import type { Locale } from "@/lib/i18n";
+import { findCategory, findItem, minPrice, omakaseFeatured } from "@/data/menu";
+import type { MediaAsset } from "@/data/media";
+import { localePath, type Locale } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
 import { homeAnchor, sectionIds } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-function Card({ item, index, lang }: { item: MenuItem; index: number; lang: Locale }) {
+type Feature = {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  componentes?: string[];
+  porcao?: string | null;
+  price: string | null;
+  imagem: MediaAsset | null;
+};
+
+function toFeatures(lang: Locale): Feature[] {
   const c = getCopy(lang);
-  const price = formatPrice(item.preco, lang);
+  return omakaseFeatured.flatMap((f): Feature[] => {
+    if ("item" in f) {
+      const it = findItem(f.item);
+      if (!it) return [];
+      return [{ id: it.id, nome: it.nome[lang], descricao: it.descricao?.[lang] ?? null, componentes: it.componentes, porcao: it.porcao, price: formatPrice(it.preco, lang), imagem: it.imagem }];
+    }
+    const cat = findCategory(f.categoria);
+    if (!cat) return [];
+    const from = formatPrice(minPrice(f.categoria), lang);
+    return [{ id: cat.id, nome: cat.nome[lang], descricao: f.descricao[lang], price: from ? `${c.menuPage.from} ${from}` : null, imagem: f.imagem }];
+  });
+}
+
+function Card({ item, index, lang }: { item: Feature; index: number; lang: Locale }) {
+  const c = getCopy(lang);
   return (
     <article className="group flex w-[82vw] shrink-0 snap-start flex-col sm:w-[58vw] md:w-[min(30rem,34vw)]">
-      <div
-        className="relative aspect-[4/5] w-full overflow-hidden md:aspect-auto md:h-[min(56vh,34rem)]"
+      <Link
+        href={`${localePath(lang, "/menu")}#${item.id === "hamachi-collection" ? "hamachi-collection" : "omakase-experience"}`}
+        className="relative block aspect-[4/5] w-full overflow-hidden md:aspect-auto md:h-[min(56vh,34rem)]"
         data-cursor={c.cursor.view}
+        aria-label={`${item.nome} — ${c.cursor.view}`}
       >
         <div className="size-full transition-transform duration-[1400ms] ease-[var(--ease-mikasa)] group-hover:scale-[1.04]">
           <MediaFrame asset={item.imagem} lang={lang} kanji="匠" sizes="(min-width:768px) 34vw, 82vw" />
         </div>
-      </div>
+      </Link>
       <div className="mt-6 flex items-baseline gap-4">
         <span className="font-sans text-[0.62rem] tracking-[0.3em] text-ouro tabular-nums">{String(index + 1).padStart(2, "0")}</span>
-        <h3 className="font-display text-display-sm text-washi">{item.nome[lang]}</h3>
+        <h3 className="font-display text-display-sm text-washi">{item.nome}</h3>
       </div>
       {item.componentes?.length ? (
         <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 pl-9">
@@ -40,10 +68,11 @@ function Card({ item, index, lang }: { item: MenuItem; index: number; lang: Loca
         </ul>
       ) : null}
       <p className="mt-3 max-w-[38ch] pl-9 text-sm leading-relaxed text-washi-dim">
-        {item.descricao?.[lang] ?? <span className="text-washi-mute">{c.menuPage.pendingDescription}</span>}
+        {item.descricao ?? <span className="text-washi-mute">{c.menuPage.pendingDescription}</span>}
       </p>
-      <p className="mt-4 pl-9 font-sans text-[0.7rem] uppercase tracking-[0.24em] text-washi-mute">
-        {price ?? c.menuPage.pendingPrice}
+      <p className="mt-4 flex items-baseline gap-4 pl-9 font-sans text-[0.7rem] uppercase tracking-[0.24em] text-washi-mute">
+        {item.porcao ? <span>{item.porcao}</span> : null}
+        <span className="font-display text-xl normal-case tracking-normal text-ouro">{item.price ?? c.menuPage.pendingPrice}</span>
       </p>
     </article>
   );
@@ -52,7 +81,7 @@ function Card({ item, index, lang }: { item: MenuItem; index: number; lang: Loca
 /** Omakase — seção assinatura com scroll horizontal fixado (desktop) e carrossel nativo (mobile). */
 export function Omakase({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
-  const items = omakaseFeatured.map(findItem).filter(Boolean) as MenuItem[];
+  const items = toFeatures(lang);
   const desktop = useMediaQuery("(min-width: 768px)");
   const reduce = useReducedMotion();
   const pinned = desktop && !reduce;
