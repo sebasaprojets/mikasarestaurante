@@ -54,7 +54,7 @@ export function CategoryTabs({
 
   return (
     <div className="sticky top-[var(--header-offset)] z-30 border-y border-line bg-sumi/85 backdrop-blur-xl transition-[top] duration-[900ms] ease-[var(--ease-mikasa)]">
-      <div ref={listRef} className="mk-no-scrollbar mx-auto max-w-[1600px] overflow-x-auto px-[var(--spacing-gutter)]">
+      <div ref={listRef} data-lenis-prevent className="mk-no-scrollbar mx-auto max-w-[1600px] overflow-x-auto px-[var(--spacing-gutter)]">
         <nav aria-label={label}>
           <LayoutGroup id={label}>
             <ul className="flex w-max gap-7 md:gap-10">

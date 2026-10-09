@@ -12,6 +12,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       options={{
         lerp: 0.1,
         smoothWheel: true,
+        // gesto lateral do trackpad também rola (ex.: carrossel do Omakase)
+        gestureOrientation: "both",
         anchors: { offset: -72 },
         stopInertiaOnNavigate: true,
         respectReducedMotion: false,
