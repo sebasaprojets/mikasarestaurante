@@ -5,7 +5,7 @@ import { animate, motion } from "motion/react";
 import { EMBLEM_ARC, GoldGradient } from "@/components/brand/logo";
 import { EMBLEM_VIEWBOX, KANJI_D, LETTERS, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-paths";
 import { Fire } from "@/components/effects/fire";
-import { INTRO_EVENT } from "@/lib/hooks/use-intro-ready";
+import { signalIntroDone } from "@/lib/hooks/use-intro-ready";
 
 export const INTRO_FORCE_KEY = "mk-intro-force";
 
@@ -83,7 +83,7 @@ export function Intro() {
   // saída
   useEffect(() => {
     if (phase !== "exit") return;
-    window.dispatchEvent(new Event(INTRO_EVENT));
+    signalIntroDone();
     const c = reduce ? null : animate(fireK.current, 1.25, { duration: 0.6, ease: EASE, onUpdate: (v) => (fireK.current = v) });
     const t = window.setTimeout(() => {
       document.documentElement.removeAttribute("data-intro");

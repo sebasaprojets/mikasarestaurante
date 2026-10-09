@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { canvasDpr, isLowEndDevice } from "@/lib/device";
+import { isPerfLite, PERF_LITE_EVENT } from "@/lib/perf";
 import { cn } from "@/lib/utils";
 
 type P = { x: number; y: number; r: number; vy: number; vx: number; life: number; max: number };
@@ -29,8 +31,8 @@ export function Embers({ className, count = 26 }: { className?: string; count?: 
     let h = 0;
     let raf = 0;
     let running = false;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    const n = window.innerWidth < 768 ? Math.round(count * 0.55) : count;
+    const dpr = canvasDpr(1, 1);
+    const n = Math.round((window.innerWidth < 768 ? count * 0.55 : count) * (isLowEndDevice() ? 0.6 : 1));
 
     const spawn = (initial = false): P => ({
       x: Math.random() * w,
@@ -80,7 +82,11 @@ export function Embers({ className, count = 26 }: { className?: string; count?: 
     });
     io.observe(canvas);
     window.addEventListener("resize", resize);
+    const lite = () => ps.splice(Math.ceil(ps.length * 0.5));
+    if (isPerfLite()) lite();
+    window.addEventListener(PERF_LITE_EVENT, lite);
     return () => {
+      window.removeEventListener(PERF_LITE_EVENT, lite);
       io.disconnect();
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);

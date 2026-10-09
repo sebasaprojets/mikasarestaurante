@@ -45,6 +45,7 @@ export function BrushKanji({
         </filter>
         <mask id={mid} maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
           <motion.path
+            className="mk-brush"
             d={BRUSH}
             fill="none"
             stroke="#fff"

@@ -54,7 +54,7 @@ export function SplitText({
         <span key={li} className="block" aria-hidden>
           {line.split(" ").map((w, wi) => (
             <span key={wi} className="inline-block whitespace-pre">
-              <motion.span className="inline-block will-change-transform" variants={word}>
+              <motion.span className="mk-split-word inline-block" variants={word}>
                 {w}
               </motion.span>
               {wi < line.split(" ").length - 1 ? " " : ""}
