@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MediaFrame } from "@/components/media/media-frame";
+import { BrushKanji } from "@/components/motion/brush-kanji";
 import { Reveal } from "@/components/motion/reveal";
 import { Tilt } from "@/components/motion/tilt";
 import { BarPromos } from "@/components/bar/bar-explorer";
@@ -36,6 +37,7 @@ export function BarPreview({ lang }: { lang: Locale }) {
         <div className="grid gap-10 lg:grid-cols-12">
           <SectionHeading index="05" eyebrow={c.barPreview.eyebrow} title={c.barPreview.title} kanji="酒" className="lg:col-span-6" />
           <Reveal className="self-end lg:col-span-5 lg:col-start-8" delay={0.15}>
+            <BrushKanji char="酒" className="mb-6 size-24 opacity-90 md:size-32" delay={0.2} />
             <p className="text-[0.95rem] leading-relaxed text-washi-dim">{c.barPreview.intro}</p>
             <p className="mt-4 font-display text-lg italic text-ouro-claro">{site.menus.bar.title}</p>
           </Reveal>
