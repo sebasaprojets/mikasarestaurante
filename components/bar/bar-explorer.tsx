@@ -73,7 +73,7 @@ export function BarExplorer({ lang }: { lang: Locale }) {
 
   return (
     <div className="relative isolate">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,transparent,#0f0a07_12%,#0f0a07_88%,transparent)]" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,transparent,#0f0a07_20%,#0f0a07_80%,transparent)]" />
 
       <CategoryTabs
         tabs={barCategories.map((x) => ({ id: x.id, label: x.nome[lang] }))}
