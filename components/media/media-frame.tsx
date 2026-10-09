@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { MediaAsset } from "@/data/media";
-import type { Locale } from "@/lib/i18n";
+import { withBasePath, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { AutoVideo } from "@/components/media/auto-video";
 
@@ -45,9 +45,9 @@ export function MediaFrame({
       return (
         <div className={cn("relative size-full overflow-hidden bg-carvao", className)}>
           <AutoVideo
-            src={asset.src}
-            webm={asset.webm}
-            poster={asset.poster}
+            src={withBasePath(asset.src)}
+            webm={asset.webm ? withBasePath(asset.webm) : undefined}
+            poster={asset.poster ? withBasePath(asset.poster) : undefined}
             priority={priority}
             label={asset.alt[lang]}
             className={motionCls}
@@ -58,7 +58,7 @@ export function MediaFrame({
     return (
       <div className={cn("relative size-full overflow-hidden bg-carvao", className)}>
         <Image
-          src={asset.src}
+          src={withBasePath(asset.src)}
           alt={asset.alt[lang]}
           fill
           sizes={sizes}
