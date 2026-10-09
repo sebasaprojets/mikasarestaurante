@@ -132,7 +132,7 @@ export const site = {
   pending: [
     "Logo oficial em SVG (o kanji dourado da capa do menu)",
     "Domínio de produção (NEXT_PUBLIC_SITE_URL)",
-    "Fotos ainda faltando: Wagyu Tiradito, Tomahawk/robata, bar (whisky, sake, coquetéis), ambiente, chef e vídeo do hero (ver data/media.ts)",
+    "Fotos ainda faltando: bar (whisky, sake, coquetéis), ambiente, chef e vídeo do hero (ver data/media.ts)",
     "Manter as promoções do bar atualizadas (data/bar.ts → barPromos)",
     "Tags dos pratos (vegetariano / picante / signature) a validar com o restaurante",
     "Avaliações reais de Google / TripAdvisor (ver data/reviews.ts)",

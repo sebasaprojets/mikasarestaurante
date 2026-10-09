@@ -85,6 +85,15 @@ export const photos = {
     es: "Nigiri variados con una copa de vino tinto",
     en: "Assorted nigiri with a glass of red wine",
   }),
+  // Do Instagram @mikasa.restaurant (recortadas da publicação e tratadas)
+  tiradito: photo("tiradito", 1200, 1500, {
+    es: "Tiradito de pescado blanco con salsa amarilla, ají y crocante",
+    en: "White fish tiradito with yellow sauce, chili and crispy garnish",
+  }),
+  robataSteak: photo("robata-steak", 1200, 1373, {
+    es: "Corte de res a la parrilla en láminas con ensalada, vegetales y puré",
+    en: "Sliced grilled beef with salad, vegetables and purée",
+  }),
 } satisfies Record<string, MediaAsset>;
 
 export const media = {
@@ -114,22 +123,10 @@ export const media = {
   omakase01: photos.sashimiSelection,
   omakase02: photos.nigiriExperience,
   omakase03: photos.hamachiRollNigiri,
-  omakase04: m({
-    id: "omakase-04",
-    kind: "image",
-    src: "/media/omakase-04.jpg",
-    width: 1200,
-    height: 1500,
-    alt: { es: "Wagyu Tiradito", en: "Wagyu Tiradito" },
-  }),
-  robata01: m({
-    id: "robata-01",
-    kind: "image",
-    src: "/media/robata-01.jpg",
-    width: 1600,
-    height: 1200,
-    alt: { es: "Tomahawk Brangus sobre la robata", en: "Brangus Tomahawk on the robata grill" },
-  }),
+  // Foto escolhida pelo restaurante para o card do Wagyu Tiradito
+  omakase04: photos.tiradito,
+  // Foto escolhida pelo restaurante para a seção Robata
+  robata01: photos.robataSteak,
   bar01: m({
     id: "bar-01",
     kind: "image",
