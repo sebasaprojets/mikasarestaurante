@@ -106,8 +106,8 @@ const es = {
     intro:
       "Una barra de luz baja dedicada al whisky japonés, al sake y a la coctelería de autor.",
     highlightWhisky: "Whisky japonés",
-    highlightSake: "Sake",
-    highlightMixology: "Guru Mixology Bar",
+    highlightSake: "Vinos",
+    highlightMixology: "Hatsu tea",
     cta: "Ver carta del bar",
   },
   gallery: {
@@ -354,8 +354,8 @@ const en: Copy = {
     title: "After dusk.",
     intro: "A low-lit bar devoted to Japanese whisky, sake and signature mixology.",
     highlightWhisky: "Japanese whisky",
-    highlightSake: "Sake",
-    highlightMixology: "Guru Mixology Bar",
+    highlightSake: "Wines",
+    highlightMixology: "Hatsu tea",
     cta: "View bar menu",
   },
   gallery: {
