@@ -14,14 +14,23 @@ export function hasLocale(value: string): value is Locale {
 }
 
 /**
- * Espanhol (padrão) vive sem prefixo: `/menu`.
- * Inglês vive em `/en`: `/en/menu`.
+ * Com servidor (Vercel): espanhol (padrão) vive sem prefixo (`/menu`, via proxy.ts)
+ * e inglês em `/en/menu`.
+ * Em exportação estática (GitHub Pages) não há proxy: todos os idiomas usam prefixo.
  */
+const prefixDefault = process.env.NEXT_PUBLIC_PREFIX_DEFAULT_LOCALE === "true";
+
 export function localePath(lang: Locale, path = "/"): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
-  if (lang === defaultLocale) return clean;
+  if (lang === defaultLocale && !prefixDefault) return clean;
   return clean === "/" ? `/${lang}` : `/${lang}${clean}`;
 }
+
+/** Prefixo do site quando publicado em subpasta (ex.: GitHub Pages). */
+export const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+/** Para <a>, <video> e next/image (que não aplicam o basePath sozinhos). */
+export const withBasePath = (path: string) => (path.startsWith("/") ? `${basePath}${path}` : path);
 
 /** Remove o prefixo de idioma de um pathname. */
 export function stripLocale(pathname: string): string {

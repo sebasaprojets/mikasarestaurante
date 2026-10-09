@@ -17,7 +17,7 @@ copy-in em `components/ui`) · Motion (`motion/react`) · Lenis · next/image ·
 
 ```
 app/[lang]/        rotas (layout raiz, Home, /menu, /bar) — ES sem prefixo, EN em /en
-app/               sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg
+app/               sitemap.ts, robots.ts, opengraph-image.png, icon.svg
 components/        ui/ (shadcn) · layout/ · sections/ · menu/ · bar/ · motion/ · effects/ · media/ · brand/ · seo/
 data/              site.ts · menu.ts · bar.ts · media.ts · reviews.ts · copy.ts (textos ES/EN)
 lib/               i18n · seo · motion (tokens) · format · hours · whatsapp · nav · hooks/
@@ -63,6 +63,13 @@ visual SaaS, excesso de animação ou de elementos simultâneos.
 
 Testar sempre em **375px, 768px e 1440px** (sem overflow horizontal).
 Metas: Lighthouse ≥ 90, LCP < 2.5s, WCAG AA, foco dourado visível.
+
+## Deploy
+
+- **Vercel** (produção): build normal, com `proxy.ts` (ES sem prefixo) e Cache Components.
+- **GitHub Pages** (preview): `.github/workflows/pages.yml` roda `scripts/build-pages.sh` a cada push na `main`
+  → export estático em `/<repo>/es/` e `/<repo>/en/` (`STATIC_EXPORT=true`, sem proxy, sitemap/robots estáticos).
+  Use `withBasePath()` em `<a>`, `<video>` e `next/image` com caminhos internos.
 
 ## Git
 
