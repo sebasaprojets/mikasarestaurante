@@ -59,7 +59,7 @@ function Petals({ className }: { className?: string }) {
     resize();
 
     const mobile = w < 768;
-    const count = Math.round((mobile ? 30 : 64) * (isLowEndDevice() ? 0.6 : 1));
+    const count = Math.round((mobile ? 24 : 48) * (isLowEndDevice() ? 0.6 : 1));
     const spawn = (initial: boolean): Petal => ({
       // nascem na copa: metade direita, terço superior
       x: w * (0.48 + Math.random() * 0.55),
