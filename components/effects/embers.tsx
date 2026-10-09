@@ -17,11 +17,22 @@ export function Embers({ className, count = 26 }: { className?: string; count?: 
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
+    // brilho pré-renderizado (evita shadowBlur por partícula, caro no mobile)
+    const sprite = document.createElement("canvas");
+    sprite.width = sprite.height = 32;
+    const sg = sprite.getContext("2d")!;
+    const grad = sg.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grad.addColorStop(0, "rgba(255,200,130,1)");
+    grad.addColorStop(0.25, "rgba(230,140,60,0.85)");
+    grad.addColorStop(1, "rgba(217,119,43,0)");
+    sg.fillStyle = grad;
+    sg.fillRect(0, 0, 32, 32);
+
     let w = 0;
     let h = 0;
     let raf = 0;
     let running = false;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const n = window.innerWidth < 768 ? Math.round(count * 0.55) : count;
 
     const spawn = (initial = false): P => ({
@@ -53,12 +64,9 @@ export function Embers({ className, count = 26 }: { className?: string; count?: 
         p.x += p.vx + Math.sin((p.life + i * 40) / 60) * 0.12;
         const t = p.life / p.max;
         const a = Math.sin(Math.PI * Math.min(t, 1)) * 0.7;
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(230, 140, 60, ${a})`;
-        ctx.shadowColor = "rgba(217, 119, 43, 0.9)";
-        ctx.shadowBlur = 6;
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
+        const size = p.r * 7;
+        ctx.globalAlpha = a;
+        ctx.drawImage(sprite, p.x - size / 2, p.y - size / 2, size, size);
         if (t >= 1 || p.y < -10) ps[i] = spawn();
       }
       raf = requestAnimationFrame(tick);

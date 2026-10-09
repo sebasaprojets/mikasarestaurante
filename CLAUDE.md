@@ -30,6 +30,14 @@ proxy.ts           roteamento de idioma
 - Todo texto visível existe em **ES (padrão)** e **EN** (`data/copy.ts` e campos `Localized`).
 - Horário, telefone, links, prêmios: somente em `data/site.ts`.
 
+## Marca e efeitos
+
+- Logo oficial vetorizado em `components/brand/logo-paths.ts` (emblema kanji + wordmark letra a letra);
+  componentes `Emblem`, `Wordmark`, `Logo` em `components/brand/logo.tsx`. Substituir pelo SVG original quando enviado.
+- Intro cinematográfica (`components/effects/intro.tsx`): 1x por sessão (`sessionStorage`), pulável (botão/Esc),
+  fogo WebGL (`effects/fire.tsx`), reduced motion = fade curto.
+- Hero: cerejeira em camadas (`public/hero/sakura-*.webp`) + pétalas em canvas (`effects/sakura.tsx`).
+
 ## Design tokens (fonte de verdade: `styles/globals.css`)
 
 - **Paleta**: Sumi `#0A0A0B` · Carvão `#151517` · Ouro `#C6A15B` · Ouro claro `#E6CF96` · Washi `#EFE9DF` · Torii `#A8322A` (só detalhes mínimos).

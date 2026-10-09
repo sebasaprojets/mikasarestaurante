@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MediaFrame } from "@/components/media/media-frame";
 import { Reveal } from "@/components/motion/reveal";
 import { Tilt } from "@/components/motion/tilt";
+import { BarPromos } from "@/components/bar/bar-explorer";
 import { SectionHeading } from "@/components/sections/section-heading";
 import { Button } from "@/components/ui/button";
 import { barCategories } from "@/data/bar";
@@ -53,7 +54,9 @@ export function BarPreview({ lang }: { lang: Locale }) {
           ))}
         </div>
 
-        <Reveal className="mt-24 border-t border-line pt-10">
+        <BarPromos lang={lang} className="mt-24" />
+
+        <Reveal className="mt-16 border-t border-line pt-10">
           <ul className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3 lg:grid-cols-5">
             {barCategories.map((cat) => (
               <li key={cat.id}>

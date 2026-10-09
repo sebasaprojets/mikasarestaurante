@@ -2,6 +2,8 @@
 
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { Emblem } from "@/components/brand/logo";
+import { SakuraTree } from "@/components/effects/sakura";
 import { MediaFrame } from "@/components/media/media-frame";
 import { CircularText } from "@/components/motion/circular-text";
 import { SplitText } from "@/components/motion/split-text";
@@ -35,7 +37,15 @@ export function Hero({ lang }: { lang: Locale }) {
     <section ref={ref} id="inicio" aria-label="MIKASA" className="relative h-[100svh] min-h-[600px] overflow-hidden bg-sumi">
       {/* Mídia */}
       <motion.div className="absolute inset-0" style={{ y: reduce ? 0 : y }}>
-        <MediaFrame asset={asset} lang={lang} priority kenBurns kanji="匠" sizes="100vw" labelClassName="bottom-auto top-[calc(var(--header-h)+1.25rem)] max-w-[60%] md:left-auto md:items-end md:text-right" />
+        <MediaFrame
+          asset={asset}
+          lang={lang}
+          priority
+          kenBurns
+          sizes="100vw"
+          labelClassName="bottom-3 left-auto right-4 max-w-[60%] items-end text-right md:bottom-5 md:right-5"
+        />
+
         {/* Luz ambiente — muito lenta, apenas atmosfera */}
         <div
           aria-hidden
@@ -48,6 +58,22 @@ export function Hero({ lang }: { lang: Locale }) {
       <div aria-hidden className="absolute inset-0 bg-sumi/35" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-[65%] bg-gradient-to-t from-sumi via-sumi/70 to-transparent" />
       <div aria-hidden className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-sumi/80 to-transparent" />
+
+      {/* Cerejeira à direita com pétalas caindo (acima dos véus, abaixo do texto) */}
+      <motion.div className="absolute inset-0 overflow-hidden" style={{ y: reduce ? 0 : y }}>
+        <SakuraTree play={ready} className="top-[calc(var(--header-h)*0.6)] h-[46%] opacity-60 sm:h-[64%] sm:opacity-80 lg:h-[calc(100%-var(--header-h)*0.6)] lg:opacity-100" />
+      </motion.div>
+
+      {/* Emblema oficial ao centro (substitui o 匠 quase invisível) */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[44%] -translate-x-1/2 -translate-y-1/2"
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={ready ? { opacity: 1, scale: 1 } : undefined}
+        transition={{ duration: 2.4, ease: EASE, delay: 0.3 }}
+      >
+        <Emblem className="mk-breathe w-[clamp(170px,22vw,330px)]" />
+      </motion.div>
 
       <motion.div
         style={{ opacity: reduce ? 1 : fade }}
@@ -85,7 +111,7 @@ export function Hero({ lang }: { lang: Locale }) {
 
       {/* Selo Restaurant Guru */}
       <motion.div
-        className="absolute right-[var(--spacing-gutter)] top-[calc(var(--header-h)+1.5rem)] text-ouro md:bottom-[clamp(5.5rem,12vh,9rem)] md:top-auto"
+        className="absolute left-[var(--spacing-gutter)] top-[calc(var(--header-h)+1.25rem)] z-10 text-ouro md:bottom-[clamp(5.5rem,12vh,9rem)] md:left-auto md:right-[var(--spacing-gutter)] md:top-auto"
         initial={{ opacity: 0 }}
         animate={ready ? { opacity: 1 } : undefined}
         transition={{ duration: 1.4, ease: EASE, delay: 1.1 }}

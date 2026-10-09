@@ -46,7 +46,7 @@ export function Header({ lang }: { lang: Locale }) {
     <motion.header
       className={cn(
         "fixed inset-x-0 top-0 z-50 h-[var(--header-h)] border-b transition-[background-color,border-color,backdrop-filter] duration-700",
-        scrolled ? "border-line bg-sumi/70 backdrop-blur-xl" : "border-transparent bg-transparent",
+        scrolled ? "border-line bg-sumi/90 lg:bg-sumi/70 lg:backdrop-blur-xl" : "border-transparent bg-transparent",
       )}
       initial={false}
       animate={{ y: hidden ? "-100%" : "0%" }}
@@ -72,8 +72,8 @@ export function Header({ lang }: { lang: Locale }) {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-4 md:gap-6">
-          <LanguageSwitch lang={lang} label={c.a11y.language} className="hidden sm:flex" />
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
+          <LanguageSwitch lang={lang} label={c.a11y.language} />
           <Button asChild size="sm" className="hidden md:inline-flex">
             <SmartLink href={homeAnchor(lang, sectionIds.reservation)}>{c.nav.reserve}</SmartLink>
           </Button>

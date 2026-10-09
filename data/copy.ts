@@ -20,6 +20,7 @@ const es = {
   },
   a11y: {
     skip: "Saltar al contenido",
+    skipIntro: "Saltar intro",
     openMenu: "Abrir menú",
     closeMenu: "Cerrar menú",
     language: "Idioma",
@@ -107,7 +108,7 @@ const es = {
       "Una barra de luz baja dedicada al whisky japonés, al sake y a la coctelería de autor.",
     highlightWhisky: "Whisky japonés",
     highlightSake: "Sake",
-    highlightMixology: "Mixología",
+    highlightMixology: "Guru Mixology Bar",
     cta: "Ver carta del bar",
   },
   gallery: {
@@ -230,12 +231,15 @@ const es = {
   barPage: {
     eyebrow: "MIKASA",
     title: "Luxury Bar & Mixology Menu",
-    intro: "Whisky japonés, sake, vinos y coctelería. Precios en USD.",
+    intro: "Guru Mixology Bar, cocteles de autor, whisky japonés, sake y vinos. Precios en USD.",
     original: "Ver carta original",
     notice:
-      "Estamos transcribiendo la carta oficial del bar. Para la versión vigente y completa, consulte la carta original.",
+      "Transcripción de la carta oficial del bar. Para la versión impresa vigente, consulte la carta original.",
     pendingCategory: "Transcripción pendiente desde la carta oficial.",
     featured: "Destacado",
+    promos: "Promociones",
+    each: "c/u",
+    responsibly: "Beba con moderación.",
   },
   tags: {
     signature: "Signature",
@@ -265,6 +269,7 @@ const en: Copy = {
   },
   a11y: {
     skip: "Skip to content",
+    skipIntro: "Skip intro",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     language: "Language",
@@ -351,7 +356,7 @@ const en: Copy = {
     intro: "A low-lit bar devoted to Japanese whisky, sake and signature mixology.",
     highlightWhisky: "Japanese whisky",
     highlightSake: "Sake",
-    highlightMixology: "Mixology",
+    highlightMixology: "Guru Mixology Bar",
     cta: "View bar menu",
   },
   gallery: {
@@ -473,12 +478,15 @@ const en: Copy = {
   barPage: {
     eyebrow: "MIKASA",
     title: "Luxury Bar & Mixology Menu",
-    intro: "Japanese whisky, sake, wine and cocktails. Prices in USD.",
+    intro: "Guru Mixology Bar, signature cocktails, Japanese whisky, sake and wine. Prices in USD.",
     original: "View original menu",
     notice:
-      "We are transcribing the official bar menu. For the current, complete version, please see the original menu.",
+      "Transcribed from the official bar menu. For the current printed version, please see the original menu.",
     pendingCategory: "Transcription from the official menu pending.",
     featured: "Featured",
+    promos: "Promotions",
+    each: "each",
+    responsibly: "Please drink responsibly.",
   },
   tags: {
     signature: "Signature",

@@ -133,7 +133,7 @@ export const site = {
     "Logo oficial em SVG (o kanji dourado da capa do menu)",
     "Domínio de produção (NEXT_PUBLIC_SITE_URL)",
     "Fotos e vídeos oficiais (ver data/media.ts)",
-    "Transcrição do menu do bar (ver data/bar.ts)",
+    "Manter as promoções do bar atualizadas (data/bar.ts → barPromos)",
     "Tags dos pratos (vegetariano / picante / signature) a validar com o restaurante",
     "Avaliações reais de Google / TripAdvisor (ver data/reviews.ts)",
   ],

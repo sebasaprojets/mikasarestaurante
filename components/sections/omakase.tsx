@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { MediaFrame } from "@/components/media/media-frame";
 import { SmartLink } from "@/components/layout/smart-link";
 import { Button } from "@/components/ui/button";
@@ -107,7 +107,8 @@ export function Omakase({ lang }: { lang: Locale }) {
   }, [pinned]);
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
-  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  // Lenis já suaviza o scroll; sem mola extra (evita atraso)
+  const smooth = scrollYProgress;
   const x = useTransform(smooth, [0, 1], [0, -distance]);
 
   const intro = (

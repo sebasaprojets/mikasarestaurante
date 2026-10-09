@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import "@/styles/globals.css";
 import { Cursor } from "@/components/effects/cursor";
 import { Grain } from "@/components/effects/grain";
-import { Preloader, preloadScript } from "@/components/effects/preloader";
+import { Intro, introScript } from "@/components/effects/intro";
 import { Footer } from "@/components/layout/footer";
 import { FloatingReserve } from "@/components/layout/floating-reserve";
 import { Header } from "@/components/layout/header";
@@ -53,7 +53,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: preloadScript }} />
+        <script dangerouslySetInnerHTML={{ __html: introScript }} />
       </head>
       <body>
         <a
@@ -62,7 +62,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         >
           {c.a11y.skip}
         </a>
-        <Preloader label="MIKASA" />
+        <Intro skipLabel={c.a11y.skipIntro} />
         <SmoothScroll>
           <Header lang={lang} />
           <main id="contenido">{children}</main>

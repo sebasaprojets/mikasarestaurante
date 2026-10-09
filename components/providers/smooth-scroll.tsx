@@ -1,7 +1,8 @@
 "use client";
 
 import { ReactLenis, useLenis } from "lenis/react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
+import { INTRO_EVENT } from "@/lib/hooks/use-intro-ready";
 
 /** Lenis — smooth scroll lento e preciso. Respeita prefers-reduced-motion. */
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
@@ -9,13 +10,14 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     <ReactLenis
       root
       options={{
-        lerp: 0.085,
+        lerp: 0.1,
         smoothWheel: true,
         anchors: { offset: -72 },
         stopInertiaOnNavigate: true,
         respectReducedMotion: true,
       }}
     >
+      <IntroScrollLock />
       {children}
     </ReactLenis>
   );
@@ -33,4 +35,17 @@ export function useScrollTo() {
     },
     [lenis],
   );
+}
+
+/** Trava o scroll do Lenis enquanto a intro toca. */
+function IntroScrollLock() {
+  const lenis = useLenis();
+  useEffect(() => {
+    if (!lenis || !document.documentElement.hasAttribute("data-intro")) return;
+    lenis.stop();
+    const start = () => lenis.start();
+    window.addEventListener(INTRO_EVENT, start, { once: true });
+    return () => window.removeEventListener(INTRO_EVENT, start);
+  }, [lenis]);
+  return null;
 }
