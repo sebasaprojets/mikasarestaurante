@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { MediaFrame } from "@/components/media/media-frame";
 import { SmartLink } from "@/components/layout/smart-link";
 import { Button } from "@/components/ui/button";
@@ -83,8 +83,8 @@ export function Omakase({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
   const items = toFeatures(lang);
   const desktop = useMediaQuery("(min-width: 768px)");
-  const reduce = useReducedMotion();
-  const pinned = desktop && !reduce;
+  // scroll horizontal fixado é controlado pelo próprio scroll da pessoa → mantido também com reduced motion
+  const pinned = desktop;
 
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);

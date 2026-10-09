@@ -7,6 +7,7 @@ import { Intro, introScript } from "@/components/effects/intro";
 import { Footer } from "@/components/layout/footer";
 import { FloatingReserve } from "@/components/layout/floating-reserve";
 import { Header } from "@/components/layout/header";
+import { MotionProvider } from "@/components/providers/motion-provider";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getCopy } from "@/data/copy";
@@ -62,15 +63,17 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         >
           {c.a11y.skip}
         </a>
-        <Intro skipLabel={c.a11y.skipIntro} />
-        <SmoothScroll>
-          <Header lang={lang} />
-          <main id="contenido">{children}</main>
-          <Footer lang={lang} />
-          <FloatingReserve href={homeAnchor(lang, sectionIds.reservation)} label={c.nav.reserve} />
-        </SmoothScroll>
-        <Cursor />
-        <Grain />
+        <MotionProvider>
+          <Intro />
+          <SmoothScroll>
+            <Header lang={lang} />
+            <main id="contenido">{children}</main>
+            <Footer lang={lang} />
+            <FloatingReserve href={homeAnchor(lang, sectionIds.reservation)} label={c.nav.reserve} />
+          </SmoothScroll>
+          <Cursor />
+          <Grain />
+        </MotionProvider>
         <JsonLd data={restaurantJsonLd(lang)} />
       </body>
     </html>

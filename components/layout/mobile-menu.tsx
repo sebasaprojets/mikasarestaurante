@@ -1,7 +1,7 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { InstagramIcon, ThreadsIcon, WhatsAppIcon } from "@/components/brand/icons";
 import { Logo } from "@/components/brand/logo";
 import { LanguageSwitch } from "@/components/layout/language-switch";
@@ -9,7 +9,7 @@ import { SmartLink } from "@/components/layout/smart-link";
 import { getCopy } from "@/data/copy";
 import { site } from "@/data/site";
 import type { Locale } from "@/lib/i18n";
-import { EASE } from "@/lib/motion";
+import { EASE, useReducedMotion } from "@/lib/motion";
 import { homeAnchor, sectionIds, type NavItem } from "@/lib/nav";
 
 /** Menu mobile em tela cheia com entrada escalonada (StaggeredMenu recalibrado). */

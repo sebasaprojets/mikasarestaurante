@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { withBasePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +47,7 @@ function Petals({ className }: { className?: string }) {
     let w = 0;
     let h = 0;
     const resize = () => {
+      if (w && canvas.clientWidth === w && Math.abs(canvas.clientHeight - h) < 160) return;
       w = canvas.clientWidth;
       h = canvas.clientHeight;
       canvas.width = Math.round(w * dpr);
@@ -76,17 +77,21 @@ function Petals({ className }: { className?: string }) {
     let raf = 0;
     let running = false;
     let t = 0;
-    const tick = () => {
-      t += 1;
+    let last = 0;
+    const tick = (now: number) => {
+      // passo normalizado a 60 fps; limitado para não "saltar" após trocar de aba
+      const k = last ? Math.min((now - last) / 16.667, 3) : 1;
+      last = now;
+      t += k;
       ctx.clearRect(0, 0, w, h);
       const wind = Math.sin(t / 420) * 0.18;
       for (let i = 0; i < ps.length; i++) {
         const p = ps[i];
-        p.x += p.vx + wind + Math.sin((t + i * 37) / 90) * 0.18;
-        p.y += p.vy;
-        p.rot += p.vr;
-        p.flip += p.vf;
-        p.a = Math.min(1, p.a + 0.01);
+        p.x += (p.vx + wind + Math.sin((t + i * 37) / 90) * 0.18) * k;
+        p.y += p.vy * k;
+        p.rot += p.vr * k;
+        p.flip += p.vf * k;
+        p.a = Math.min(1, p.a + 0.01 * k);
         const fade = Math.min(1, (h - p.y) / (h * 0.25));
         const sp = sprites[p.sprite];
         ctx.save();
@@ -104,6 +109,7 @@ function Petals({ className }: { className?: string }) {
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting && !running) {
         running = true;
+        last = 0;
         raf = requestAnimationFrame(tick);
       } else if (!e.isIntersecting && running) {
         running = false;
@@ -119,7 +125,13 @@ function Petals({ className }: { className?: string }) {
     };
   }, []);
 
-  return <canvas ref={ref} aria-hidden className={cn("pointer-events-none absolute inset-0 size-full", className)} />;
+  return (
+    <canvas
+      ref={ref}
+      aria-hidden
+      className={cn("pointer-events-none absolute inset-0 size-full [transform:translateZ(0)]", className)}
+    />
+  );
 }
 
 /**
@@ -127,7 +139,6 @@ function Petals({ className }: { className?: string }) {
  * e pétalas caindo. Decorativa (aria-hidden).
  */
 export function SakuraTree({ play, className }: { play: boolean; className?: string }) {
-  const reduce = useReducedMotion();
   const src = (n: string) => withBasePath(`/hero/sakura-${n}.webp`);
 
   return (
@@ -154,7 +165,7 @@ export function SakuraTree({ play, className }: { play: boolean; className?: str
         </div>
         {/* eslint-enable @next/next/no-img-element */}
       </motion.div>
-      {!reduce && play ? <Petals /> : null}
+      {play ? <Petals /> : null}
     </>
   );
 }

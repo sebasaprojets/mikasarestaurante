@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
-import { EASE } from "@/lib/motion";
+import { motion, type HTMLMotionProps } from "motion/react";
+import { EASE, useReducedMotion } from "@/lib/motion";
 
 type Props = HTMLMotionProps<"div"> & { delay?: number; y?: number; amount?: number };
 

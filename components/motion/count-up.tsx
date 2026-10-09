@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { animate, useInView, useReducedMotion } from "motion/react";
-import { EASE } from "@/lib/motion";
+import { animate, useInView } from "motion/react";
+import { EASE, useReducedMotion } from "@/lib/motion";
 
 /** Contador discreto; dispara uma única vez ao entrar na viewport. */
 export function CountUp({ to, suffix = "", className, duration = 2.4 }: { to: number; suffix?: string; className?: string; duration?: number }) {

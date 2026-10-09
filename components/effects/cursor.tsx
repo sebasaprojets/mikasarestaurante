@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 import { useFinePointer } from "@/lib/hooks/use-media-query";
-import { EASE } from "@/lib/motion";
+import { EASE, useReducedMotion } from "@/lib/motion";
 
 /**
  * Cursor extremamente sutil (somente desktop com mouse):

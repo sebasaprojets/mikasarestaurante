@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { AnimatePresence, LayoutGroup, motion, useMotionValue, useSpring } from "motion/react";
 import { ArrowUpRight, Search, X } from "lucide-react";
 import { MediaFrame } from "@/components/media/media-frame";
 import { useScrollTo } from "@/components/providers/smooth-scroll";
@@ -14,7 +14,7 @@ import { site } from "@/data/site";
 import type { Locale } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
 import { useFinePointer } from "@/lib/hooks/use-media-query";
-import { EASE } from "@/lib/motion";
+import { EASE, useReducedMotion } from "@/lib/motion";
 import { homeAnchor, sectionIds } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +53,7 @@ export function CategoryTabs({
   }, [active]);
 
   return (
-    <div className="sticky top-[var(--header-offset)] z-30 border-y border-line bg-sumi/95 lg:bg-sumi/85 lg:backdrop-blur-xl transition-[top] duration-[900ms] ease-[var(--ease-mikasa)]">
+    <div className="sticky top-[var(--header-offset)] z-30 border-y border-line bg-sumi/85 backdrop-blur-xl transition-[top] duration-[900ms] ease-[var(--ease-mikasa)]">
       <div ref={listRef} className="mk-no-scrollbar mx-auto max-w-[1600px] overflow-x-auto px-[var(--spacing-gutter)]">
         <nav aria-label={label}>
           <LayoutGroup id={label}>

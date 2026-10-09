@@ -8,3 +8,11 @@ export const DURATION = {
 } as const;
 
 export const STAGGER = 0.06;
+
+/**
+ * Preferência de movimento do site.
+ * Decisão do cliente: as animações da marca tocam sempre (inclusive com
+ * "reduzir movimento" no sistema). Retorna sempre `false` — igual no servidor
+ * e no navegador, evitando divergência de hidratação.
+ */
+export const useReducedMotion = (): boolean => false;

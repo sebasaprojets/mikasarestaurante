@@ -14,7 +14,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
         smoothWheel: true,
         anchors: { offset: -72 },
         stopInertiaOnNavigate: true,
-        respectReducedMotion: true,
+        respectReducedMotion: false,
       }}
     >
       <IntroScrollLock />
