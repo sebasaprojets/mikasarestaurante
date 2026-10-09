@@ -94,6 +94,18 @@ export const photos = {
     es: "Corte de res a la parrilla en láminas con ensalada, vegetales y puré",
     en: "Sliced grilled beef with salad, vegetables and purée",
   }),
+  barWhisky: photo("bar-whisky-kamiki", 1000, 1470, {
+    es: "Whisky japonés Kamiki Blended Malt con su estuche",
+    en: "Kamiki Japanese blended malt whisky with its box",
+  }),
+  barVinos: photo("bar-vinos", 1000, 1551, {
+    es: "Botellas de vino Ramón Bilbao y Minuty Côtes de Provence en la terraza de MIKASA",
+    en: "Ramón Bilbao and Minuty Côtes de Provence wine bottles on the MIKASA terrace",
+  }),
+  barHatsu: photo("bar-hatsu-tea", 1000, 1606, {
+    es: "Botellas de Hatsu tea frente a la entrada de MIKASA",
+    en: "Hatsu tea bottles in front of the MIKASA entrance",
+  }),
 } satisfies Record<string, MediaAsset>;
 
 export const media = {
@@ -127,30 +139,9 @@ export const media = {
   omakase04: photos.tiradito,
   // Foto escolhida pelo restaurante para a seção Robata
   robata01: photos.robataSteak,
-  bar01: m({
-    id: "bar-01",
-    kind: "image",
-    src: "/media/bar-01.jpg",
-    width: 1200,
-    height: 1600,
-    alt: { es: "Whisky japonés servido en la barra", en: "Japanese whisky served at the bar" },
-  }),
-  bar02: m({
-    id: "bar-02",
-    kind: "image",
-    src: "/media/bar-02.jpg",
-    width: 1200,
-    height: 1600,
-    alt: { es: "Selección de sake", en: "Sake selection" },
-  }),
-  bar03: m({
-    id: "bar-03",
-    kind: "image",
-    src: "/media/bar-03.jpg",
-    width: 1200,
-    height: 1600,
-    alt: { es: "Coctelería de autor", en: "Signature mixology" },
-  }),
+  bar01: photos.barWhisky,
+  bar02: photos.barVinos,
+  bar03: photos.barHatsu,
 } satisfies Record<string, MediaAsset>;
 
 export type GalleryItem = {
