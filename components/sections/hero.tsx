@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { Emblem } from "@/components/brand/logo";
+import { OffscreenPause } from "@/components/effects/offscreen-pause";
 import { SakuraTree } from "@/components/effects/sakura";
 import { MediaFrame } from "@/components/media/media-frame";
 import { CircularText } from "@/components/motion/circular-text";
@@ -124,6 +125,8 @@ export function Hero({ lang }: { lang: Locale }) {
           center={<span className="font-display text-lg italic text-ouro-claro md:text-2xl">IV</span>}
         />
       </motion.div>
+
+      <OffscreenPause targetId="inicio" />
 
       {/* Indicador de scroll */}
       <div aria-hidden className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 sm:flex">

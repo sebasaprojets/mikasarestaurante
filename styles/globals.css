@@ -248,6 +248,13 @@ html[data-intro] body {
   animation: mk-breathe 7s ease-in-out infinite;
 }
 
+/* Seção fora da tela → animações contínuas pausadas (ver OffscreenPause) */
+[data-paused] *,
+[data-paused]::before,
+[data-paused]::after {
+  animation-play-state: paused !important;
+}
+
 .mk-scroll-line {
   animation: scroll-line 2.6s var(--ease-mikasa) infinite;
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Embers } from "@/components/effects/embers";
+import { OffscreenPause } from "@/components/effects/offscreen-pause";
 import { MediaFrame } from "@/components/media/media-frame";
 import { MaskReveal } from "@/components/motion/mask-reveal";
 import { Reveal } from "@/components/motion/reveal";
@@ -32,6 +33,7 @@ export function Robata({ lang }: { lang: Locale }) {
       />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 mk-washi opacity-60" />
       <Embers className="-z-10" />
+      <OffscreenPause targetId={sectionIds.robata} />
 
       <div className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)]">
         <div className="grid gap-10 lg:grid-cols-12">
