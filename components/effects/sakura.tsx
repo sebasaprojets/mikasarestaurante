@@ -147,8 +147,14 @@ function Petals({ className }: { className?: string }) {
 export function SakuraTree({ play, className }: { play: boolean; className?: string }) {
   const src = (n: string) => withBasePath(`/hero/sakura-${n}.webp`);
   // versão leve para telas pequenas (menos memória de GPU)
-  const set = (n: string, lg: number) =>
-    `${withBasePath(`/hero/sakura-${n}-sm.webp`)} ${lg / 2}w, ${withBasePath(`/hero/sakura-${n}.webp`)} ${lg}w`;
+  // galhos + flores numa única imagem (movem-se juntos); 3 tamanhos para cada tela
+  const treeSet = [
+    `${withBasePath("/hero/sakura-tree-sm.webp")} 520w`,
+    `${withBasePath("/hero/sakura-tree-md.webp")} 800w`,
+    `${withBasePath("/hero/sakura-tree.webp")} 1200w`,
+  ].join(", ");
+  // largura real ocupada pela árvore em cada faixa de tela
+  const treeSizes = "(max-width: 639px) 280px, (max-width: 1023px) 460px, 52vw";
 
   return (
     <>
@@ -163,11 +169,10 @@ export function SakuraTree({ play, className }: { play: boolean; className?: str
       >
         {/* eslint-disable @next/next/no-img-element -- camadas decorativas animadas, já otimizadas (webp) */}
         {/* fundo desfocado: profundidade / névoa */}
-        <img src={src("back")} srcSet={set("back", 700)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="mk-sway-slow absolute inset-0 size-full object-contain object-right-top" />
+        <img src={src("back")} fetchPriority="low" loading="lazy" alt="" decoding="async" className="mk-sway-slow absolute inset-0 size-full object-contain object-right-top" />
         {/* galhos + flores nítidas balançam juntos a partir do tronco */}
         <div className="mk-sway absolute inset-0" style={{ transformOrigin: "100% 80%" }}>
-          <img src={src("branches")} fetchPriority="high" srcSet={set("branches", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
-          <img src={src("front")} fetchPriority="high" srcSet={set("front", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
+          <img src={src("tree-md")} srcSet={treeSet} sizes={treeSizes} fetchPriority="high" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
         </div>
         {/* eslint-enable @next/next/no-img-element */}
       </motion.div>
