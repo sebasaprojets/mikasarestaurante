@@ -83,20 +83,20 @@
 @keyframes mk-sway {
   0%,
   100% {
-    transform: rotate(-0.45deg);
+    transform: rotate(-1deg) translate3d(0, 0, 0);
   }
   50% {
-    transform: rotate(0.55deg);
+    transform: rotate(1.1deg) translate3d(-6px, 2px, 0);
   }
 }
 
 @keyframes mk-sway-slow {
   0%,
   100% {
-    transform: translate3d(-6px, 2px, 0) scale(1.01);
+    transform: translate3d(-12px, 3px, 0) scale(1.01);
   }
   50% {
-    transform: translate3d(6px, -3px, 0) scale(1.02);
+    transform: translate3d(12px, -5px, 0) scale(1.03);
   }
 }
 
@@ -237,11 +237,11 @@ html[data-intro] body {
 }
 
 .mk-sway {
-  animation: mk-sway 11s ease-in-out infinite;
+  animation: mk-sway 9s ease-in-out infinite;
   will-change: transform;
 }
 .mk-sway-slow {
-  animation: mk-sway-slow 15s ease-in-out infinite;
+  animation: mk-sway-slow 12s ease-in-out infinite;
   will-change: transform;
 }
 .mk-breathe {
@@ -259,12 +259,10 @@ html[data-intro] body {
   display: none;
 }
 
+/* Reduced motion: sem Ken Burns nem scroll animado. Animações ambientes
+   lentas da marca (árvore, pétalas, intro) continuam — decisão do cliente. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+  html {
     scroll-behavior: auto !important;
   }
   .mk-kenburns {

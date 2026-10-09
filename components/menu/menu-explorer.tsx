@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { AnimatePresence, LayoutGroup, motion, useMotionValue, useSpring } from "motion/react";
 import { ArrowUpRight, Search, X } from "lucide-react";
 import { MediaFrame } from "@/components/media/media-frame";
 import { useScrollTo } from "@/components/providers/smooth-scroll";
@@ -14,7 +14,7 @@ import { site } from "@/data/site";
 import type { Locale } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
 import { useFinePointer } from "@/lib/hooks/use-media-query";
-import { EASE } from "@/lib/motion";
+import { EASE, useReducedMotion } from "@/lib/motion";
 import { homeAnchor, sectionIds } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 

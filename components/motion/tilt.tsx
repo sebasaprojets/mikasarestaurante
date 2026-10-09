@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useFinePointer } from "@/lib/hooks/use-media-query";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/motion";
 
 /** Tilt 3D leve (máx. 6°) com reflexo de vidro sutil. Somente desktop. */
 export function Tilt({ children, className, max = 6 }: { children: React.ReactNode; className?: string; max?: number }) {

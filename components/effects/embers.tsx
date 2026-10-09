@@ -1,18 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 type P = { x: number; y: number; r: number; vy: number; vx: number; life: number; max: number };
 
-/** Brasas discretas subindo. Canvas leve, pausado fora da tela, ausente em reduced motion. */
+/** Brasas discretas subindo. Canvas leve, pausado fora da tela. */
 export function Embers({ className, count = 26 }: { className?: string; count?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const reduce = useReducedMotion();
 
   useEffect(() => {
-    if (reduce) return;
     const canvas = ref.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
@@ -88,8 +85,7 @@ export function Embers({ className, count = 26 }: { className?: string; count?: 
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
     };
-  }, [reduce, count]);
+  }, [count]);
 
-  if (reduce) return null;
   return <canvas ref={ref} aria-hidden className={cn("pointer-events-none absolute inset-0 size-full", className)} />;
 }

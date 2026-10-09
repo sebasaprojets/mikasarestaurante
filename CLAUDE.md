@@ -34,7 +34,7 @@ proxy.ts           roteamento de idioma
 
 - Logo oficial vetorizado em `components/brand/logo-paths.ts` (emblema kanji + wordmark letra a letra);
   componentes `Emblem`, `Wordmark`, `Logo` em `components/brand/logo.tsx`. Substituir pelo SVG original quando enviado.
-- Intro cinematográfica (`components/effects/intro.tsx`): 1x por sessão (`sessionStorage`), pulável (botão/Esc),
+- Intro cinematográfica (`components/effects/intro.tsx`): 1x por sessão (`sessionStorage`), sem botão de pular (toca até o fim),
   fogo WebGL (`effects/fire.tsx`), reduced motion = fade curto.
 - Hero: cerejeira em camadas (`public/hero/sakura-*.webp`) + pétalas em canvas (`effects/sakura.tsx`).
 

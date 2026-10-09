@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/motion";
 
 /** Desloca o conteúdo verticalmente durante o scroll. Desativado em reduced motion. */
 export function Parallax({

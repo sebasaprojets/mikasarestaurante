@@ -1,21 +1,26 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { animate, motion, useReducedMotion } from "motion/react";
+import { animate, motion } from "motion/react";
 import { EMBLEM_ARC, GoldGradient } from "@/components/brand/logo";
 import { EMBLEM_VIEWBOX, KANJI_D, LETTERS, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-paths";
 import { Fire } from "@/components/effects/fire";
 import { INTRO_EVENT } from "@/lib/hooks/use-intro-ready";
 
-export const INTRO_KEY = "mk-intro-seen";
+export const INTRO_FORCE_KEY = "mk-intro-force";
 
-/** Script inline no <head>: marca a primeira visita da sessão antes do primeiro paint. */
-export const introScript = `try{if(!sessionStorage.getItem("${INTRO_KEY}")){document.documentElement.setAttribute("data-intro","")}}catch(e){}`;
+/**
+ * Script inline no <head>, antes do primeiro paint: a intro toca quando a pessoa
+ * ENTRA no site (link externo, URL digitada, nova aba). Não toca ao recarregar,
+ * voltar/avançar, nem em navegação interna ou troca de idioma (referrer do próprio
+ * site) — exceto quando a página de redirecionamento da raiz pede (flag em sessionStorage).
+ */
+export const introScript = `try{var f=sessionStorage.getItem("${INTRO_FORCE_KEY}");sessionStorage.removeItem("${INTRO_FORCE_KEY}");var r=document.referrer,same=false;try{same=!!r&&new URL(r).host===location.host}catch(e){}var nav=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];var t=nav&&nav.type;if(f||(!same&&t!=="reload"&&t!=="back_forward")){document.documentElement.setAttribute("data-intro","")}}catch(e){}`;
 
 const CAM = [0.16, 1, 0.3, 1] as const;
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** Duração (s) — total ≈ 5,8s; pode ser pulada a qualquer momento. */
+/** Duração (s) — total ≈ 5,8s; a intro toca sempre até o fim. */
 const T = { exit: 4.7, exitDur: 1.1 };
 
 function Torii({ className }: { className?: string }) {
@@ -37,8 +42,9 @@ function Torii({ className }: { className?: string }) {
  * Intro cinematográfica (1x por sessão). A camada só existe quando o script
  * inline marca <html data-intro>; sem JS, um fallback CSS a esconde.
  */
-export function Intro({ skipLabel }: { skipLabel: string }) {
-  const reduce = useReducedMotion();
+export function Intro() {
+  // A intro é a assinatura da marca: toca completa sempre (decisão do cliente).
+  const reduce = false as boolean;
   const [phase, setPhase] = useState<"idle" | "play" | "exit" | "done">("idle");
   const fireK = useRef(0);
   const gid = useId();
@@ -52,9 +58,6 @@ export function Intro({ skipLabel }: { skipLabel: string }) {
       const id = requestAnimationFrame(() => setPhase("done"));
       return () => cancelAnimationFrame(id);
     }
-    try {
-      sessionStorage.setItem(INTRO_KEY, "1");
-    } catch {}
     window.scrollTo(0, 0);
     const id = requestAnimationFrame(() => setPhase("play"));
     return () => cancelAnimationFrame(id);
@@ -91,14 +94,6 @@ export function Intro({ skipLabel }: { skipLabel: string }) {
       c?.stop();
     };
   }, [phase, reduce]);
-
-  // Esc pula
-  useEffect(() => {
-    if (phase !== "play") return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPhase("exit");
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [phase]);
 
   if (phase === "done") return null;
   const playing = phase === "play" || phase === "exit";
@@ -266,17 +261,6 @@ export function Intro({ skipLabel }: { skipLabel: string }) {
         </motion.div>
       </div>
 
-      {/* Pular */}
-      <motion.button
-        type="button"
-        onClick={() => setPhase("exit")}
-        className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-10 min-h-11 px-3 font-sans text-[0.6rem] uppercase tracking-[0.3em] text-washi/70 transition-colors hover:text-washi"
-        initial={{ opacity: 0 }}
-        animate={playing && !exiting ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.8, delay: exiting ? 0 : at(1) }}
-      >
-        {skipLabel}
-      </motion.button>
       <span className="sr-only" role="status">
         MIKASA — Japanese Nikkei Cuisine
       </span>

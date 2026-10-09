@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "motion/react";
+
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/lib/motion";
 
 /**
  * Vídeo em loop: autoplay · muted · loop · playsInline · poster.

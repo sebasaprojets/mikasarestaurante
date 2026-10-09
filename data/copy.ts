@@ -20,7 +20,6 @@ const es = {
   },
   a11y: {
     skip: "Saltar al contenido",
-    skipIntro: "Saltar intro",
     openMenu: "Abrir menú",
     closeMenu: "Cerrar menú",
     language: "Idioma",
@@ -269,7 +268,6 @@ const en: Copy = {
   },
   a11y: {
     skip: "Skip to content",
-    skipIntro: "Skip intro",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     language: "Language",

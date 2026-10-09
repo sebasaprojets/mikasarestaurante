@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-import { EASE } from "@/lib/motion";
+import { motion } from "motion/react";
+import { EASE, useReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type Props = {

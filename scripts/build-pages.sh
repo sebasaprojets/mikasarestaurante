@@ -17,16 +17,18 @@ trap restore EXIT
 
 npx next build
 
-# Raiz → espanhol (idioma padrão)
+# Raiz → espanhol (idioma padrão). Página preta, sem texto visível, redireciona na hora.
 cat > out/index.html <<HTML
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <title>MIKASA — Japanese Nikkei Cuisine</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0; url=${BASE}/es/">
+<meta name="theme-color" content="#0a0a0b">
+<script>try{sessionStorage.setItem("mk-intro-force","1")}catch(e){}location.replace("${BASE}/es/"+location.search+location.hash)</script>
+<noscript><meta http-equiv="refresh" content="0; url=${BASE}/es/"></noscript>
 <link rel="canonical" href="${SITE}/es/">
-<style>html{background:#0a0a0b;color:#efe9df;font-family:Georgia,serif}a{color:#c6a15b}</style>
-</head><body><p style="text-align:center;margin-top:40vh"><a href="${BASE}/es/">MIKASA</a></p></body></html>
+<style>html,body{margin:0;height:100%;background:#0a0a0b}</style>
+</head><body><noscript><a href="${BASE}/es/" style="color:#c6a15b">MIKASA</a></noscript></body></html>
 HTML
 
 # sitemap.xml e robots.txt estáticos
