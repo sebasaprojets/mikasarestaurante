@@ -190,6 +190,14 @@ html[data-intro],
 html[data-intro] body {
   overflow: hidden;
 }
+/* Por baixo da intro o hero já está pronto: título e árvore pintados desde o
+   primeiro quadro (antes mesmo do JS) — a fenda da intro revela a página completa. */
+html[data-intro] #inicio .mk-split-word,
+html[data-intro] #inicio .mk-early {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
 @keyframes mk-intro-failsafe {
   to {
     opacity: 0;

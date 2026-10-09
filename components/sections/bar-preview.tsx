@@ -3,7 +3,7 @@ import { MediaFrame } from "@/components/media/media-frame";
 import { BrushKanji } from "@/components/motion/brush-kanji";
 import { Reveal } from "@/components/motion/reveal";
 import { Tilt } from "@/components/motion/tilt";
-import { BarPromos } from "@/components/bar/bar-explorer";
+import { BarPromos } from "@/components/bar/bar-promos";
 import { SectionHeading } from "@/components/sections/section-heading";
 import { Button } from "@/components/ui/button";
 import { barCategories } from "@/data/bar";

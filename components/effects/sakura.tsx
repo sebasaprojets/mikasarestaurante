@@ -154,7 +154,7 @@ export function SakuraTree({ play, className }: { play: boolean; className?: str
     <>
       <motion.div
         aria-hidden
-        className={cn("pointer-events-none absolute right-0 top-0 h-full aspect-[7/8] max-w-none", className)}
+        className={cn("mk-early pointer-events-none absolute right-0 top-0 h-full aspect-[7/8] max-w-none", className)}
         initial={{ opacity: 0, scale: 1.05, x: 24 }}
         animate={play ? { opacity: 1, scale: 1, x: 0 } : {}}
         transition={{ duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
@@ -166,8 +166,8 @@ export function SakuraTree({ play, className }: { play: boolean; className?: str
         <img src={src("back")} srcSet={set("back", 700)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="mk-sway-slow absolute inset-0 size-full object-contain object-right-top" />
         {/* galhos + flores nítidas balançam juntos a partir do tronco */}
         <div className="mk-sway absolute inset-0" style={{ transformOrigin: "100% 80%" }}>
-          <img src={src("branches")} srcSet={set("branches", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
-          <img src={src("front")} srcSet={set("front", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
+          <img src={src("branches")} fetchPriority="high" srcSet={set("branches", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
+          <img src={src("front")} fetchPriority="high" srcSet={set("front", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
         </div>
         {/* eslint-enable @next/next/no-img-element */}
       </motion.div>
