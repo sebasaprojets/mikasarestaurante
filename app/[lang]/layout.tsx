@@ -55,6 +55,8 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       suppressHydrationWarning
     >
       <head>
+        {/* fundo escuro desde o primeiro quadro (antes do CSS carregar) */}
+        <style dangerouslySetInnerHTML={{ __html: "html,body{background:#0a0a0b;color:#efe9df}" }} />
         <script dangerouslySetInnerHTML={{ __html: introScript }} />
       </head>
       <body>
