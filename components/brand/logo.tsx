@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { EMBLEM_VIEWBOX, KANJI_D, LETTERS, WORDMARK_VIEWBOX } from "@/components/brand/logo-paths";
+import { EMBLEM_VIEWBOX, KANJI_ID, LETTER_BOXES, letterId, WORDMARK_VIEWBOX } from "@/components/brand/logo-meta";
 import { cn } from "@/lib/utils";
 
 /** Gradiente dourado do logo (luz no alto, ouro profundo embaixo). */
@@ -25,7 +25,7 @@ export function Emblem({ className, title }: { className?: string; title?: strin
         <GoldGradient id={gid} />
       </defs>
       <path d={EMBLEM_ARC} fill="none" stroke={`url(#${gid})`} strokeWidth="5" strokeLinecap="round" />
-      <path d={KANJI_D} fill={`url(#${gid})`} fillRule="evenodd" />
+      <use href={`#${KANJI_ID}`} fill={`url(#${gid})`} />
     </svg>
   );
 }
@@ -38,9 +38,9 @@ export function Wordmark({ className }: { className?: string }) {
       <defs>
         <GoldGradient id={gid} />
       </defs>
-      <g fill={`url(#${gid})`} fillRule="evenodd">
-        {LETTERS.map((l, i) => (
-          <path key={i} d={l.d} />
+      <g fill={`url(#${gid})`}>
+        {LETTER_BOXES.map((_, i) => (
+          <use key={i} href={`#${letterId(i)}`} />
         ))}
       </g>
     </svg>

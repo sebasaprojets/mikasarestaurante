@@ -10,6 +10,7 @@ import { Recognition } from "@/components/sections/recognition";
 import { Reservation } from "@/components/sections/reservation";
 import { Robata } from "@/components/sections/robata";
 import { hasLocale } from "@/lib/i18n";
+import { getOmakaseFeatures } from "@/lib/omakase";
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
@@ -19,7 +20,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
     <>
       <Hero lang={lang} />
       <Philosophy lang={lang} />
-      <Omakase lang={lang} />
+      <Omakase lang={lang} features={getOmakaseFeatures(lang)} />
       <Robata lang={lang} />
       <MenuPreview lang={lang} />
       <BarPreview lang={lang} />

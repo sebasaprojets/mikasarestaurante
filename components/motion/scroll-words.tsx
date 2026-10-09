@@ -24,7 +24,9 @@ export function ScrollWords({ text, className }: { text: string; className?: str
   if (reduce) return <p className={className}>{text}</p>;
 
   return (
-    <p ref={ref} className={cn(className)} aria-label={text}>
+    <p ref={ref} className={cn(className)}>
+      {/* texto para leitores de tela (sem aria-label, que não é permitido em <p>) */}
+      <span className="sr-only">{text}</span>
       <span aria-hidden>
         {words.map((w, i) => {
           const start = i / words.length;

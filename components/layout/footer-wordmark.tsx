@@ -3,15 +3,19 @@
 import { useId, useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { GoldGradient } from "@/components/brand/logo";
-import { LETTERS, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-paths";
+import { LETTER_BOXES, letterId, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-meta";
 
-function Letter({ d, i, progress }: { d: string; i: number; progress: MotionValue<number> }) {
+function Letter({ i, progress }: { i: number; progress: MotionValue<number> }) {
   // cada letra entra numa janela própria do progresso → revelação letra a letra
   const start = i * 0.09;
   const end = start + 0.45;
   const y = useTransform(progress, [start, end], [WORDMARK_H * 1.05, 0], { clamp: true });
   const opacity = useTransform(progress, [start, start + 0.12], [0, 1], { clamp: true });
-  return <motion.path d={d} style={{ y, opacity }} />;
+  return (
+    <motion.g style={{ y, opacity }}>
+      <use href={`#${letterId(i)}`} />
+    </motion.g>
+  );
 }
 
 /**
@@ -34,9 +38,9 @@ export function FooterWordmark() {
             <rect x={-20} y={-WORDMARK_H} width={WORDMARK_W + 40} height={WORDMARK_H * 2} />
           </clipPath>
         </defs>
-        <g clipPath={`url(#${clipId})`} fill={`url(#${gid})`} fillRule="evenodd">
-          {LETTERS.map((l, i) => (
-            <Letter key={i} d={l.d} i={i} progress={scrollYProgress} />
+        <g clipPath={`url(#${clipId})`} fill={`url(#${gid})`}>
+          {LETTER_BOXES.map((_, i) => (
+            <Letter key={i} i={i} progress={scrollYProgress} />
           ))}
         </g>
       </svg>

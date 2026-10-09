@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { Emblem } from "@/components/brand/logo";
 import { OffscreenPause } from "@/components/effects/offscreen-pause";
@@ -19,7 +19,16 @@ import { homeAnchor, sectionIds } from "@/lib/nav";
 
 export function Hero({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
-  const ready = useIntroReady();
+  const introDone = useIntroReady();
+  // Se a intro está tocando, o hero se monta já por baixo dela (a abertura em
+  // fenda revela a página pronta) — e o título conta como visível desde o início (LCP).
+  const [underIntro, setUnderIntro] = useState(false);
+  useEffect(() => {
+    if (!document.documentElement.hasAttribute("data-intro")) return;
+    const id = requestAnimationFrame(() => setUnderIntro(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const ready = introDone || underIntro;
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });

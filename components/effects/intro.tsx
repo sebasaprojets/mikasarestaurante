@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { animate, motion } from "motion/react";
 import { EMBLEM_ARC, GoldGradient } from "@/components/brand/logo";
-import { EMBLEM_VIEWBOX, KANJI_D, LETTERS, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-paths";
+import { EMBLEM_VIEWBOX, KANJI_ID, LETTER_BOXES, letterId, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-meta";
 import { Fire } from "@/components/effects/fire";
 import { signalIntroDone } from "@/lib/hooks/use-intro-ready";
 
@@ -172,14 +172,14 @@ export function Intro() {
               animate={playing ? { pathLength: 1, opacity: 1 } : {}}
               transition={{ pathLength: { duration: 1.8, ease: EASE, delay: at(0.3) }, opacity: { duration: 0.4, delay: at(0.3) } }}
             />
-            <motion.path
-              d={KANJI_D}
+            <motion.g
               fill={`url(#${gid})`}
-              fillRule="evenodd"
               initial={reduce ? { opacity: 0 } : { opacity: 0, clipPath: "inset(0% 0% 100% 0%)", filter: "blur(6px)" }}
               animate={playing ? { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", filter: "blur(0px)" } : {}}
               transition={{ duration: 1.5, ease: EASE, delay: at(0.9) }}
-            />
+            >
+              <use href={`#${KANJI_ID}`} />
+            </motion.g>
           </svg>
 
           {/* Wordmark letra a letra + brilho que atravessa */}
@@ -203,24 +203,25 @@ export function Intro() {
                 />
               </mask>
             </defs>
-            <g fill={`url(#${gid}w)`} fillRule="evenodd">
-              {LETTERS.map((l, i) => {
+            <g fill={`url(#${gid}w)`}>
+              {LETTER_BOXES.map((l, i) => {
                 const fromCenter = l.x + l.w / 2 - WORDMARK_W / 2;
                 return (
-                  <motion.path
+                  <motion.g
                     key={i}
-                    d={l.d}
                     initial={reduce ? { opacity: 0 } : { opacity: 0, y: WORDMARK_H * 0.5, x: fromCenter * 0.28, filter: "blur(10px)" }}
                     animate={playing ? { opacity: 1, y: 0, x: 0, filter: "blur(0px)" } : {}}
                     transition={{ duration: 1.4, ease: EASE, delay: at(1.5 + i * 0.09) }}
-                  />
+                  >
+                    <use href={`#${letterId(i)}`} />
+                  </motion.g>
                 );
               })}
             </g>
             {/* reflexo dourado claro */}
-            <g fill="#fff6dc" fillRule="evenodd" mask={`url(#${maskId})`} opacity="0.85">
-              {LETTERS.map((l, i) => (
-                <path key={i} d={l.d} />
+            <g fill="#fff6dc" mask={`url(#${maskId})`} opacity="0.85">
+              {LETTER_BOXES.map((_, i) => (
+                <use key={i} href={`#${letterId(i)}`} />
               ))}
             </g>
           </svg>

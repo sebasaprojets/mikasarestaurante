@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import "@/styles/globals.css";
 import { Cursor } from "@/components/effects/cursor";
 import { Grain } from "@/components/effects/grain";
+import { LogoSprite } from "@/components/brand/logo-sprite";
 import { Intro, introScript } from "@/components/effects/intro";
 import { Footer } from "@/components/layout/footer";
 import { FloatingReserve } from "@/components/layout/floating-reserve";
@@ -63,6 +64,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         >
           {c.a11y.skip}
         </a>
+        <LogoSprite />
         <MotionProvider>
           <Intro />
           <SmoothScroll>

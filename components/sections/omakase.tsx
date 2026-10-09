@@ -10,38 +10,11 @@ import { BrushKanji } from "@/components/motion/brush-kanji";
 import { SmartLink } from "@/components/layout/smart-link";
 import { Button } from "@/components/ui/button";
 import { getCopy } from "@/data/copy";
-import { findCategory, findItem, minPrice, omakaseFeatured } from "@/data/menu";
-import type { MediaAsset } from "@/data/media";
 import { localePath, type Locale } from "@/lib/i18n";
-import { formatPrice } from "@/lib/format";
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
+import type { OmakaseFeature as Feature } from "@/lib/omakase";
 import { homeAnchor, sectionIds } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-
-type Feature = {
-  id: string;
-  nome: string;
-  descricao: string | null;
-  componentes?: string[];
-  porcao?: string | null;
-  price: string | null;
-  imagem: MediaAsset | null;
-};
-
-function toFeatures(lang: Locale): Feature[] {
-  const c = getCopy(lang);
-  return omakaseFeatured.flatMap((f): Feature[] => {
-    if ("item" in f) {
-      const it = findItem(f.item);
-      if (!it) return [];
-      return [{ id: it.id, nome: it.nome[lang], descricao: it.descricao?.[lang] ?? null, componentes: it.componentes, porcao: it.porcao, price: formatPrice(it.preco, lang), imagem: it.imagem }];
-    }
-    const cat = findCategory(f.categoria);
-    if (!cat) return [];
-    const from = formatPrice(minPrice(f.categoria), lang);
-    return [{ id: cat.id, nome: cat.nome[lang], descricao: f.descricao[lang], price: from ? `${c.menuPage.from} ${from}` : null, imagem: f.imagem }];
-  });
-}
 
 function Card({ item, index, lang }: { item: Feature; index: number; lang: Locale }) {
   const c = getCopy(lang);
@@ -51,7 +24,6 @@ function Card({ item, index, lang }: { item: Feature; index: number; lang: Local
         href={`${localePath(lang, "/menu")}#${item.id === "hamachi-collection" ? "hamachi-collection" : "omakase-experience"}`}
         className="relative block aspect-[4/5] w-full overflow-hidden md:aspect-auto md:h-[min(56vh,34rem)]"
         data-cursor={c.cursor.view}
-        aria-label={`${item.nome} — ${c.cursor.view}`}
       >
         <div className="size-full transition-transform duration-[1400ms] ease-[var(--ease-mikasa)] group-hover:scale-[1.04]">
           <MediaFrame asset={item.imagem} lang={lang} kanji="匠" sizes="(min-width:768px) 34vw, 82vw" />
@@ -82,9 +54,10 @@ function Card({ item, index, lang }: { item: Feature; index: number; lang: Local
 }
 
 /** Omakase — seção assinatura com scroll horizontal fixado (desktop) e carrossel nativo (mobile). */
-export function Omakase({ lang }: { lang: Locale }) {
+/** Os destaques chegam prontos do servidor (o menu completo não vai para o navegador). */
+export function Omakase({ lang, features }: { lang: Locale; features: Feature[] }) {
   const c = getCopy(lang);
-  const items = toFeatures(lang);
+  const items = features;
   const desktop = useMediaQuery("(min-width: 768px)");
   // scroll horizontal fixado é controlado pelo próprio scroll da pessoa → mantido também com reduced motion
   const pinned = desktop;

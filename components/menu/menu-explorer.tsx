@@ -220,7 +220,6 @@ function ItemRow({
         onPointerLeave={() => onHover(null)}
         onFocus={() => onHover(null)}
         className="group grid w-full gap-5 py-7 text-left md:py-8"
-        aria-label={`${item.nome[lang]}${price ? ` — ${price}` : ""}. ${c.menuPage.view}`}
       >
         {/* Mobile: card com imagem (quando o prato tem mídia) */}
         {item.imagem ? (

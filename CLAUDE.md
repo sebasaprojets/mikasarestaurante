@@ -32,8 +32,9 @@ proxy.ts           roteamento de idioma
 
 ## Marca e efeitos
 
-- Logo oficial vetorizado em `components/brand/logo-paths.ts` (emblema kanji + wordmark letra a letra);
-  componentes `Emblem`, `Wordmark`, `Logo` em `components/brand/logo.tsx`. Substituir pelo SVG original quando enviado.
+- Logo oficial vetorizado: traços em `components/brand/logo-paths.ts`, renderizados UMA vez pelo sprite
+  `LogoSprite` (layout) e reutilizados com `<use href="#mk-kanji">` / `#mk-l0…5` (medidas em `logo-meta.ts`).
+  Nunca importar `logo-paths` em Client Components. Substituir pelo SVG original quando enviado.
 - Intro cinematográfica (`components/effects/intro.tsx`): 1x por sessão (`sessionStorage`), sem botão de pular (toca até o fim),
   fogo WebGL (`effects/fire.tsx`), reduced motion = fade curto.
 - Hero: cerejeira em camadas (`public/hero/sakura-*.webp`) + pétalas em canvas (`effects/sakura.tsx`).
@@ -42,7 +43,8 @@ proxy.ts           roteamento de idioma
 
 - **Paleta**: Sumi `#0A0A0B` · Carvão `#151517` · Ouro `#C6A15B` · Ouro claro `#E6CF96` · Washi `#EFE9DF` · Torii `#A8322A` (só detalhes mínimos).
   Texto secundário `washi-dim #B9B3AA`, terciário `washi-mute #8D8880` (≥ 4.5:1 sobre Sumi).
-- **Tipografia**: Cormorant Garamond (display) · Manrope (texto/UI) · Shippori Mincho (kanji 匠 炎 酒, discreto).
+- **Tipografia**: Cormorant Garamond (display) · Manrope (texto/UI) — fontes variáveis, subset latino.
+  Shippori Mincho = subset local só com 匠 炎 酒 (`styles/fonts/`); kanji novo → gerar subset de novo.
   Escala: `text-display-xl/lg/md/sm`, `mk-eyebrow`.
 - **Movimento**: easing `cubic-bezier(0.22, 1, 0.36, 1)`, 0.8–1.4s, stagger leve. Reduced motion: sem parallax, sem autoplay, só fades.
 - **Bordas**: quase retas (1–2px). Linhas douradas de 1px (`border-line`, `mk-rule`).
@@ -71,6 +73,9 @@ visual SaaS, excesso de animação ou de elementos simultâneos.
 
 Testar sempre em **375px, 768px e 1440px** (sem overflow horizontal).
 Metas: Lighthouse ≥ 90, LCP < 2.5s, WCAG AA, foco dourado visível.
+Performance: dados pesados (menu completo etc.) ficam no servidor — passe só o necessário como props
+para Client Components; componentes abertos sob demanda via `next/dynamic` (ex.: lightbox da galeria).
+Acessibilidade: não usar `aria-label` em `<p>`/`<div>` sem role; texto animado usa `sr-only` + `aria-hidden`.
 
 ## Deploy
 
