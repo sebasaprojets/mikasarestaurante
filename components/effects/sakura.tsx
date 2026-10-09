@@ -59,7 +59,7 @@ function Petals({ className }: { className?: string }) {
     resize();
 
     const mobile = w < 768;
-    const count = Math.round((mobile ? 16 : 34) * (isLowEndDevice() ? 0.6 : 1));
+    const count = Math.round((mobile ? 30 : 64) * (isLowEndDevice() ? 0.6 : 1));
     const spawn = (initial: boolean): Petal => ({
       // nascem na copa: metade direita, terço superior
       x: w * (0.48 + Math.random() * 0.55),
@@ -120,7 +120,7 @@ function Petals({ className }: { className?: string }) {
     });
     io.observe(canvas);
     window.addEventListener("resize", resize);
-    const lite = () => ps.splice(Math.ceil(ps.length * 0.5));
+    const lite = () => ps.splice(Math.ceil(ps.length * 0.65));
     if (isPerfLite()) lite();
     window.addEventListener(PERF_LITE_EVENT, lite);
     return () => {
