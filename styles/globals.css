@@ -1,0 +1,287 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────
+   MIKASA — Design Tokens
+   Fonte de verdade dos tokens (não há Figma). Ver CLAUDE.md.
+   ────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Paleta */
+  --color-sumi: #0a0a0b;
+  --color-carvao: #151517;
+  --color-carvao-2: #1c1c1f;
+  --color-ouro: #c6a15b;
+  --color-ouro-claro: #e6cf96;
+  --color-washi: #efe9df;
+  --color-washi-dim: #b9b3aa; /* washi suavizado — 9:1 sobre sumi */
+  --color-washi-mute: #8d8880; /* texto terciário — 5.6:1 sobre sumi */
+  --color-torii: #a8322a; /* somente detalhes mínimos */
+  --color-ambar: #2a1708; /* atmosfera robata / bar */
+  --color-brasa: #d9772b;
+
+  /* Linhas */
+  --color-line: rgb(198 161 91 / 0.18);
+  --color-line-strong: rgb(198 161 91 / 0.42);
+  --color-line-washi: rgb(239 233 223 / 0.1);
+
+  /* Tipografia */
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-jp: var(--font-shippori), "Shippori Mincho", serif;
+
+  /* Escala de display (fluida) */
+  --text-display-xl: clamp(2.75rem, 1.6rem + 5.6vw, 7rem);
+  --text-display-xl--line-height: 0.98;
+  --text-display-lg: clamp(2.25rem, 1.5rem + 3.6vw, 5rem);
+  --text-display-lg--line-height: 1.02;
+  --text-display-md: clamp(1.75rem, 1.3rem + 2vw, 3.25rem);
+  --text-display-md--line-height: 1.08;
+  --text-display-sm: clamp(1.375rem, 1.15rem + 0.9vw, 2rem);
+  --text-display-sm--line-height: 1.15;
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.32em;
+
+  /* Movimento */
+  --ease-mikasa: cubic-bezier(0.22, 1, 0.36, 1);
+  --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  --default-transition-duration: 600ms;
+
+  /* Bordas — contenção: quase retas */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+
+  /* Espaçamento editorial */
+  --spacing-section: clamp(6rem, 4rem + 9vw, 12rem);
+  --spacing-gutter: clamp(1.25rem, 0.6rem + 3vw, 4rem);
+
+  --animate-spin-slow: spin 60s linear infinite;
+  --animate-kenburns: kenburns 18s var(--ease-mikasa) both;
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(-3%, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(3%, -2%, 0) scale(1.08);
+    opacity: 0.8;
+  }
+}
+
+@keyframes scroll-line {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+:root {
+  --header-h: 76px;
+  --header-offset: 76px; /* atualizado pelo header (0 quando oculto) */
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-sumi);
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var(--header-h);
+}
+
+body {
+  background: var(--color-sumi);
+  color: var(--color-washi);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "kern";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(198 161 91 / 0.35);
+  color: var(--color-washi);
+}
+
+/* Foco dourado, visível e consistente */
+:focus-visible {
+  outline: 1px solid var(--color-ouro);
+  outline-offset: 4px;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Preloader — só aparece quando o script inline marca a primeira visita */
+.mk-preloader {
+  display: none;
+}
+html[data-preload] .mk-preloader {
+  display: flex;
+}
+
+/* Grão de filme muito sutil */
+.mk-grain {
+  pointer-events: none;
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Textura inspirada em papel washi — fibras longas, quase invisíveis */
+.mk-washi {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.18' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 0.94  0 0 0 0 0.91  0 0 0 0 0.87  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+}
+
+/* Linha dourada de 1px */
+.mk-rule {
+  height: 1px;
+  background: var(--color-line);
+}
+
+/* Eyebrow editorial */
+.mk-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-ouro);
+}
+
+/* Linha de pontos do menu (Nome ........ Preço) */
+.mk-leader {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  margin: 0 0.75rem;
+  transform: translateY(-0.3em);
+  border-bottom: 1px dotted rgb(198 161 91 / 0.35);
+}
+
+.mk-scroll-line {
+  animation: scroll-line 2.6s var(--ease-mikasa) infinite;
+}
+
+.mk-no-scrollbar {
+  scrollbar-width: none;
+}
+.mk-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .mk-kenburns {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+@keyframes mk-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mk-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes mk-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Preloader — tempo total ≤ 1,8s */
+html[data-preload] .mk-preloader {
+  animation: mk-pl-out 0.35s var(--ease-mikasa) 1.45s forwards;
+}
+.mk-pl-enso {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: mk-pl-draw 1.2s var(--ease-mikasa) 0.05s forwards;
+}
+.mk-pl-kanji {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation:
+    mk-pl-kanji 1.1s var(--ease-mikasa) 0.2s forwards,
+    mk-pl-fill 0.6s var(--ease-mikasa) 0.9s forwards;
+}
+.mk-pl-word {
+  opacity: 0;
+  animation: mk-fade-in 0.7s var(--ease-mikasa) 0.6s forwards;
+}
+@keyframes mk-pl-draw {
+  to {
+    stroke-dashoffset: 0.06;
+  }
+}
+@keyframes mk-pl-kanji {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes mk-pl-fill {
+  to {
+    fill: rgb(198 161 91 / 0.9);
+  }
+}
+@keyframes mk-pl-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
