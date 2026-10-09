@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
+import { canvasDpr, isLowEndDevice } from "@/lib/device";
+import { isPerfLite, PERF_LITE_EVENT } from "@/lib/perf";
 import { withBasePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +45,7 @@ function Petals({ className }: { className?: string }) {
     if (!canvas || !ctx) return;
 
     const sprites = PINKS.map((p) => makeSprite(16, p));
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    const dpr = canvasDpr();
     let w = 0;
     let h = 0;
     const resize = () => {
@@ -57,7 +59,7 @@ function Petals({ className }: { className?: string }) {
     resize();
 
     const mobile = w < 768;
-    const count = mobile ? 16 : 34;
+    const count = Math.round((mobile ? 16 : 34) * (isLowEndDevice() ? 0.6 : 1));
     const spawn = (initial: boolean): Petal => ({
       // nascem na copa: metade direita, terço superior
       x: w * (0.48 + Math.random() * 0.55),
@@ -118,7 +120,11 @@ function Petals({ className }: { className?: string }) {
     });
     io.observe(canvas);
     window.addEventListener("resize", resize);
+    const lite = () => ps.splice(Math.ceil(ps.length * 0.5));
+    if (isPerfLite()) lite();
+    window.addEventListener(PERF_LITE_EVENT, lite);
     return () => {
+      window.removeEventListener(PERF_LITE_EVENT, lite);
       io.disconnect();
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
@@ -140,6 +146,9 @@ function Petals({ className }: { className?: string }) {
  */
 export function SakuraTree({ play, className }: { play: boolean; className?: string }) {
   const src = (n: string) => withBasePath(`/hero/sakura-${n}.webp`);
+  // versão leve para telas pequenas (menos memória de GPU)
+  const set = (n: string, lg: number) =>
+    `${withBasePath(`/hero/sakura-${n}-sm.webp`)} ${lg / 2}w, ${withBasePath(`/hero/sakura-${n}.webp`)} ${lg}w`;
 
   return (
     <>
@@ -149,19 +158,16 @@ export function SakuraTree({ play, className }: { play: boolean; className?: str
         initial={{ opacity: 0, scale: 1.05, x: 24 }}
         animate={play ? { opacity: 1, scale: 1, x: 0 } : {}}
         transition={{ duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          transformOrigin: "100% 60%",
-          maskImage: "linear-gradient(to bottom, transparent 0%, #000 14%, #000 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 14%, #000 100%)",
-        }}
+        // degradê do topo vem embutido nas imagens (mask-image forçava repaint a cada quadro)
+        style={{ transformOrigin: "100% 60%" }}
       >
         {/* eslint-disable @next/next/no-img-element -- camadas decorativas animadas, já otimizadas (webp) */}
         {/* fundo desfocado: profundidade / névoa */}
-        <img src={src("back")} alt="" decoding="async" className="mk-sway-slow absolute inset-0 size-full object-contain object-right-top" />
+        <img src={src("back")} srcSet={set("back", 700)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="mk-sway-slow absolute inset-0 size-full object-contain object-right-top" />
         {/* galhos + flores nítidas balançam juntos a partir do tronco */}
         <div className="mk-sway absolute inset-0" style={{ transformOrigin: "100% 80%" }}>
-          <img src={src("branches")} alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
-          <img src={src("front")} alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
+          <img src={src("branches")} srcSet={set("branches", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
+          <img src={src("front")} srcSet={set("front", 1400)} sizes="(max-width: 1023px) 420px, 800px" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
         </div>
         {/* eslint-enable @next/next/no-img-element */}
       </motion.div>

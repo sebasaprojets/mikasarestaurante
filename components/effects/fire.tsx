@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { isLowEndDevice } from "@/lib/device";
 import { cn } from "@/lib/utils";
 
 const VERT = `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
@@ -14,7 +15,7 @@ uniform float k;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);
   return mix(mix(hash(i),hash(i+vec2(1.,0.)),u.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),u.x),u.y);}
-float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v;}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v;}
 vec3 ramp(float x){
   vec3 c=mix(vec3(.10,.01,.0),vec3(.50,.06,.04),smoothstep(.0,.25,x));
   c=mix(c,vec3(.80,.24,.08),smoothstep(.2,.5,x));
@@ -52,7 +53,7 @@ void main(){
 export function Fire({
   className,
   intensityRef,
-  scale = 0.5,
+  scale = 0.42,
 }: {
   className?: string;
   intensityRef: React.RefObject<number>;
@@ -89,7 +90,7 @@ export function Fire({
     const uK = gl.getUniformLocation(prog, "k");
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2) * scale;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5) * scale * (isLowEndDevice() ? 0.7 : 1);
       canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
       canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
