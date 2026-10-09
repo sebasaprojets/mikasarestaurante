@@ -1,5 +1,5 @@
 import type { Localized } from "@/lib/i18n";
-import { media, type MediaAsset } from "@/data/media";
+import { media, photos, type MediaAsset } from "@/data/media";
 
 /**
  * MIKASA FOOD MENU — dados da carta.
@@ -140,7 +140,8 @@ export const menuItems: MenuItem[] = [
     "Camarones crujientes con salsa spicy mayo sobre lechuga y guacamole Nikkei."),
   item("entradas", "wakame-kuku-salad", "Wakame Kuku Salad", 14, null,
     "Ripe mango, green mango, cucumber and wakame seaweed.",
-    "Mango maduro, mango verde, pepino y alga wakame."),
+    "Mango maduro, mango verde, pepino y alga wakame.",
+    { imagem: photos.wakameKukuSalad }),
   item("entradas", "gyoza-dumplings", "Gyoza Dumplings", 10, null,
     "Samurai or steamed. Pork or chicken dumplings in the chef's sauce.",
     "Samurai o al vapor. Dumplings de cerdo o pollo, en salsa del chef."),
@@ -204,7 +205,8 @@ export const menuItems: MenuItem[] = [
     "Selección de nigiri elegida por el chef con cortes premium como salmón, atún, carne prime y pulpo."),
   item("omakase-experience", "sashimi-selection", "Sashimi Selection", 54, "25 pc",
     "Chef selection of fresh sashimi including tuna, salmon, octopus, eel and hamachi.",
-    "Selección de sashimi fresco con atún, salmón, pulpo, anguila y hamachi."),
+    "Selección de sashimi fresco con atún, salmón, pulpo, anguila y hamachi.",
+    { imagem: photos.sashimiSelection }),
   item("omakase-experience", "gyukazo-tiradito-atun", "Gyukazo Tiradito Atún", 28, null,
     "Thin sliced tuna in ponzu sauce with chalaquita and crunchy quinoa.",
     "Atún laminado con salsa ponzu, chalaquita y quinoa crocante."),
@@ -213,7 +215,8 @@ export const menuItems: MenuItem[] = [
     "Tiradito de salmón salvaje con salsa ponzu, chalaquita y quinoa crocante."),
   item("omakase-experience", "mitoko-tataki", "Mitoko Tataki", 24, "6 pc",
     "Seared tuna or salmon slices served with tomato kichi sauce.",
-    "Atún o salmón sellado servido con salsa tomate kichi."),
+    "Atún o salmón sellado servido con salsa tomate kichi.",
+    { imagem: photos.mitokoTataki }),
   item("omakase-experience", "wagyu-tiradito", "Wagyu Tiradito", 36, null,
     "Wagyu with dill, lemon, avocado guacamole and Osaka-style cream cheese sauce.",
     "Wagyu con eneldo, limón, guacamole de aguacate y salsa de queso crema estilo Osaka.",
@@ -237,7 +240,7 @@ export const menuItems: MenuItem[] = [
   item("hamachi-collection", "miyamoto-hamachi-roll", "Miyamoto Hamachi Roll", 48, "4 pc + 2 nigiri",
     "Tempura shrimp, avocado, flamed Hamachi, lemon drops and anticuchera sauce.",
     "Camarón tempura, aguacate, hamachi flameado, limón y salsa anticuchera.",
-    { imagem: media.omakase03 }),
+    { imagem: photos.hamachiRollNigiri }),
   item("hamachi-collection", "mono-roll-de-hamachi-acevichado", "Mono Roll de Hamachi Acevichado", 34, "4 pc",
     "Cream cheese, avocado and Hamachi with chef's sauce, togarashi and sea salt.",
     "Queso crema, aguacate y hamachi con salsa del chef, togarashi y sal."),
@@ -254,13 +257,16 @@ export const menuItems: MenuItem[] = [
     "Pechuga de pollo empanizada con ajo y panko, acompañada de arroz Nikkei o papas fritas."),
   item("platos-principales", "grand-maison-tokyo-duck-rice", "Grand Maison Tokyo Duck Rice", 38, null,
     "Nikkei fried rice with fresh vegetables, roasted duck, duck demi-glace and truffle oil.",
-    "Arroz Nikkei salteado con vegetales frescos, pato asado, demi-glace de pato y aceite de trufa."),
+    "Arroz Nikkei salteado con vegetales frescos, pato asado, demi-glace de pato y aceite de trufa.",
+    { imagem: photos.duckRice }),
   item("platos-principales", "lomo-saltado-causa-limena", "Lomo Saltado Causa Limeña", 34, null,
     "Flamed Brangus beef tenderloin with sake, sautéed vegetables, avocado causa and criolla salad.",
-    "Lomo fino de res Brangus flameado en sake con vegetales salteados, acompañado de causa rellena de aguacate y criolla."),
+    "Lomo fino de res Brangus flameado en sake con vegetales salteados, acompañado de causa rellena de aguacate y criolla.",
+    { imagem: photos.lomoSaltadoCausa }),
   item("platos-principales", "nagasaki-beef-nippon-rice", "Nagasaki Beef & Nippon Rice", 32, null,
     "Wok fried rice with Angus beef strips in Nikkei sauce finished with chives.",
-    "Arroz salteado al wok con cortes Angus en salsa Nikkei y toque de cebollino."),
+    "Arroz salteado al wok con cortes Angus en salsa Nikkei y toque de cebollino.",
+    { imagem: photos.nagasakiBeefRice }),
   item("platos-principales", "mikayaki-salmon-salvaje", "Mikayaki Salmon Salvaje", 38, null,
     "Wild salmon grilled with Asian salad mix, potato purée and tamarind sauce.",
     "Salmón salvaje al grill con ensalada asiática, puré de papa y salsa de tamarindo."),
@@ -323,7 +329,8 @@ export const menuItems: MenuItem[] = [
     "Por favor consulte con su mesero por su sabor favorito."),
   item("postres-caseros", "artesano-dessert", "Artesano Dessert", 14, null,
     "Crunchy wonton filled with banana and Nutella.",
-    "Wonton crocante relleno de banana y Nutella."),
+    "Wonton crocante relleno de banana y Nutella.",
+    { imagem: photos.artesanoDessert }),
 ];
 
 /**

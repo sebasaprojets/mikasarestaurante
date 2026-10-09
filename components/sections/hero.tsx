@@ -53,7 +53,7 @@ export function Hero({ lang }: { lang: Locale }) {
           priority
           kenBurns
           sizes="100vw"
-          labelClassName="bottom-3 left-auto right-4 max-w-[60%] items-end text-right md:bottom-5 md:right-5"
+          hideLabel
         />
 
         {/* Luz ambiente — muito lenta, apenas atmosfera */}

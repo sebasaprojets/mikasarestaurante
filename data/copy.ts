@@ -122,6 +122,7 @@ const es = {
       detalles: "Detalles",
       chef: "Chef",
       fuego: "Fuego",
+      postres: "Postres",
     },
   },
   recognition: {
@@ -369,6 +370,7 @@ const en: Copy = {
       detalles: "Details",
       chef: "Chef",
       fuego: "Fire",
+      postres: "Desserts",
     },
   },
   recognition: {

@@ -20,6 +20,8 @@ type Props = {
   fallbackLabel?: string;
   /** Posição do rótulo "Placeholder" (ex.: no hero fica no topo). */
   labelClassName?: string;
+  /** Fundo decorativo intencional: sem rótulo de placeholder (ex.: hero escuro com a cerejeira). */
+  hideLabel?: boolean;
 };
 
 /**
@@ -37,6 +39,7 @@ export function MediaFrame({
   tone = "neutral",
   fallbackLabel,
   labelClassName,
+  hideLabel = false,
 }: Props) {
   const motionCls = kenBurns ? "mk-kenburns animate-kenburns" : "";
 
@@ -74,8 +77,9 @@ export function MediaFrame({
 
   return (
     <div
-      role="img"
-      aria-label={`${lang === "es" ? "Imagen provisional" : "Placeholder image"}: ${label}`}
+      role={hideLabel ? undefined : "img"}
+      aria-hidden={hideLabel ? true : undefined}
+      aria-label={hideLabel ? undefined : `${lang === "es" ? "Imagen provisional" : "Placeholder image"}: ${label}`}
       className={cn(
         "mk-placeholder relative size-full overflow-hidden",
         tone === "warm" ? "bg-[#140c07]" : "bg-carvao",
@@ -106,12 +110,14 @@ export function MediaFrame({
       <span aria-hidden className="absolute right-3 top-3 size-3 border-r border-t border-line-strong" />
       <span aria-hidden className="absolute bottom-3 left-3 size-3 border-b border-l border-line-strong" />
       <span aria-hidden className="absolute bottom-3 right-3 size-3 border-b border-r border-line-strong" />
+      {hideLabel ? null : (
       <div aria-hidden className={cn("absolute inset-x-5 bottom-5 flex flex-col gap-1", labelClassName)}>
         <span className="font-display text-base italic text-washi-dim line-clamp-2">{label}</span>
         <span className="font-sans text-[0.6rem] uppercase tracking-[0.28em] text-washi-mute">
           Placeholder{file ? ` · ${file}` : ""}
         </span>
       </div>
+      )}
     </div>
   );
 }
