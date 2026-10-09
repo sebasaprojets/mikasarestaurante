@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useLenis } from "lenis/react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { MediaFrame } from "@/components/media/media-frame";
@@ -87,18 +89,22 @@ export function Omakase({ lang }: { lang: Locale }) {
   const pinned = desktop;
 
   const sectionRef = useRef<HTMLElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [distance, setDistance] = useState(0);
+  const lenis = useLenis();
 
   useEffect(() => {
     if (!pinned) return;
     const measure = () => {
       const track = trackRef.current;
-      if (track) setDistance(Math.max(0, track.scrollWidth - window.innerWidth));
+      const vp = viewportRef.current;
+      if (track && vp) setDistance(Math.max(0, track.scrollWidth - vp.clientWidth));
     };
     measure();
     const ro = new ResizeObserver(measure);
     if (trackRef.current) ro.observe(trackRef.current);
+    if (viewportRef.current) ro.observe(viewportRef.current);
     window.addEventListener("resize", measure);
     return () => {
       ro.disconnect();
@@ -107,12 +113,25 @@ export function Omakase({ lang }: { lang: Locale }) {
   }, [pinned]);
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
-  // Lenis já suaviza o scroll; sem mola extra (evita atraso)
-  const smooth = scrollYProgress;
-  const x = useTransform(smooth, [0, 1], [0, -distance]);
+  // pequena pausa no início e no fim; Lenis já suaviza (sem mola extra)
+  const x = useTransform(scrollYProgress, [0.06, 0.94], [0, -distance], { clamp: true });
+
+  /** Setas: avança/volta um card rolando a página até o ponto equivalente. */
+  const go = (dir: 1 | -1) => {
+    const sec = sectionRef.current;
+    if (!sec) return;
+    const range = sec.offsetHeight - window.innerHeight;
+    const n = items.length;
+    const p = Math.min(1, Math.max(0, (window.scrollY - sec.offsetTop) / range));
+    const inner = Math.min(1, Math.max(0, (p - 0.06) / 0.88));
+    const idx = Math.min(n, Math.max(0, Math.round(inner * n) + dir));
+    const target = sec.offsetTop + (0.06 + (idx / n) * 0.88) * range;
+    if (lenis) lenis.scrollTo(target, { duration: 1.4 });
+    else window.scrollTo({ top: target, behavior: "smooth" });
+  };
 
   const intro = (
-    <div className="flex w-[82vw] shrink-0 snap-start flex-col justify-center sm:w-[58vw] md:w-[min(34rem,38vw)] md:pr-10">
+    <div className={cn("flex shrink-0 flex-col justify-center", pinned ? "w-full pr-10" : "w-[82vw] snap-start sm:w-[58vw]")}>
       <div className="mb-7 flex items-center gap-4">
         <span className="font-sans text-[0.65rem] tracking-[0.3em] text-washi-mute tabular-nums">02</span>
         <span aria-hidden className="h-px w-10 bg-ouro/70" />
@@ -121,47 +140,84 @@ export function Omakase({ lang }: { lang: Locale }) {
       </div>
       <h2 className="font-display text-display-lg font-light text-washi">{c.omakase.title}</h2>
       <p className="mt-8 max-w-[36ch] text-[0.95rem] leading-relaxed text-washi-dim">{c.omakase.intro}</p>
-      <div className="mt-10 flex flex-wrap items-center gap-8">
+      <div className="mt-10 flex flex-wrap items-center gap-6">
         <Button asChild variant="outline">
           <SmartLink href={homeAnchor(lang, sectionIds.reservation)}>{c.omakase.reserve}</SmartLink>
         </Button>
-        <span className="hidden items-center gap-3 font-sans text-[0.6rem] uppercase tracking-[0.3em] text-washi-mute md:flex">
+        {pinned ? (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label={c.a11y.previous}
+              className="grid size-11 place-items-center border border-line text-washi transition-colors duration-500 hover:border-ouro hover:text-ouro-claro"
+            >
+              <ChevronLeft className="size-4" strokeWidth={1.25} aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label={c.a11y.next}
+              className="grid size-11 place-items-center border border-line text-washi transition-colors duration-500 hover:border-ouro hover:text-ouro-claro"
+            >
+              <ChevronRight className="size-4" strokeWidth={1.25} aria-hidden />
+            </button>
+          </div>
+        ) : null}
+      </div>
+      {pinned ? (
+        <span className="mt-8 flex items-center gap-3 font-sans text-[0.6rem] uppercase tracking-[0.3em] text-washi-mute">
           {c.omakase.hint}
           <span aria-hidden className="h-px w-10 bg-line-strong" />
         </span>
-      </div>
+      ) : null}
     </div>
   );
 
+  const cards = items.map((item, i) => <Card key={item.id} item={item} index={i} lang={lang} />);
+
+  if (!pinned) {
+    // Mobile/tablet: carrossel nativo com snap
+    return (
+      <section id={sectionIds.omakase} aria-label={c.omakase.eyebrow} className="relative bg-sumi py-[var(--spacing-section)]">
+        <div className="mk-no-scrollbar flex snap-x snap-mandatory scroll-px-[var(--spacing-gutter)] gap-8 overflow-x-auto px-[var(--spacing-gutter)] pb-4">
+          {intro}
+          {cards}
+          <div aria-hidden className="w-[4vw] shrink-0" />
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop: texto fixo à esquerda; só os cards deslizam (rolagem vertical ou gesto lateral)
   return (
     <section
       ref={sectionRef}
       id={sectionIds.omakase}
       aria-label={c.omakase.eyebrow}
       className="relative bg-sumi"
-      style={pinned && distance ? { height: `calc(100vh + ${distance}px)` } : undefined}
+      style={distance ? { height: `calc(100vh + ${Math.round(distance * 1.15)}px)` } : undefined}
     >
-      <div className={cn(pinned ? "sticky top-0 flex h-screen items-center overflow-hidden" : "py-[var(--spacing-section)]")}>
-        <motion.div
-          ref={trackRef}
-          style={pinned ? { x } : undefined}
-          className={cn(
-            "flex gap-8 px-[var(--spacing-gutter)] md:gap-14",
-            pinned ? "w-max will-change-transform" : "mk-no-scrollbar snap-x snap-mandatory overflow-x-auto scroll-px-[var(--spacing-gutter)] pb-4",
-          )}
-        >
+      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+        <div className="grid w-full grid-cols-[minmax(19rem,34vw)_1fr] items-center pl-[var(--spacing-gutter)] xl:grid-cols-[minmax(22rem,30vw)_1fr]">
           {intro}
-          {items.map((item, i) => (
-            <Card key={item.id} item={item} index={i} lang={lang} />
-          ))}
-          <div aria-hidden className="w-[4vw] shrink-0" />
-        </motion.div>
-
-        {pinned ? (
-          <div aria-hidden className="absolute inset-x-[var(--spacing-gutter)] bottom-10 h-px bg-line">
-            <motion.div className="h-full origin-left bg-ouro" style={{ scaleX: smooth }} />
+          <div
+            ref={viewportRef}
+            className="relative overflow-hidden"
+            style={{
+              maskImage: "linear-gradient(to right, transparent 0, #000 4rem, #000 calc(100% - 3rem), transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 0, #000 4rem, #000 calc(100% - 3rem), transparent 100%)",
+            }}
+          >
+            <motion.div ref={trackRef} style={{ x }} className="flex w-max gap-14 pl-16 pr-[var(--spacing-gutter)] will-change-transform">
+              {cards}
+            </motion.div>
           </div>
-        ) : null}
+        </div>
+
+        <div aria-hidden className="absolute inset-x-[var(--spacing-gutter)] bottom-10 h-px bg-line">
+          <motion.div className="h-full origin-left bg-ouro" style={{ scaleX: scrollYProgress }} />
+        </div>
       </div>
     </section>
   );
