@@ -3,6 +3,7 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { InstagramIcon, ThreadsIcon, WhatsAppIcon } from "@/components/brand/icons";
+import { Logo } from "@/components/brand/logo";
 import { LanguageSwitch } from "@/components/layout/language-switch";
 import { SmartLink } from "@/components/layout/smart-link";
 import { getCopy } from "@/data/copy";
@@ -53,7 +54,7 @@ export function MobileMenu({
               >
                 <DialogPrimitive.Title className="sr-only">MIKASA</DialogPrimitive.Title>
                 <div className="flex h-[var(--header-h)] items-center justify-between px-[var(--spacing-gutter)]">
-                  <span className="font-display text-[1.45rem] font-medium tracking-[0.34em]">MIKASA</span>
+                  <Logo />
                   <DialogPrimitive.Close className="grid size-11 place-items-center" aria-label={c.a11y.closeMenu}>
                     <span aria-hidden className="relative block size-6">
                       <span className="absolute left-0 top-1/2 h-px w-6 rotate-45 bg-washi" />

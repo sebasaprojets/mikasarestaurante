@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 
 export const INTRO_EVENT = "mikasa:intro-done";
 
-/** `true` quando o preloader terminou (ou não existe nesta visita). */
+/** `true` quando a intro terminou (ou não existe nesta visita). */
 export function useIntroReady() {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const done = () => setReady(true);
-    if (!document.documentElement.hasAttribute("data-preload")) {
+    if (!document.documentElement.hasAttribute("data-intro")) {
       const id = requestAnimationFrame(done);
       return () => cancelAnimationFrame(id);
     }
