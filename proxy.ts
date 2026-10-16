@@ -11,7 +11,8 @@ export function proxy(request: NextRequest) {
 
   if (pathname === "/es" || pathname.startsWith("/es/")) {
     const url = request.nextUrl.clone();
-    url.pathname = pathname.slice(3) || "/";
+    // colapsa barras iniciais: "/es//host" nunca vira "//host" (open redirect protocol-relative)
+    url.pathname = `/${pathname.slice(3).replace(/^\/+/, "")}`;
     return NextResponse.redirect(url, 308);
   }
 

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:security": "node --test \"tests/security/*.test.ts\"",
+    "test:security:e2e": "node --test scripts/security-check.mjs",
+    "audit:prod": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.2.0",

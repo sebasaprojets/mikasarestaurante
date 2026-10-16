@@ -11,6 +11,7 @@ import { site } from "@/data/site";
 import type { Locale } from "@/lib/i18n";
 import { isClosedOn, reservationSlots, to12h, todayIso } from "@/lib/hours";
 import { sectionIds } from "@/lib/nav";
+import { LIMITS, sanitizeText } from "@/lib/sanitize";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 
@@ -56,12 +57,13 @@ export function Reservation({ lang }: { lang: Locale }) {
 
   const validate = (f: Form): Errors => {
     const e: Errors = {};
-    if (!f.name.trim()) e.name = r.errors.name;
+    if (!sanitizeText(f.name, LIMITS.name)) e.name = r.errors.name;
     if (!f.date) e.date = r.errors.date;
+    else if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) e.date = r.errors.date
     else if (f.date < todayIso()) e.date = r.pastDate;
     else if (isClosedOn(f.date)) e.date = r.closedDay;
-    if (!f.time) e.time = r.errors.time;
-    if (!f.guests || f.guests < 1) e.guests = r.errors.guests;
+    if (!f.time || !slots.includes(f.time)) e.time = r.errors.time;
+    if (!Number.isInteger(f.guests) || f.guests < 1 || f.guests > site.reservations.maxGuests) e.guests = r.errors.guests;
     return e;
   };
 
@@ -76,14 +78,14 @@ export function Reservation({ lang }: { lang: Locale }) {
     const lines = [
       r.message.greeting,
       "",
-      `• ${r.message.name}: ${f.name.trim()}`,
+      `• ${r.message.name}: ${sanitizeText(f.name, LIMITS.name)}`,
       `• ${r.message.date}: ${dateLabel}`,
       `• ${r.message.time}: ${to12h(f.time)}`,
       `• ${r.message.guests}: ${f.guests}`,
     ];
     if (f.occasion) lines.push(`• ${r.message.occasion}: ${r.occasions[f.occasion]}`);
-    if (f.allergies.trim()) lines.push(`• ${r.message.allergies}: ${f.allergies.trim()}`);
-    if (f.notes.trim()) lines.push(`• ${r.message.notes}: ${f.notes.trim()}`);
+    if (sanitizeText(f.allergies, LIMITS.allergies)) lines.push(`• ${r.message.allergies}: ${sanitizeText(f.allergies, LIMITS.allergies)}`);
+    if (sanitizeText(f.notes, LIMITS.notes, { multiline: true })) lines.push(`• ${r.message.notes}: ${sanitizeText(f.notes, LIMITS.notes, { multiline: true })}`);
     lines.push("", r.message.thanks);
     return lines.join("\n");
   };
@@ -133,6 +135,7 @@ export function Reservation({ lang }: { lang: Locale }) {
               <input
                 id={id("name")}
                 name="name"
+                maxLength={LIMITS.name}
                 autoComplete="name"
                 required
                 placeholder={r.namePlaceholder}
@@ -267,6 +270,7 @@ export function Reservation({ lang }: { lang: Locale }) {
               <input
                 id={id("allergies")}
                 name="allergies"
+                maxLength={LIMITS.allergies}
                 placeholder={r.allergiesPlaceholder}
                 value={form.allergies}
                 onChange={(e) => set("allergies", e.target.value)}
@@ -282,6 +286,7 @@ export function Reservation({ lang }: { lang: Locale }) {
               <textarea
                 id={id("notes")}
                 name="notes"
+                maxLength={LIMITS.notes}
                 rows={3}
                 placeholder={r.notesPlaceholder}
                 value={form.notes}

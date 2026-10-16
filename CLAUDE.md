@@ -84,6 +84,12 @@ Acessibilidade: não usar `aria-label` em `<p>`/`<div>` sem role; texto animado 
   → export estático em `/<repo>/es/` e `/<repo>/en/` (`STATIC_EXPORT=true`, sem proxy, sitemap/robots estáticos).
   Use `withBasePath()` em `<a>`, `<video>` e `next/image` com caminhos internos.
 
+## Segurança
+
+Ver `docs/SECURITY.md`. Cabeçalhos/CSP só em `config/security-headers.ts` (domínio externo novo → adicionar ali).
+Texto livre do visitante passa por `lib/sanitize.ts`. Sem `dangerouslySetInnerHTML` com dado externo.
+Antes de commitar mudanças de config/rotas: `npm run test:security` e, após o build, `npm run test:security:e2e`.
+
 ## Git
 
 Nunca commitar `.env*`, chaves, tokens ou segredos. Nunca commitar vídeos pesados
