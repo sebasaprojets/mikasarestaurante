@@ -91,8 +91,6 @@ jobs:
     name: Dependency review
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    # Exige "Dependency graph" ligado (Settings → Code security). Até lá, não bloqueia o PR.
-    continue-on-error: true
     permissions:
       contents: read
       pull-requests: write
@@ -101,6 +99,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/dependency-review-action@v4
+        # Exige "Dependency graph" ligado (Settings → Code security). Até lá, não bloqueia o PR.
+        continue-on-error: true
         with:
           fail-on-severity: high
           fail-on-scopes: runtime
