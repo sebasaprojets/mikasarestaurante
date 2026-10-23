@@ -106,6 +106,22 @@ export const photos = {
     es: "Botellas de Hatsu tea frente a la entrada de MIKASA",
     en: "Hatsu tea bottles in front of the MIKASA entrance",
   }),
+  mochiIceCream: photo("mochi-ice-cream", 720, 900, {
+    es: "Mochi con helado de la casa servido en sartén negra",
+    en: "Mochi with house-made ice cream served in a black pan",
+  }),
+  spicyTunaSavageRoll: photo("spicy-tuna-savage-roll", 720, 900, {
+    es: "Spicy Tuna Savage Roll con atún picante sobre bandeja de pizarra",
+    en: "Spicy Tuna Savage Roll topped with spicy tuna on a slate tray",
+  }),
+  generalTso: photo("general-tso", 720, 900, {
+    es: "General Tso con ajonjolí sobre arroz, servido en sartén de hierro",
+    en: "General Tso with sesame over rice, served in a cast-iron pan",
+  }),
+  nigiriAtun: photo("nigiri-atun", 960, 1200, {
+    es: "Cuatro nigiri de atún con hoja de shiso y salsa de soya",
+    en: "Four tuna nigiri with a shiso leaf and soy sauce",
+  }),
 } satisfies Record<string, MediaAsset>;
 
 export const media = {
