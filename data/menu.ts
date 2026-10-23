@@ -165,7 +165,7 @@ export const menuItems: MenuItem[] = [
   item("sushi-rolls", "spicy-tuna-savage-roll", "Spicy Tuna Savage Roll", 15, "8 pc",
     "Spicy tuna with tempura coriander.",
     "Atún picante con cilantro tempura.",
-    { tags: ["picante"] }),
+    { tags: ["picante"], imagem: photos.spicyTunaSavageRoll }),
   item("sushi-rolls", "mushi-zushi-fried-roll", "Mushi Zushi Fried Roll", 15, null,
     "Shrimp, king crab, avocado, spicy mayo and eel sauce.",
     "Camarón, cangrejo, aguacate, mayo picante y salsa de anguila."),
@@ -199,7 +199,7 @@ export const menuItems: MenuItem[] = [
   item("omakase-experience", "nigiri-selection", "Nigiri Selection (Chef Choice)", 17, "2 pc",
     "Fresh nigiri prepared by the chef using premium seasonal fish. Options: tuna or salmon.",
     "Nigiri fresco preparado por el chef con pescado premium de temporada. Opciones: atún o salmón.",
-    { tags: ["chefs-choice"] }),
+    { tags: ["chefs-choice"], imagem: photos.nigiriAtun }),
   item("omakase-experience", "omakase-box-nigiri-experience", "Omakase Box Nigiri Experience", 38, "4 pc",
     "Chef curated nigiri selection featuring premium cuts including salmon, tuna, prime beef and octopus.",
     "Selección de nigiri elegida por el chef con cortes premium como salmón, atún, carne prime y pulpo."),
@@ -278,7 +278,8 @@ export const menuItems: MenuItem[] = [
     "Arroz japonés salteado al wok con esencia Nikkei y textura ligeramente crocante."),
   item("platos-principales", "general-tsos-chicken", "General Tso's Chicken", 24, null,
     "Crispy chicken breast glazed in General Tso sauce served with steamed rice.",
-    "Pechuga de pollo crujiente glaseada en salsa General Tso, servida con arroz al vapor."),
+    "Pechuga de pollo crujiente glaseada en salsa General Tso, servida con arroz al vapor.",
+    { imagem: photos.generalTso }),
 
   // ── Noodles & Vegetables (p. 5) ───────────────────────────────
   item("noodles-vegetables", "nikkei-style-wok-noodles", { es: "Wok noodles estilo Nikkei", en: "Nikkei-style wok noodles" }, 14, null,
@@ -320,7 +321,8 @@ export const menuItems: MenuItem[] = [
   // ── Home Made Dessert / Postres Caseros (p. 5) ────────────────
   item("postres-caseros", "home-made-ice-cream-with-mochi", "Home Made Ice Cream with Mochi", 11, null,
     "Please ask your server for your favorite flavor.",
-    "Por favor consulte con su mesero por su sabor favorito."),
+    "Por favor consulte con su mesero por su sabor favorito.",
+    { imagem: photos.mochiIceCream }),
   item("postres-caseros", "ageta-fried-ice-cream", "Ageta Fried Ice Cream", 15, null,
     "Mochi of your choice with dragon fruit ice cream.",
     "Mochi de su elección con helado de dragon fruit."),
