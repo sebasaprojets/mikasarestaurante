@@ -199,7 +199,7 @@ function FeatureCard({ item, lang, wide, onOpen }: { item: MenuItem; lang: Local
         onClick={() => onOpen(item)}
         className={cn("group grid h-full w-full text-left", side ? "gap-6 md:grid-cols-2 md:items-center md:gap-10" : "content-start gap-6")}
       >
-        <div className={cn("relative w-full overflow-hidden border border-line bg-carvao", panorama ? "aspect-[4/5] md:aspect-[16/9]" : "aspect-[4/5]")}>
+        <div className={cn("relative w-full overflow-hidden border border-line bg-carvao", panorama ? "aspect-[4/3] md:aspect-[16/9]" : "aspect-[4/5]")}>
           <MediaFrame
             asset={item.imagem}
             lang={lang}
