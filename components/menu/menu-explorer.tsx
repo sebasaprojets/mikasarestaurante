@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion, useMotionValue, useSpring } from "motion/react";
+import { LayoutGroup, motion } from "motion/react";
 import { ArrowUpRight, Search, X } from "lucide-react";
 import { MediaFrame } from "@/components/media/media-frame";
 import { useScrollTo } from "@/components/providers/smooth-scroll";
@@ -13,8 +13,7 @@ import { menuCategories, menuItems, type MenuItem, type MenuTag } from "@/data/m
 import { site } from "@/data/site";
 import type { Locale } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
-import { useFinePointer } from "@/lib/hooks/use-media-query";
-import { EASE, useReducedMotion } from "@/lib/motion";
+import { EASE } from "@/lib/motion";
 import { homeAnchor, sectionIds } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -118,48 +117,6 @@ export function useScrollSpy(ids: string[]) {
   return [active, setActive] as const;
 }
 
-/* ─────────────── Preview que segue o cursor ─────────────── */
-
-function HoverPreview({ item, lang }: { item: MenuItem | null; lang: Locale }) {
-  const fine = useFinePointer();
-  const reduce = useReducedMotion();
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 150, damping: 24, mass: 0.7 });
-  const sy = useSpring(y, { stiffness: 150, damping: 24, mass: 0.7 });
-
-  useEffect(() => {
-    if (!fine) return;
-    const move = (e: PointerEvent) => {
-      x.set(e.clientX + 28);
-      y.set(e.clientY - 140);
-    };
-    window.addEventListener("pointermove", move, { passive: true });
-    return () => window.removeEventListener("pointermove", move);
-  }, [fine, x, y]);
-
-  if (!fine) return null;
-
-  return (
-    <motion.div aria-hidden className="pointer-events-none fixed left-0 top-0 z-40 hidden lg:block" style={{ x: reduce ? x : sx, y: reduce ? y : sy }}>
-      <AnimatePresence>
-        {item ? (
-          <motion.div
-            key={item.id}
-            className="h-72 w-56 overflow-hidden border border-line"
-            initial={{ opacity: 0, scale: 0.92, clipPath: "inset(10% 10% 10% 10%)" }}
-            animate={{ opacity: 1, scale: 1, clipPath: "inset(0% 0% 0% 0%)" }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.7, ease: EASE }}
-          >
-            <MediaFrame asset={item.imagem} lang={lang} fallbackLabel={item.nome[lang]} kanji="匠" sizes="224px" />
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
-
 /* ─────────────── Item ─────────────── */
 
 function priceLabel(item: MenuItem, lang: Locale) {
@@ -198,63 +155,132 @@ function TagList({ tags, lang }: { tags: MenuTag[]; lang: Locale }) {
   );
 }
 
-function ItemRow({
-  item,
-  lang,
-  onOpen,
-  onHover,
-}: {
-  item: MenuItem;
-  lang: Locale;
-  onOpen: (i: MenuItem) => void;
-  onHover: (i: MenuItem | null) => void;
-}) {
+function ItemText({ item, lang, clamp = false }: { item: MenuItem; lang: Locale; clamp?: boolean }) {
   const c = getCopy(lang);
+  return (
+    <>
+      {item.componentes?.length ? (
+        <p className="mt-2 font-display text-base italic text-ouro-claro/90">{item.componentes.join(" · ")}</p>
+      ) : null}
+      <p className={cn("mt-2 max-w-[60ch] text-sm leading-relaxed text-washi-dim", clamp && "line-clamp-3")}>
+        {item.descricao?.[lang] ?? <span className="text-washi-mute">{c.menuPage.pendingDescription}</span>}
+      </p>
+      {item.escolha ? <p className="mt-1.5 text-sm italic text-washi-mute">{item.escolha[lang]}</p> : null}
+      <Options item={item} lang={lang} />
+      {item.tags.length ? (
+        <div className="mt-4">
+          <TagList tags={item.tags} lang={lang} />
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function Price({ item, lang, className }: { item: MenuItem; lang: Locale; className?: string }) {
   const price = priceLabel(item, lang);
   return (
-    <li className="border-b border-line">
+    <span className={cn("shrink-0 whitespace-nowrap font-display text-xl text-ouro tabular-nums", className)}>
+      {price ?? <span className="font-sans text-[0.62rem] uppercase tracking-[0.22em] text-washi-mute">{getCopy(lang).menuPage.pendingPrice}</span>}
+    </span>
+  );
+}
+
+/** Prato com foto: card editorial, a foto é vista de cara. `wide` = foto + texto lado a lado. */
+const isLandscape = (item: MenuItem) => !!item.imagem && item.imagem.width > item.imagem.height;
+
+function FeatureCard({ item, lang, wide, onOpen }: { item: MenuItem; lang: Locale; wide: boolean; onOpen: (i: MenuItem) => void }) {
+  // destaque com foto horizontal: foto panorâmica em cima; com foto vertical: foto e texto lado a lado
+  const panorama = wide && isLandscape(item);
+  const side = wide && !panorama;
+  return (
+    <li className={cn(wide && "md:col-span-2")}>
       <button
         type="button"
         onClick={() => onOpen(item)}
-        onPointerEnter={(e) => e.pointerType === "mouse" && item.imagem && onHover(item)}
-        onPointerLeave={() => onHover(null)}
-        onFocus={() => onHover(null)}
-        className="group grid w-full gap-5 py-7 text-left md:py-8"
+        className={cn("group grid h-full w-full text-left", side ? "gap-6 md:grid-cols-2 md:items-center md:gap-10" : "content-start gap-6")}
       >
-        {/* Mobile: card com imagem (quando o prato tem mídia) */}
-        {item.imagem ? (
-          <div className="relative aspect-[4/3] w-full overflow-hidden md:hidden">
-            <MediaFrame asset={item.imagem} lang={lang} fallbackLabel={item.nome[lang]} kanji="匠" sizes="100vw" />
-          </div>
-        ) : null}
-
-        <div>
-          <div className="flex items-baseline">
+        <div className={cn("relative w-full overflow-hidden border border-line bg-carvao", panorama ? "aspect-[4/3] md:aspect-[16/9]" : "aspect-[4/5]")}>
+          <MediaFrame
+            asset={item.imagem}
+            lang={lang}
+            fallbackLabel={item.nome[lang]}
+            kanji="匠"
+            sizes={panorama ? "(min-width:1024px) 60vw, 100vw" : "(min-width:1024px) 30vw, (min-width:768px) 50vw, 100vw"}
+            className="[&_img]:transition-transform [&_img]:duration-[1400ms] [&_img]:ease-[var(--ease-mikasa)] group-hover:[&_img]:scale-[1.04]"
+          />
+        </div>
+        <div className={cn(side && "md:py-6", panorama && "md:max-w-[70%]")}>
+          <div className="flex items-baseline gap-4 border-b border-line pb-3">
             <h3 className="font-display text-[clamp(1.35rem,1.15rem+0.7vw,1.85rem)] leading-tight text-washi transition-colors duration-500 group-hover:text-ouro-claro">
               {item.nome[lang]}
-              {item.porcao ? <span className="ml-3 font-sans text-[0.68rem] tracking-[0.18em] text-washi-mute">{item.porcao}</span> : null}
             </h3>
-            <span aria-hidden className="mk-leader hidden md:block" />
-            <span className="ml-auto shrink-0 whitespace-nowrap pl-4 font-display text-xl text-ouro tabular-nums md:ml-0 md:pl-0">
-              {price ?? <span className="font-sans text-[0.62rem] uppercase tracking-[0.22em] text-washi-mute">{c.menuPage.pendingPrice}</span>}
-            </span>
+            <Price item={item} lang={lang} className="ml-auto" />
           </div>
-          {item.componentes?.length ? (
-            <p className="mt-2 font-display text-base italic text-ouro-claro/90">{item.componentes.join(" · ")}</p>
-          ) : null}
-          <p className="mt-2 max-w-[60ch] text-sm leading-relaxed text-washi-dim">
-            {item.descricao?.[lang] ?? <span className="text-washi-mute">{c.menuPage.pendingDescription}</span>}
-          </p>
-          {item.escolha ? <p className="mt-1.5 text-sm italic text-washi-mute">{item.escolha[lang]}</p> : null}
-          <Options item={item} lang={lang} />
-          {item.tags.length ? (
-            <div className="mt-3">
-              <TagList tags={item.tags} lang={lang} />
-            </div>
-          ) : null}
+          {item.porcao ? <p className="mt-3 font-sans text-[0.62rem] uppercase tracking-[0.24em] text-washi-mute">{item.porcao}</p> : null}
+          <ItemText item={item} lang={lang} clamp={!wide} />
         </div>
       </button>
     </li>
+  );
+}
+
+function ItemRow({ item, lang, onOpen }: { item: MenuItem; lang: Locale; onOpen: (i: MenuItem) => void }) {
+  return (
+    <li className="border-b border-line">
+      <button type="button" onClick={() => onOpen(item)} className="group w-full py-7 text-left md:py-8">
+        <div className="flex items-baseline">
+          <h3 className="font-display text-[clamp(1.35rem,1.15rem+0.7vw,1.85rem)] leading-tight text-washi transition-colors duration-500 group-hover:text-ouro-claro">
+            {item.nome[lang]}
+            {item.porcao ? <span className="ml-3 font-sans text-[0.68rem] tracking-[0.18em] text-washi-mute">{item.porcao}</span> : null}
+          </h3>
+          <span aria-hidden className="mk-leader hidden md:block" />
+          <Price item={item} lang={lang} className="ml-auto pl-4 md:ml-0 md:pl-0" />
+        </div>
+        <ItemText item={item} lang={lang} />
+      </button>
+    </li>
+  );
+}
+
+/** Separa os pratos com foto (cada foto uma única vez por categoria) dos demais. */
+function splitByPhoto(items: MenuItem[]) {
+  const seen = new Set<string>();
+  const featured: MenuItem[] = [];
+  const rest: MenuItem[] = [];
+  for (const i of items) {
+    if (i.imagem?.available && !seen.has(i.imagem.src)) {
+      seen.add(i.imagem.src);
+      featured.push(i);
+    } else rest.push(i);
+  }
+  return { featured, rest };
+}
+
+function CategoryItems({ items, lang, onOpen }: { items: MenuItem[]; lang: Locale; onOpen: (i: MenuItem) => void }) {
+  const { featured, rest } = splitByPhoto(items);
+  // número ímpar de fotos → um card em destaque (de preferência a foto horizontal) e o resto em pares
+  const wideFirst = featured.length % 2 === 1;
+  if (wideFirst) {
+    const k = featured.findIndex(isLandscape);
+    if (k > 0) featured.unshift(...featured.splice(k, 1));
+  }
+  return (
+    <>
+      {featured.length ? (
+        <ul className="grid gap-x-8 gap-y-14 md:grid-cols-2">
+          {featured.map((item, i) => (
+            <FeatureCard key={item.id} item={item} lang={lang} wide={wideFirst && i === 0} onOpen={onOpen} />
+          ))}
+        </ul>
+      ) : null}
+      {rest.length ? (
+        <ul className={cn("border-t border-line", featured.length && "mt-16")}>
+          {rest.map((item) => (
+            <ItemRow key={item.id} item={item} lang={lang} onOpen={onOpen} />
+          ))}
+        </ul>
+      ) : null}
+    </>
   );
 }
 
@@ -339,7 +365,6 @@ export function MenuExplorer({ lang }: { lang: Locale }) {
   const scrollTo = useScrollTo();
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<MenuTag[]>([]);
-  const [hovered, setHovered] = useState<MenuItem | null>(null);
   const [selected, setSelected] = useState<MenuItem | null>(null);
 
   const searching = query.trim().length > 0 || filters.length > 0;
@@ -460,11 +485,7 @@ export function MenuExplorer({ lang }: { lang: Locale }) {
 
               <div className="lg:col-span-8">
                 {items.length ? (
-                  <ul className="border-t border-line">
-                    {items.map((item) => (
-                      <ItemRow key={item.id} item={item} lang={lang} onOpen={setSelected} onHover={setHovered} />
-                    ))}
-                  </ul>
+                  <CategoryItems items={items} lang={lang} onOpen={setSelected} />
                 ) : (
                   <div className="flex flex-col items-start gap-6 border border-dashed border-line-strong p-8">
                     <span className="font-sans text-[0.6rem] uppercase tracking-[0.3em] text-ouro">Placeholder</span>
@@ -483,7 +504,6 @@ export function MenuExplorer({ lang }: { lang: Locale }) {
         ))}
       </div>
 
-      <HoverPreview item={hovered} lang={lang} />
       <ItemDialog item={selected} lang={lang} onClose={() => setSelected(null)} />
     </>
   );

@@ -37,88 +37,88 @@ const photo = (id: string, width: number, height: number, alt: Localized): Media
   m({ id, kind: "image", src: `/media/${id}.webp`, width, height, alt, available: true });
 
 export const photos = {
-  hamachiRollNigiri: photo("hamachi-roll-nigiri", 1200, 1686, {
+  hamachiRollNigiri: photo("hamachi-roll-nigiri", 1400, 1967, {
     es: "Roll y nigiri de hamachi flameado sobre hoja de plátano",
     en: "Seared hamachi roll and nigiri on a banana leaf",
   }),
-  lomoSaltadoCausa: photo("lomo-saltado-causa", 1200, 1493, {
+  lomoSaltadoCausa: photo("lomo-saltado-causa", 1400, 1741, {
     es: "Lomo saltado con causa limeña y salsa criolla",
     en: "Lomo saltado with causa limeña and criolla salad",
   }),
-  arrozCamaron: photo("arroz-camaron", 1200, 1193, {
+  arrozCamaron: photo("arroz-camaron", 1400, 1391, {
     es: "Arroz salteado con camarones y huevo pochado en sartén de hierro",
     en: "Fried rice with shrimp and a poached egg in a cast-iron pan",
   }),
-  nigiriExperience: photo("nigiri-experience", 1200, 803, {
+  nigiriExperience: photo("nigiri-experience", 1400, 938, {
     es: "Selección de ocho nigiri alrededor de salsa de soya",
     en: "Selection of eight nigiri around soy sauce",
   }),
-  duckRice: photo("duck-rice", 1200, 1740, {
+  duckRice: photo("duck-rice", 1400, 2030, {
     es: "Arroz Nikkei con pato asado en sartén de hierro",
     en: "Nikkei rice with roasted duck in a cast-iron pan",
   }),
-  salmonRoll: photo("salmon-roll", 1200, 1767, {
+  salmonRoll: photo("salmon-roll", 1400, 2063, {
     es: "Roll de salmón flameado con salsa sobre mármol",
     en: "Seared salmon roll with sauce on marble",
   }),
-  artesanoDessert: photo("artesano-dessert", 1200, 1791, {
+  artesanoDessert: photo("artesano-dessert", 1400, 2091, {
     es: "Wontons crocantes con helado y chocolate",
     en: "Crispy wontons with ice cream and chocolate",
   }),
-  sashimiSelection: photo("sashimi-selection", 1200, 1734, {
+  sashimiSelection: photo("sashimi-selection", 1400, 2023, {
     es: "Selección de sashimi de atún y salmón sobre hielo",
     en: "Tuna and salmon sashimi selection on ice",
   }),
-  nagasakiBeefRice: photo("nagasaki-beef-rice", 1200, 1764, {
+  nagasakiBeefRice: photo("nagasaki-beef-rice", 1400, 2058, {
     es: "Carne glaseada sobre arroz salteado al wok",
     en: "Glazed beef over wok-fried rice",
   }),
-  mitokoTataki: photo("mitoko-tataki", 1200, 1791, {
+  mitokoTataki: photo("mitoko-tataki", 1400, 2091, {
     es: "Tataki de atún sellado con salsa y naranja",
     en: "Seared tuna tataki with sauce and orange",
   }),
-  wakameKukuSalad: photo("wakame-kuku-salad", 1200, 1760, {
+  wakameKukuSalad: photo("wakame-kuku-salad", 1400, 2053, {
     es: "Ensalada de wakame, mango, pepino y aguacate",
     en: "Wakame, mango, cucumber and avocado salad",
   }),
-  nigiriWine: photo("nigiri-wine", 1200, 1788, {
+  nigiriWine: photo("nigiri-wine", 1400, 2086, {
     es: "Nigiri variados con una copa de vino tinto",
     en: "Assorted nigiri with a glass of red wine",
   }),
   // Do Instagram @mikasa.restaurant (recortadas da publicação e tratadas)
-  tiradito: photo("tiradito", 1200, 1500, {
+  tiradito: photo("tiradito", 1400, 1750, {
     es: "Tiradito de pescado blanco con salsa amarilla, ají y crocante",
     en: "White fish tiradito with yellow sauce, chili and crispy garnish",
   }),
-  robataSteak: photo("robata-steak", 1200, 1373, {
+  robataSteak: photo("robata-steak", 1400, 1601, {
     es: "Corte de res a la parrilla en láminas con ensalada, vegetales y puré",
     en: "Sliced grilled beef with salad, vegetables and purée",
   }),
-  barWhisky: photo("bar-whisky-kamiki", 1000, 1470, {
+  barWhisky: photo("bar-whisky-kamiki", 1400, 2058, {
     es: "Whisky japonés Kamiki Blended Malt con su estuche",
     en: "Kamiki Japanese blended malt whisky with its box",
   }),
-  barVinos: photo("bar-vinos", 1000, 1551, {
+  barVinos: photo("bar-vinos", 1400, 2172, {
     es: "Botellas de vino Ramón Bilbao y Minuty Côtes de Provence en la terraza de MIKASA",
     en: "Ramón Bilbao and Minuty Côtes de Provence wine bottles on the MIKASA terrace",
   }),
-  barHatsu: photo("bar-hatsu-tea", 1000, 1606, {
+  barHatsu: photo("bar-hatsu-tea", 1400, 2249, {
     es: "Botellas de Hatsu tea frente a la entrada de MIKASA",
     en: "Hatsu tea bottles in front of the MIKASA entrance",
   }),
-  mochiIceCream: photo("mochi-ice-cream", 720, 900, {
+  mochiIceCream: photo("mochi-ice-cream", 1400, 1750, {
     es: "Mochi con helado de la casa servido en sartén negra",
     en: "Mochi with house-made ice cream served in a black pan",
   }),
-  spicyTunaSavageRoll: photo("spicy-tuna-savage-roll", 720, 900, {
+  spicyTunaSavageRoll: photo("spicy-tuna-savage-roll", 1400, 1750, {
     es: "Spicy Tuna Savage Roll con atún picante sobre bandeja de pizarra",
     en: "Spicy Tuna Savage Roll topped with spicy tuna on a slate tray",
   }),
-  generalTso: photo("general-tso", 720, 900, {
+  generalTso: photo("general-tso", 1400, 1750, {
     es: "General Tso con ajonjolí sobre arroz, servido en sartén de hierro",
     en: "General Tso with sesame over rice, served in a cast-iron pan",
   }),
-  nigiriAtun: photo("nigiri-atun", 960, 1200, {
+  nigiriAtun: photo("nigiri-atun", 1400, 1750, {
     es: "Cuatro nigiri de atún con hoja de shiso y salsa de soya",
     en: "Four tuna nigiri with a shiso leaf and soy sauce",
   }),
