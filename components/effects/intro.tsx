@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { animate, motion } from "motion/react";
+import { animate, motion, useMotionValue } from "motion/react";
 import { EMBLEM_ARC, GoldGradient } from "@/components/brand/logo";
 import { EMBLEM_VIEWBOX, KANJI_ID, LETTER_BOXES, letterId, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-meta";
 import { Fire } from "@/components/effects/fire";
@@ -53,49 +53,67 @@ function Torii({ className }: { className?: string }) {
 /** Altura (y no viewBox do wordmark) da frente da queima para o progresso p (0–1). */
 const burnY = (p: number) => WORDMARK_H + 30 - p * (WORDMARK_H + 70);
 
+const REGION = { x: -60, y: -80, width: WORDMARK_W + 120, height: WORDMARK_H + 160 };
+
 /**
- * Máscaras da queima. A frente sobe de baixo para cima com borda irregular
- * (turbulência fixa no espaço do logo, então as três máscaras coincidem):
+ * Borda irregular da queima, calculada UMA vez (soma de senoides com fases fixas).
+ * Antes era feTurbulence + displacement recalculados a cada quadro — pesado em celular.
+ */
+const edge = (ph: number) => {
+  const pts: [number, number][] = [];
+  for (let x = REGION.x; x <= REGION.x + REGION.width; x += 6) {
+    const y =
+      7 * Math.sin(x * 0.021 + 1.3 + ph) + 5 * Math.sin(x * 0.057 + 4.1 + ph * 2) + 3.5 * Math.sin(x * 0.13 + 2.2 + ph * 3) + 2 * Math.sin(x * 0.31 + 0.7 + ph * 5);
+    pts.push([x, Math.round(y * 10) / 10]);
+  }
+  return pts;
+};
+const EDGE = edge(0);
+const EDGE_TOP = edge(2.4);
+const line = (e: [number, number][], dy: number) => e.map(([x, y], i) => `${i ? "L" : "M"}${x} ${y + dy}`).join("");
+const back = (e: [number, number][], dy: number) => e.slice().reverse().map(([x, y]) => `L${x} ${y + dy}`).join("");
+const BURN_PATHS = {
+  // tudo abaixo da frente (some)
+  gone: `${line(EDGE, 0)}L${REGION.x + REGION.width} ${WORDMARK_H + 400}L${REGION.x} ${WORDMARK_H + 400}Z`,
+  // carvão: topo com outra ondulação, base = a frente
+  char: `${line(EDGE_TOP, -58)}${back(EDGE, 0)}Z`,
+  // brasa: faixa na frente (o degradê dá o halo)
+  ember: `${line(EDGE, -15)}${back(EDGE, 2)}Z`,
+};
+
+/**
+ * Máscaras da queima. Os desenhos são fixos e só deslizam para cima (transform):
  * `alive` = o que ainda existe, `char` = faixa carbonizada acima da frente,
- * `ember` = faixa fina de brasa na própria frente.
+ * `ember` = brasa na própria frente (com halo falso, sem desfoque).
  */
 function BurnDefs({ id, playing }: { id: string; playing: boolean }) {
-  const y = burnY(0);
-  const tr = { duration: T.burnDur, delay: T.burnStart, ease: "linear" as const };
-  const front = playing ? { y: burnY(1) } : {};
-  const region = { x: -60, y: -80, width: WORDMARK_W + 120, height: WORDMARK_H + 160 };
+  const front = useMotionValue(burnY(0));
+  useEffect(() => {
+    if (!playing) return;
+    const c = animate(front, burnY(1), { duration: T.burnDur, delay: T.burnStart, ease: "linear" });
+    return () => c.stop();
+  }, [playing, front]);
   return (
     <>
-      <filter id={`${id}-edge`} filterUnits="userSpaceOnUse" {...region}>
-        <feTurbulence type="fractalNoise" baseFrequency="0.03 0.08" numOctaves="3" seed="7" result="n" />
-        <feDisplacementMap in="SourceGraphic" in2="n" scale="44" xChannelSelector="R" yChannelSelector="G" />
-      </filter>
-      <filter id={`${id}-soft`} filterUnits="userSpaceOnUse" {...region}>
-        <feTurbulence type="fractalNoise" baseFrequency="0.03 0.08" numOctaves="3" seed="7" result="n" />
-        <feDisplacementMap in="SourceGraphic" in2="n" scale="44" xChannelSelector="R" yChannelSelector="G" result="d" />
-        <feGaussianBlur in="d" stdDeviation="2.2" />
-      </filter>
-      <filter id={`${id}-glow`} filterUnits="userSpaceOnUse" {...region}>
-        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b" />
-        <feMerge>
-          <feMergeNode in="b" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
       <linearGradient id={`${id}-charg`} x1="0" x2="0" y1="0" y2="1">
         <stop offset="0" stopColor="#fff" stopOpacity="0" />
         <stop offset="0.4" stopColor="#fff" stopOpacity="0.9" />
         <stop offset="1" stopColor="#fff" stopOpacity="1" />
       </linearGradient>
-      <mask id={`${id}-alive`} maskUnits="userSpaceOnUse" {...region}>
-        <rect {...region} fill="#fff" />
-        <motion.rect x={region.x} width={region.width} height={WORDMARK_H + 200} fill="#000" filter={`url(#${id}-edge)`} initial={{ y }} animate={front} transition={tr} />
+      <linearGradient id={`${id}-emberg`} x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stopColor="#fff" stopOpacity="0" />
+        <stop offset="0.55" stopColor="#fff" stopOpacity="0.55" />
+        <stop offset="1" stopColor="#fff" stopOpacity="1" />
+      </linearGradient>
+      <mask id={`${id}-alive`} maskUnits="userSpaceOnUse" {...REGION}>
+        <rect {...REGION} fill="#fff" />
+        <motion.path d={BURN_PATHS.gone} fill="#000" style={{ y: front }} />
       </mask>
-      <mask id={`${id}-char`} maskUnits="userSpaceOnUse" {...region}>
-        <motion.rect x={region.x} width={region.width} height={60} fill={`url(#${id}-charg)`} filter={`url(#${id}-soft)`} initial={{ y: y - 60 }} animate={playing ? { y: burnY(1) - 60 } : {}} transition={tr} />
+      <mask id={`${id}-char`} maskUnits="userSpaceOnUse" {...REGION}>
+        <motion.path d={BURN_PATHS.char} fill={`url(#${id}-charg)`} style={{ y: front }} />
       </mask>
-      <mask id={`${id}-ember`} maskUnits="userSpaceOnUse" {...region}>
-        <motion.rect x={region.x} width={region.width} height={12} fill="#fff" filter={`url(#${id}-soft)`} initial={{ y: y - 8 }} animate={playing ? { y: burnY(1) - 8 } : {}} transition={tr} />
+      <mask id={`${id}-ember`} maskUnits="userSpaceOnUse" {...REGION}>
+        <motion.path d={BURN_PATHS.ember} fill={`url(#${id}-emberg)`} style={{ y: front }} />
       </mask>
     </>
   );
@@ -216,7 +234,7 @@ export function Intro() {
           initial={reduce ? { opacity: 0 } : { scale: 1.22, rotateX: 14, y: 30, opacity: 1 }}
           animate={
             exiting && !reduce
-              ? { scale: 1.08, rotateX: 0, y: -10, opacity: 0, filter: "blur(6px)" }
+              ? { scale: 1.08, rotateX: 0, y: -10, opacity: 0 }
               : playing
                 ? { scale: 1, rotateX: 0, y: 0, opacity: 1 }
                 : {}
@@ -240,8 +258,8 @@ export function Intro() {
             />
             <motion.g
               fill={`url(#${gid})`}
-              initial={reduce ? { opacity: 0 } : { opacity: 0, clipPath: "inset(0% 0% 100% 0%)", filter: "blur(6px)" }}
-              animate={playing ? { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", filter: "blur(0px)" } : {}}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, clipPath: "inset(0% 0% 100% 0%)" }}
+              animate={playing ? { opacity: 1, clipPath: "inset(0% 0% 0% 0%)" } : {}}
               transition={{ duration: 1.5, ease: EASE, delay: at(0.9) }}
             >
               <use href={`#${KANJI_ID}`} />
@@ -277,8 +295,8 @@ export function Intro() {
                 return (
                   <motion.g
                     key={i}
-                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: WORDMARK_H * 0.5, x: fromCenter * 0.28, filter: "blur(10px)" }}
-                    animate={playing ? { opacity: 1, y: 0, x: 0, filter: "blur(0px)" } : {}}
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: WORDMARK_H * 0.5, x: fromCenter * 0.28 }}
+                    animate={playing ? { opacity: 1, y: 0, x: 0 } : {}}
                     transition={{ duration: 1.4, ease: EASE, delay: at(1.5 + i * 0.09) }}
                   >
                     <use href={`#${letterId(i)}`} />
@@ -300,7 +318,7 @@ export function Intro() {
             </motion.g>
             </g>
             {/* brasa na frente da queima */}
-            <motion.g fill="#ff9636" mask={`url(#${burnId}-ember)`} filter={`url(#${burnId}-glow)`} initial={{ opacity: 0 }} animate={playing ? { opacity: 1 } : {}} transition={{ duration: 0.4, delay: T.burnStart }}>
+            <motion.g fill="#ff9636" mask={`url(#${burnId}-ember)`} initial={{ opacity: 0 }} animate={playing ? { opacity: 1 } : {}} transition={{ duration: 0.4, delay: T.burnStart }}>
               {LETTER_BOXES.map((_, i) => (
                 <use key={i} href={`#${letterId(i)}`} />
               ))}
@@ -317,8 +335,9 @@ export function Intro() {
                       cx={e.x * WORDMARK_W}
                       r={e.size}
                       fill="#ffc46b"
-                      initial={{ cy: y0, opacity: 0, x: 0 }}
-                      animate={{ cy: y0 - e.rise, opacity: [0, 1, 0], x: e.drift }}
+                      cy={y0}
+                      initial={{ opacity: 0, x: 0, y: 0 }}
+                      animate={{ opacity: [0, 1, 0], x: e.drift, y: -e.rise }}
                       transition={{ duration: e.dur, delay: T.burnStart + p * T.burnDur, ease: "easeOut" }}
                     />
                   );

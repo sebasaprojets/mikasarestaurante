@@ -69,10 +69,11 @@ export function Hero({ lang }: { lang: Locale }) {
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-[65%] bg-gradient-to-t from-sumi via-sumi/70 to-transparent" />
       <div aria-hidden className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-sumi/80 to-transparent" />
 
-      {/* Cerejeira à direita com pétalas caindo (acima dos véus, abaixo do texto) */}
+      {/* Cerejeira à direita com pétalas caindo (acima dos véus, abaixo do texto).
+          Só começa quando a intro abre: escondida atrás dela, o canvas só roubaria quadros. */}
       {/* sem parallax: acompanha o scroll nativo (parallax aqui fazia as pétalas tremerem) */}
       <div className="absolute inset-0 overflow-hidden">
-        <SakuraTree play={ready} className="top-[calc(var(--header-h)*0.6)] h-[46%] opacity-60 sm:h-[64%] sm:opacity-80 lg:h-[calc(100%-var(--header-h)*0.6)] lg:opacity-100" />
+        <SakuraTree play={introDone} className="top-[calc(var(--header-h)*0.6)] h-[46%] opacity-60 sm:h-[64%] sm:opacity-80 lg:h-[calc(100%-var(--header-h)*0.6)] lg:opacity-100" />
       </div>
 
       {/* Emblema oficial ao centro (substitui o 匠 quase invisível) */}
