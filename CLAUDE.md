@@ -36,7 +36,7 @@ proxy.ts           roteamento de idioma
   `LogoSprite` (layout) e reutilizados com `<use href="#mk-kanji">` / `#mk-l0…5` (medidas em `logo-meta.ts`).
   Nunca importar `logo-paths` em Client Components. Substituir pelo SVG original quando enviado.
 - Intro cinematográfica (`components/effects/intro.tsx`): 1x por sessão (`sessionStorage`), sem botão de pular (toca até o fim),
-  fogo WebGL (`effects/fire.tsx`), reduced motion = fade curto.
+  fogo WebGL (`effects/fire.tsx`) que sobe e queima as letras de MIKASA de baixo para cima (máscaras SVG), reduced motion = fade curto.
 - Hero: cerejeira em camadas (`public/hero/sakura-*.webp`) + pétalas em canvas (`effects/sakura.tsx`).
 
 ## Design tokens (fonte de verdade: `styles/globals.css`)

@@ -20,8 +20,20 @@ export const introScript = `try{var f=sessionStorage.getItem("${INTRO_FORCE_KEY}
 const CAM = [0.16, 1, 0.3, 1] as const;
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** Duração (s) — total ≈ 5,8s; a intro toca sempre até o fim. */
-const T = { exit: 4.7, exitDur: 1.1 };
+/**
+ * Duração (s) — total ≈ 7,7s; a intro toca sempre até o fim.
+ * As letras de MIKASA queimam devagar, de baixo para cima, quando o fogo sobe.
+ */
+const T = { exit: 6.6, exitDur: 1.1, burnStart: 3.5, burnDur: 2.8 };
+
+/** Faíscas soltas pela frente da queima (posições fixas, sem aleatoriedade por render). */
+const EMBERS = Array.from({ length: 16 }, (_, i) => {
+  const r = (n: number) => {
+    const v = Math.sin((i + 1) * 12.9898 + n * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  return { x: r(1), t: r(2), drift: (r(3) - 0.5) * 70, rise: 70 + r(4) * 90, size: 1.6 + r(5) * 2.2, dur: 1.1 + r(6) * 0.9 };
+});
 
 function Torii({ className }: { className?: string }) {
   return (
@@ -38,6 +50,57 @@ function Torii({ className }: { className?: string }) {
   );
 }
 
+/** Altura (y no viewBox do wordmark) da frente da queima para o progresso p (0–1). */
+const burnY = (p: number) => WORDMARK_H + 30 - p * (WORDMARK_H + 70);
+
+/**
+ * Máscaras da queima. A frente sobe de baixo para cima com borda irregular
+ * (turbulência fixa no espaço do logo, então as três máscaras coincidem):
+ * `alive` = o que ainda existe, `char` = faixa carbonizada acima da frente,
+ * `ember` = faixa fina de brasa na própria frente.
+ */
+function BurnDefs({ id, playing }: { id: string; playing: boolean }) {
+  const y = burnY(0);
+  const tr = { duration: T.burnDur, delay: T.burnStart, ease: "linear" as const };
+  const front = playing ? { y: burnY(1) } : {};
+  const region = { x: -60, y: -80, width: WORDMARK_W + 120, height: WORDMARK_H + 160 };
+  return (
+    <>
+      <filter id={`${id}-edge`} filterUnits="userSpaceOnUse" {...region}>
+        <feTurbulence type="fractalNoise" baseFrequency="0.03 0.08" numOctaves="3" seed="7" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="44" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id={`${id}-soft`} filterUnits="userSpaceOnUse" {...region}>
+        <feTurbulence type="fractalNoise" baseFrequency="0.03 0.08" numOctaves="3" seed="7" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="44" xChannelSelector="R" yChannelSelector="G" result="d" />
+        <feGaussianBlur in="d" stdDeviation="2.2" />
+      </filter>
+      <filter id={`${id}-glow`} filterUnits="userSpaceOnUse" {...region}>
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b" />
+        <feMerge>
+          <feMergeNode in="b" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+      <linearGradient id={`${id}-charg`} x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stopColor="#fff" stopOpacity="0" />
+        <stop offset="0.4" stopColor="#fff" stopOpacity="0.9" />
+        <stop offset="1" stopColor="#fff" stopOpacity="1" />
+      </linearGradient>
+      <mask id={`${id}-alive`} maskUnits="userSpaceOnUse" {...region}>
+        <rect {...region} fill="#fff" />
+        <motion.rect x={region.x} width={region.width} height={WORDMARK_H + 200} fill="#000" filter={`url(#${id}-edge)`} initial={{ y }} animate={front} transition={tr} />
+      </mask>
+      <mask id={`${id}-char`} maskUnits="userSpaceOnUse" {...region}>
+        <motion.rect x={region.x} width={region.width} height={60} fill={`url(#${id}-charg)`} filter={`url(#${id}-soft)`} initial={{ y: y - 60 }} animate={playing ? { y: burnY(1) - 60 } : {}} transition={tr} />
+      </mask>
+      <mask id={`${id}-ember`} maskUnits="userSpaceOnUse" {...region}>
+        <motion.rect x={region.x} width={region.width} height={12} fill="#fff" filter={`url(#${id}-soft)`} initial={{ y: y - 8 }} animate={playing ? { y: burnY(1) - 8 } : {}} transition={tr} />
+      </mask>
+    </>
+  );
+}
+
 /**
  * Intro cinematográfica (1x por sessão). A camada só existe quando o script
  * inline marca <html data-intro>; sem JS, um fallback CSS a esconde.
@@ -50,6 +113,7 @@ export function Intro() {
   const gid = useId();
   const sheenId = useId();
   const maskId = useId();
+  const burnId = useId();
 
   // inicia
   useEffect(() => {
@@ -71,7 +135,9 @@ export function Intro() {
       ? []
       : [
           animate(0, 0.42, { duration: 1.6, delay: 0.2, ease: EASE, onUpdate: (v) => (fireK.current = v) }),
-          animate(0.42, 1, { duration: 1.6, delay: 2.0, ease: EASE, onUpdate: (v) => (fireK.current = v) }),
+          animate(0.42, 0.7, { duration: 1.4, delay: 2.0, ease: EASE, onUpdate: (v) => (fireK.current = v) }),
+          // as chamas crescem junto com a queima das letras
+          animate(0.7, 1.12, { duration: T.burnDur, delay: T.burnStart, ease: [0.4, 0, 0.6, 1], onUpdate: (v) => (fireK.current = v) }),
         ];
     const t = window.setTimeout(() => setPhase("exit"), total * 1000);
     return () => {
@@ -199,10 +265,12 @@ export function Intro() {
                   fill={`url(#${sheenId})`}
                   initial={{ x: -WORDMARK_W * 0.4 }}
                   animate={playing && !reduce ? { x: WORDMARK_W * 1.1 } : {}}
-                  transition={{ duration: 1.6, ease: [0.45, 0, 0.2, 1], delay: 2.5 }}
+                  transition={{ duration: 1.3, ease: [0.45, 0, 0.2, 1], delay: 2.25 }}
                 />
               </mask>
+              <BurnDefs id={burnId} playing={playing} />
             </defs>
+            <g mask={`url(#${burnId}-alive)`}>
             <g fill={`url(#${gid}w)`}>
               {LETTER_BOXES.map((l, i) => {
                 const fromCenter = l.x + l.w / 2 - WORDMARK_W / 2;
@@ -224,6 +292,39 @@ export function Intro() {
                 <use key={i} href={`#${letterId(i)}`} />
               ))}
             </g>
+            {/* carvão logo acima da frente da queima */}
+            <motion.g fill="#070201" mask={`url(#${burnId}-char)`} initial={{ opacity: 0 }} animate={playing ? { opacity: 1 } : {}} transition={{ duration: 0.4, delay: T.burnStart }}>
+              {LETTER_BOXES.map((_, i) => (
+                <use key={i} href={`#${letterId(i)}`} />
+              ))}
+            </motion.g>
+            </g>
+            {/* brasa na frente da queima */}
+            <motion.g fill="#ff9636" mask={`url(#${burnId}-ember)`} filter={`url(#${burnId}-glow)`} initial={{ opacity: 0 }} animate={playing ? { opacity: 1 } : {}} transition={{ duration: 0.4, delay: T.burnStart }}>
+              {LETTER_BOXES.map((_, i) => (
+                <use key={i} href={`#${letterId(i)}`} />
+              ))}
+            </motion.g>
+            {/* faíscas que se soltam das letras */}
+            {playing ? (
+              <g>
+                {EMBERS.map((e, i) => {
+                  const p = 0.08 + e.t * 0.84;
+                  const y0 = burnY(p);
+                  return (
+                    <motion.circle
+                      key={i}
+                      cx={e.x * WORDMARK_W}
+                      r={e.size}
+                      fill="#ffc46b"
+                      initial={{ cy: y0, opacity: 0, x: 0 }}
+                      animate={{ cy: y0 - e.rise, opacity: [0, 1, 0], x: e.drift }}
+                      transition={{ duration: e.dur, delay: T.burnStart + p * T.burnDur, ease: "easeOut" }}
+                    />
+                  );
+                })}
+              </g>
+            ) : null}
           </svg>
 
           {/* Tagline */}
