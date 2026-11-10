@@ -253,6 +253,60 @@ html[data-intro] #inicio .mk-early {
   animation: mk-sway-slow 12s ease-in-out infinite;
   will-change: transform;
 }
+/* Revelações por transição CSS (opacity/transform rodam na GPU; o JS só marca data-shown). */
+.mk-reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--ry, 28px), 0);
+  transition:
+    opacity 1.2s var(--ease-mikasa) var(--rd, 0s),
+    transform 1.2s var(--ease-mikasa) var(--rd, 0s);
+}
+.mk-reveal[data-shown] {
+  opacity: 1;
+  transform: none;
+}
+.mk-split-word {
+  opacity: 0;
+  transform: translate3d(0, 0.6em, 0);
+  transition:
+    opacity 1.3s var(--ease-mikasa),
+    transform 1.3s var(--ease-mikasa);
+  transition-delay: calc(var(--sd, 0s) + var(--i, 0) * var(--ss, 0.07s));
+}
+[data-shown] .mk-split-word {
+  opacity: 1;
+  transform: none;
+}
+[data-instant] .mk-split-word {
+  transition: none;
+}
+.mk-brush {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--bd, 2.4s) cubic-bezier(0.45, 0.05, 0.25, 1) var(--bdl, 0s);
+}
+.mk-brush-late {
+  transition-delay: calc(var(--bdl, 0s) + 0.12s);
+}
+[data-shown] .mk-brush {
+  stroke-dashoffset: 0;
+}
+.mk-ink {
+  opacity: 0;
+}
+[data-shown] .mk-ink {
+  animation: mk-ink 1.6s ease-out calc(var(--bdl, 0s) + var(--bd, 2.4s) * 0.85) both;
+}
+@keyframes mk-ink {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.08;
+  }
+}
+
 .mk-breathe {
   animation: mk-breathe 7s ease-in-out infinite;
 }
@@ -266,12 +320,6 @@ html[data-perf="lite"] [class*="backdrop-blur"] {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   background-color: rgb(10 10 11 / 0.92) !important;
-}
-html[data-perf="lite"] .mk-split-word {
-  filter: none !important;
-}
-html[data-perf="lite"] .mk-brush {
-  filter: none !important;
 }
 html[data-perf="lite"] .mk-sway-slow {
   animation: none;

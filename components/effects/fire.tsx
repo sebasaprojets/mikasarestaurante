@@ -15,7 +15,7 @@ uniform float k;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);
   return mix(mix(hash(i),hash(i+vec2(1.,0.)),u.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),u.x),u.y);}
-float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v;}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v*1.07;}
 vec3 ramp(float x){
   vec3 c=mix(vec3(.10,.01,.0),vec3(.50,.06,.04),smoothstep(.0,.25,x));
   c=mix(c,vec3(.80,.24,.08),smoothstep(.2,.5,x));
@@ -89,8 +89,10 @@ export function Fire({
     const uT = gl.getUniformLocation(prog, "t");
     const uK = gl.getUniformLocation(prog, "k");
 
+    // resolução adaptativa: começa baixa (o fogo é suave por natureza) e cai mais se o aparelho não acompanhar
+    let quality = isLowEndDevice() ? 0.7 : 1;
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5) * scale * (isLowEndDevice() ? 0.7 : 1);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1) * scale * quality;
       canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
       canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -100,7 +102,20 @@ export function Fire({
 
     let raf = 0;
     const start = performance.now();
+    let last = start;
+    const deltas: number[] = [];
     const frame = (now: number) => {
+      deltas.push(now - last);
+      last = now;
+      if (deltas.length === 24) {
+        const sorted = deltas.slice(4).sort((a, b) => a - b);
+        // mediana acima de ~45 fps → reduz a resolução (até 2 vezes)
+        if (sorted[Math.floor(sorted.length / 2)] > 22 && quality > 0.45) {
+          quality *= 0.7;
+          resize();
+        }
+        deltas.length = 0;
+      }
       gl.uniform2f(uR, canvas.width, canvas.height);
       gl.uniform1f(uT, (now - start) / 1000);
       gl.uniform1f(uK, intensityRef.current ?? 0);

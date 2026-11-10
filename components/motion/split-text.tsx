@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
-import { EASE, useReducedMotion } from "@/lib/motion";
+import { useRef } from "react";
+import { useInView } from "motion/react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -18,7 +18,11 @@ type Props = {
   instant?: boolean;
 };
 
-/** Revela palavra a palavra: sobe, desfoca → nítido. Lento e contido. */
+/**
+ * Revela palavra a palavra: sobe e aparece, lento e contido.
+ * Transição CSS por palavra (opacity/transform, na GPU) com atraso escalonado;
+ * o JS só marca `data-shown` — sem desfoque animado nem estilo por quadro.
+ */
 export function SplitText({
   text,
   as = "h2",
@@ -29,39 +33,30 @@ export function SplitText({
   inView = false,
   instant = false,
 }: Props) {
-  const reduce = useReducedMotion();
-  const Tag = motion[as];
+  const Tag = as;
+  const ref = useRef<HTMLHeadingElement>(null);
+  const seen = useInView(ref, { once: true, amount: 0.5 });
+  const shown = inView ? seen : play;
   const lines = text.split("\n");
-
-  const container = {
-    hidden: {},
-    show: { transition: instant ? { staggerChildren: 0, delayChildren: 0 } : { staggerChildren: reduce ? 0 : stagger, delayChildren: delay } },
-  };
-  const word = {
-    hidden: reduce ? { opacity: 0 } : { opacity: 0, y: "0.6em", filter: "blur(8px)" },
-    show: {
-      opacity: 1,
-      y: "0em",
-      filter: "blur(0px)",
-      transition: { duration: instant ? 0 : reduce ? 0.6 : 1.3, ease: EASE },
-    },
-  };
-
-  const trigger = inView
-    ? { whileInView: "show", viewport: { once: true, amount: 0.5 } }
-    : { animate: play ? "show" : "hidden" };
+  let i = 0;
 
   return (
-    <Tag className={cn(className)} initial="hidden" variants={container} {...trigger}>
+    <Tag
+      ref={ref}
+      data-shown={shown ? "" : undefined}
+      data-instant={instant ? "" : undefined}
+      className={cn(className)}
+      style={{ ["--sd" as string]: `${delay}s`, ["--ss" as string]: `${stagger}s` }}
+    >
       <span className="sr-only">{text.replace(/\n/g, " ")}</span>
       {lines.map((line, li) => (
         <span key={li} className="block" aria-hidden>
-          {line.split(" ").map((w, wi) => (
+          {line.split(" ").map((w, wi, arr) => (
             <span key={wi} className="inline-block whitespace-pre">
-              <motion.span className="mk-split-word inline-block" variants={word}>
+              <span className="mk-split-word inline-block" style={{ ["--i" as string]: i++ }}>
                 {w}
-              </motion.span>
-              {wi < line.split(" ").length - 1 ? " " : ""}
+              </span>
+              {wi < arr.length - 1 ? " " : ""}
             </span>
           ))}
         </span>
