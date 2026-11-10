@@ -25,7 +25,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
  * Duração (s) — total ≈ 7,7s; a intro toca sempre até o fim.
  * As letras de MIKASA queimam devagar, de baixo para cima, quando o fogo sobe.
  */
-const T = { exit: 6.6, exitDur: 1.1, burnStart: 3.5, burnDur: 2.8 };
+const T = { exit: 6.6, exitDur: 1.1, exitDelay: 0.15, burnStart: 3.5, burnDur: 2.8 };
 
 /** Faíscas soltas pela frente da queima (posições fixas, sem aleatoriedade por render). */
 const EMBERS = Array.from({ length: 16 }, (_, i) => {
@@ -156,7 +156,8 @@ function BurnCanvas({ playing, lite, hideRef }: { playing: boolean; lite: boolea
       }
       const t = (now - t0) / 1000;
       draw(t);
-      if (t < T.burnDur + 2) raf = requestAnimationFrame(loop);
+      // para quando as faíscas acabam ou quando a intro já saiu da tela
+      if (t < T.burnDur + 2 && document.documentElement.hasAttribute("data-intro")) raf = requestAnimationFrame(loop);
     };
     const timer = window.setTimeout(() => (raf = requestAnimationFrame(loop)), T.burnStart * 1000);
     return () => {
@@ -189,6 +190,7 @@ export function Intro() {
   const reduce = false as boolean;
   const [phase, setPhase] = useState<"idle" | "play" | "exit" | "done">("idle");
   const fireK = useRef(0);
+  const fireOn = useRef(true);
   const gid = useId();
   const sheenId = useId();
   const maskId = useId();
@@ -234,12 +236,25 @@ export function Intro() {
     if (phase !== "exit") return;
     signalIntroDone();
     const c = reduce ? null : animate(fireK.current, 1.25, { duration: 0.6, ease: EASE, onUpdate: (v) => (fireK.current = v) });
+    let idle = 0;
+    let late = 0;
+    // Só quando a fenda fechou de vez (antes cortava com uma faixa ainda visível).
     const t = window.setTimeout(() => {
+      // 1º passo, barato: a camada vira display:none (CSS) e o fogo para de desenhar.
+      fireOn.current = false;
       document.documentElement.removeAttribute("data-intro");
-      setPhase("done");
-    }, (reduce ? 0.5 : T.exitDur) * 1000);
+      // 2º passo, num momento ocioso: desmontar a árvore da intro e o contexto WebGL
+      // (antes tudo isso caía no mesmo quadro e dava um tranco no fim).
+      const unmount = () => setPhase("done");
+      // Safari antigo não tem requestIdleCallback
+      const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+      if (ric) idle = ric(unmount, { timeout: 1200 });
+      else late = window.setTimeout(unmount, 400);
+    }, (reduce ? 0.5 : T.exitDelay + T.exitDur) * 1000 + 40);
     return () => {
       window.clearTimeout(t);
+      window.clearTimeout(late);
+      if (idle) window.cancelIdleCallback(idle);
       c?.stop();
     };
   }, [phase, reduce]);
@@ -261,7 +276,7 @@ export function Intro() {
             : { clipPath: "inset(50% 0% 50% 0%)" }
           : { clipPath: "inset(0% 0% 0% 0%)", opacity: 1 }
       }
-      transition={{ duration: reduce ? 0.5 : T.exitDur, ease: [0.76, 0, 0.24, 1], delay: exiting && !reduce ? 0.15 : 0 }}
+      transition={{ duration: reduce ? 0.5 : T.exitDur, ease: [0.76, 0, 0.24, 1], delay: exiting && !reduce ? T.exitDelay : 0 }}
     >
       {/* luz ambiente atrás do logo */}
       <motion.div
@@ -276,7 +291,7 @@ export function Intro() {
       {/* fogo subindo por baixo */}
       {!reduce && playing ? (
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-[58%] mix-blend-screen">
-          <Fire intensityRef={fireK} className="h-full w-full" />
+          <Fire intensityRef={fireK} activeRef={fireOn} className="h-full w-full" />
         </div>
       ) : null}
 

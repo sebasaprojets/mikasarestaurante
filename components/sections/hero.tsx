@@ -13,22 +13,20 @@ import { Button } from "@/components/ui/button";
 import { getCopy } from "@/data/copy";
 import { media } from "@/data/media";
 import { localePath, type Locale } from "@/lib/i18n";
-import { useIntroReady } from "@/lib/hooks/use-intro-ready";
 import { EASE, useReducedMotion } from "@/lib/motion";
 import { homeAnchor, sectionIds } from "@/lib/nav";
 
 export function Hero({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
-  const introDone = useIntroReady();
-  // Se a intro está tocando, o hero se monta já por baixo dela (a abertura em
-  // fenda revela a página pronta) — e o título conta como visível desde o início (LCP).
-  const [underIntro, setUnderIntro] = useState(false);
+  // Entra no 1º quadro, com ou sem intro: se ela está tocando, o hero se monta já
+  // por baixo dela (a abertura em fenda revela a página pronta) e o título conta
+  // como visível desde o início (LCP). Não depende do fim da intro, para não
+  // re-renderizar o hero justo no quadro em que ela começa a sair.
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (!document.documentElement.hasAttribute("data-intro")) return;
-    const id = requestAnimationFrame(() => setUnderIntro(true));
+    const id = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(id);
   }, []);
-  const ready = introDone || underIntro;
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -70,10 +68,10 @@ export function Hero({ lang }: { lang: Locale }) {
       <div aria-hidden className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-sumi/80 to-transparent" />
 
       {/* Cerejeira à direita com pétalas caindo (acima dos véus, abaixo do texto).
-          Só começa quando a intro abre: escondida atrás dela, o canvas só roubaria quadros. */}
+          As pétalas só começam depois que a intro sai (ver SakuraTree). */}
       {/* sem parallax: acompanha o scroll nativo (parallax aqui fazia as pétalas tremerem) */}
       <div className="absolute inset-0 overflow-hidden">
-        <SakuraTree play={introDone} className="top-[calc(var(--header-h)*0.6)] h-[46%] opacity-60 sm:h-[64%] sm:opacity-80 lg:h-[calc(100%-var(--header-h)*0.6)] lg:opacity-100" />
+        <SakuraTree className="top-[calc(var(--header-h)*0.6)] h-[46%] opacity-60 sm:h-[64%] sm:opacity-80 lg:h-[calc(100%-var(--header-h)*0.6)] lg:opacity-100" />
       </div>
 
       {/* Emblema oficial ao centro (substitui o 匠 quase invisível) */}

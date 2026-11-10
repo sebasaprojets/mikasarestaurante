@@ -144,6 +144,9 @@ html {
   background: var(--color-sumi);
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: var(--header-h);
+  /* reserva o espaço da barra de rolagem (Windows/desktop): a página não "pula"
+     para o lado quando a intro libera o scroll nem quando um menu o trava */
+  scrollbar-gutter: stable;
 }
 
 body {

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { canvasDpr, isLowEndDevice } from "@/lib/device";
+import { useIntroReady } from "@/lib/hooks/use-intro-ready";
 import { isPerfLite, PERF_LITE_EVENT } from "@/lib/perf";
 import { withBasePath } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -144,7 +145,39 @@ function Petals({ className }: { className?: string }) {
  * Cerejeira (sakura) no canto direito do hero, em três camadas com balanço lento
  * e pétalas caindo. Decorativa (aria-hidden).
  */
-export function SakuraTree({ play, className }: { play: boolean; className?: string }) {
+export function SakuraTree({ className }: { className?: string }) {
+  // Com intro: a árvore já está pintada por baixo dela (CSS `mk-early`), então assume
+  // o estado final sem animar, e nada salta quando a intro sai.
+  // Sem intro: entra suave no 1º quadro.
+  const [mode, setMode] = useState<"wait" | "instant" | "animate">("wait");
+  useEffect(() => {
+    const underIntro = document.documentElement.hasAttribute("data-intro");
+    const id = requestAnimationFrame(() => setMode(underIntro ? "instant" : "animate"));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const play = mode !== "wait";
+
+  // Pétalas: só depois que a intro saiu e o navegador ficou ocioso (nascem
+  // transparentes, então começar um pouco depois é imperceptível; começar junto
+  // com a saída da intro somava trabalho justo no quadro mais pesado).
+  const introDone = useIntroReady();
+  const [petals, setPetals] = useState(false);
+  useEffect(() => {
+    if (!introDone || mode === "wait") return;
+    let idle = 0;
+    // com intro, "pronta" chega no INÍCIO da saída: espera a fenda fechar (~1,3s)
+    const wait = mode === "instant" ? 1700 : 500;
+    const t = window.setTimeout(() => {
+      const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+      if (ric) idle = ric(() => setPetals(true), { timeout: 1500 });
+      else setPetals(true);
+    }, wait);
+    return () => {
+      window.clearTimeout(t);
+      if (idle) window.cancelIdleCallback(idle);
+    };
+  }, [introDone, mode]);
+
   const src = (n: string) => withBasePath(`/hero/sakura-${n}.webp`);
   // versão leve para telas pequenas (menos memória de GPU)
   // galhos + flores numa única imagem (movem-se juntos); 3 tamanhos para cada tela
@@ -163,7 +196,7 @@ export function SakuraTree({ play, className }: { play: boolean; className?: str
         className={cn("mk-early pointer-events-none absolute right-0 top-0 h-full aspect-[7/8] max-w-none", className)}
         initial={{ opacity: 0, scale: 1.05, x: 24 }}
         animate={play ? { opacity: 1, scale: 1, x: 0 } : {}}
-        transition={{ duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={mode === "instant" ? { duration: 0 } : { duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
         // degradê do topo vem embutido nas imagens (mask-image forçava repaint a cada quadro)
         style={{ transformOrigin: "100% 60%" }}
       >
@@ -176,7 +209,7 @@ export function SakuraTree({ play, className }: { play: boolean; className?: str
         </div>
         {/* eslint-enable @next/next/no-img-element */}
       </motion.div>
-      {play ? <Petals /> : null}
+      {petals ? <Petals /> : null}
     </>
   );
 }
