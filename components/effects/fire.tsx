@@ -53,10 +53,13 @@ void main(){
 export function Fire({
   className,
   intensityRef,
+  activeRef,
   scale = 0.42,
 }: {
   className?: string;
   intensityRef: React.RefObject<number>;
+  /** Quando vira `false`, o laço para de desenhar (ex.: camada já escondida, aguardando desmontar). */
+  activeRef?: React.RefObject<boolean>;
   scale?: number;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -105,6 +108,7 @@ export function Fire({
     let last = start;
     const deltas: number[] = [];
     const frame = (now: number) => {
+      if (activeRef && !activeRef.current) return;
       deltas.push(now - last);
       last = now;
       if (deltas.length === 24) {
@@ -131,7 +135,7 @@ export function Fire({
       window.removeEventListener("resize", resize);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [intensityRef, scale]);
+  }, [intensityRef, activeRef, scale]);
 
   return <canvas ref={ref} aria-hidden className={cn("pointer-events-none block size-full", className)} />;
 }

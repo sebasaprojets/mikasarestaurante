@@ -2,7 +2,6 @@
 
 import { ReactLenis, useLenis } from "lenis/react";
 import { useCallback, useEffect } from "react";
-import { INTRO_EVENT } from "@/lib/hooks/use-intro-ready";
 
 /** Lenis — smooth scroll lento e preciso. Respeita prefers-reduced-motion. */
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
@@ -43,11 +42,31 @@ export function useScrollTo() {
 function IntroScrollLock() {
   const lenis = useLenis();
   useEffect(() => {
-    if (!lenis || !document.documentElement.hasAttribute("data-intro")) return;
+    const root = document.documentElement;
+    if (!lenis || !root.hasAttribute("data-intro")) return;
     lenis.stop();
-    const start = () => lenis.start();
-    window.addEventListener(INTRO_EVENT, start, { once: true });
-    return () => window.removeEventListener(INTRO_EVENT, start);
+    // Religa só quando a intro já sumiu (o scroll da página fica travado por CSS
+    // até lá) e num momento ocioso: `lenis.start()` lê a posição do scroll e força
+    // um layout da página inteira; no quadro em que a intro começava a sair isso
+    // custava ~50 ms (o "tranco" da transição).
+    let idle = 0;
+    let late = 0;
+    const start = () => {
+      const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+      if (ric) idle = ric(() => lenis.start(), { timeout: 800 });
+      else late = window.setTimeout(() => lenis.start(), 100);
+    };
+    const mo = new MutationObserver(() => {
+      if (root.hasAttribute("data-intro")) return;
+      mo.disconnect();
+      start();
+    });
+    mo.observe(root, { attributes: true, attributeFilter: ["data-intro"] });
+    return () => {
+      mo.disconnect();
+      window.clearTimeout(late);
+      if (idle) window.cancelIdleCallback(idle);
+    };
   }, [lenis]);
   return null;
 }
