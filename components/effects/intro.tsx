@@ -382,7 +382,7 @@ export function Intro() {
 
           {/* Tagline */}
           <motion.p
-            className="mt-5 whitespace-nowrap font-sans text-[clamp(0.55rem,1.1vw,0.8rem)] uppercase tracking-[0.42em] text-ouro-claro"
+            className="mt-5 whitespace-nowrap font-sans text-[clamp(0.7rem,1.1vw,0.8rem)] uppercase tracking-[0.42em] text-ouro-claro"
             initial={{ opacity: 0, scaleX: reduce ? 1 : 1.35 }}
             animate={playing ? { opacity: 1, scaleX: 1 } : {}}
             transition={{ duration: 1.8, ease: EASE, delay: at(2.4) }}

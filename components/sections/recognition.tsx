@@ -12,7 +12,7 @@ export function Recognition({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
   return (
     <section id={sectionIds.recognition} className="relative border-y border-line py-[var(--spacing-section)] mk-washi">
-      <div className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)]">
+      <div className="mx-auto max-w-[100rem] px-[var(--spacing-gutter)]">
         <SectionHeading index="07" eyebrow={c.recognition.eyebrow} title={c.recognition.title} align="center" />
 
         <ul className="mx-auto mt-20 grid max-w-5xl grid-cols-2 border-l border-t border-line md:grid-cols-4">

@@ -13,7 +13,7 @@ export function Philosophy({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
   return (
     <section id={sectionIds.philosophy} className="relative py-[var(--spacing-section)] mk-washi">
-      <div className="mx-auto grid max-w-[1600px] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12 lg:gap-10">
+      <div className="mx-auto grid max-w-[100rem] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-6 lg:pt-10 xl:col-span-6">
           <SectionHeading index="01" eyebrow={c.philosophy.eyebrow} title={c.philosophy.title} kanji="匠" />
           <ScrollWords
@@ -46,7 +46,7 @@ export function Philosophy({ lang }: { lang: Locale }) {
       </div>
 
       {/* Criolla · Chifa · Nikkei — texto oficial da carta */}
-      <div className="mx-auto mt-[clamp(5rem,10vw,9rem)] max-w-[1600px] px-[var(--spacing-gutter)]">
+      <div className="mx-auto mt-[clamp(5rem,10vw,9rem)] max-w-[100rem] px-[var(--spacing-gutter)]">
         <ol className="grid gap-px border-y border-line bg-line md:grid-cols-3">
           {c.philosophy.pillars.map((p, i) => (
             <li key={p.name} className="bg-sumi">

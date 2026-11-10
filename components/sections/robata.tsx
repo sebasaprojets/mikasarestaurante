@@ -36,7 +36,7 @@ export function Robata({ lang }: { lang: Locale }) {
       <Embers className="-z-10" />
       <OffscreenPause targetId={sectionIds.robata} />
 
-      <div className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)]">
+      <div className="mx-auto max-w-[100rem] px-[var(--spacing-gutter)]">
         <div className="grid gap-10 lg:grid-cols-12">
           <SectionHeading index="03" eyebrow={c.robata.eyebrow} title={c.robata.title} kanji="炎" className="lg:col-span-7" />
           <Reveal className="self-end lg:col-span-4 lg:col-start-9" delay={0.2}>

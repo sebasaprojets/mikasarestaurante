@@ -32,7 +32,7 @@ export function Gallery({ lang }: { lang: Locale }) {
 
   return (
     <section id={sectionIds.gallery} className="relative py-[var(--spacing-section)]">
-      <div className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)]">
+      <div className="mx-auto max-w-[100rem] px-[var(--spacing-gutter)]">
         <SectionHeading index="06" eyebrow={c.gallery.eyebrow} title={c.gallery.title} />
 
         <ul className="mt-20 columns-1 gap-6 sm:columns-2 lg:columns-3 lg:gap-8">

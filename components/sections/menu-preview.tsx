@@ -17,7 +17,7 @@ export function MenuPreview({ lang }: { lang: Locale }) {
 
   return (
     <section id={sectionIds.menu} className="relative py-[var(--spacing-section)]">
-      <div className="mx-auto grid max-w-[1600px] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12">
+      <div className="mx-auto grid max-w-[100rem] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12">
         <div className="lg:col-span-4">
           <SectionHeading index="04" eyebrow={c.menuPreview.eyebrow} title={c.menuPreview.title} />
           <Reveal>

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Telas baixas (celular deitado): o hero compacta para caber inteiro. */
+@custom-variant short (@media (max-height: 500px));
+
 /* ──────────────────────────────────────────────────────────────
    MIKASA — Design Tokens
    Fonte de verdade dos tokens (não há Figma). Ver CLAUDE.md.
@@ -30,7 +33,7 @@
   --font-jp: var(--font-shippori), "Shippori Mincho", serif;
 
   /* Escala de display (fluida) */
-  --text-display-xl: clamp(2.75rem, 1.6rem + 5.6vw, 7rem);
+  --text-display-xl: clamp(2.25rem, min(1.1rem + 6.4vw, 1.5rem + 9vh), 7rem);
   --text-display-xl--line-height: 0.98;
   --text-display-lg: clamp(2.25rem, 1.5rem + 3.6vw, 5rem);
   --text-display-lg--line-height: 1.02;
@@ -309,6 +312,29 @@ html[data-intro] #inicio .mk-early {
 
 .mk-breathe {
   animation: mk-breathe 7s ease-in-out infinite;
+}
+
+/* Celular (em pé ou deitado): nenhum rótulo abaixo de ~11px (os tamanhos de 0.5–0.66rem são do desktop). */
+@media (max-width: 767px), (max-height: 500px) {
+  .text-\[0\.5rem\],
+  .text-\[0\.58rem\],
+  .text-\[0\.6rem\],
+  .text-\[0\.62rem\],
+  .text-\[0\.65rem\],
+  .text-\[0\.66rem\] {
+    font-size: 0.6875rem;
+  }
+}
+/* Monitores grandes: tudo em rem cresce junto (tipografia, espaços e a largura máx. de 100rem). */
+@media (min-width: 1920px) {
+  html {
+    font-size: 106.25%;
+  }
+}
+@media (min-width: 2400px) {
+  html {
+    font-size: 118.75%;
+  }
 }
 
 /* Qualidade adaptativa (lib/perf.ts): em aparelhos que não acompanham,

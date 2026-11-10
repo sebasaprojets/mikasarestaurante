@@ -66,7 +66,7 @@ export function BarExplorer({ lang }: { lang: Locale }) {
       />
 
       {/* Promoções */}
-      <section aria-labelledby="bar-promos" className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)] pt-16 md:pt-20">
+      <section aria-labelledby="bar-promos" className="mx-auto max-w-[100rem] px-[var(--spacing-gutter)] pt-16 md:pt-20">
         <h2 id="bar-promos" className="mk-eyebrow mb-8 flex items-center gap-4">
           <span aria-hidden className="h-px w-10 bg-ouro/70" />
           {b.promos}
@@ -74,7 +74,7 @@ export function BarExplorer({ lang }: { lang: Locale }) {
         <BarPromos lang={lang} />
       </section>
 
-      <div className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)] pb-[var(--spacing-section)] pt-10">
+      <div className="mx-auto max-w-[100rem] px-[var(--spacing-gutter)] pb-[var(--spacing-section)] pt-10">
         {barCategories.map((cat, gi) => {
           const items = barItemsByCategory(cat.id);
           const cards = cat.grupo === "cocteles";
