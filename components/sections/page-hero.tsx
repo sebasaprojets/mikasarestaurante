@@ -38,7 +38,7 @@ export function PageHero({
       >
         {kanji}
       </span>
-      <div className="relative mx-auto max-w-[1600px] px-[var(--spacing-gutter)]">
+      <div className="relative mx-auto max-w-[100rem] px-[var(--spacing-gutter)]">
         <Reveal className="mb-7 flex items-center gap-4">
           <span aria-hidden className="h-px w-10 bg-ouro/70" />
           <span className="mk-eyebrow">{eyebrow}</span>

@@ -44,7 +44,7 @@ export function Hero({ lang }: { lang: Locale }) {
   });
 
   return (
-    <section ref={ref} id="inicio" aria-label="MIKASA" className="relative h-[100svh] min-h-[600px] overflow-hidden bg-sumi">
+    <section ref={ref} id="inicio" aria-label="MIKASA" className="relative h-[100svh] min-h-[600px] overflow-hidden bg-sumi short:min-h-[340px]">
       {/* Mídia */}
       <motion.div className="absolute inset-0" style={{ y: reduce ? 0 : y }}>
         <MediaFrame
@@ -89,9 +89,9 @@ export function Hero({ lang }: { lang: Locale }) {
 
       <motion.div
         style={{ opacity: reduce ? 1 : fade }}
-        className="relative mx-auto flex h-full max-w-[1600px] flex-col justify-end px-[var(--spacing-gutter)] pb-[clamp(5.5rem,12vh,9rem)]"
+        className="relative mx-auto flex h-full max-w-[100rem] flex-col justify-end px-[var(--spacing-gutter)] pb-[clamp(5.5rem,12vh,9rem)] short:pb-8"
       >
-        <motion.p className="mk-eyebrow mb-7 flex items-center gap-4" {...fadeUp(0.05)}>
+        <motion.p className="mk-eyebrow mb-7 flex items-center gap-4 short:mb-3" {...fadeUp(0.05)}>
           <span aria-hidden className="h-px w-10 bg-ouro" />
           {c.hero.eyebrow}
         </motion.p>
@@ -101,17 +101,17 @@ export function Hero({ lang }: { lang: Locale }) {
           text={c.hero.headline}
           play={ready}
           delay={0.15}
-          className="max-w-[20ch] font-display text-display-xl font-light text-washi"
+          className="max-w-[20ch] font-display text-display-xl font-light text-washi short:max-w-[24ch] short:text-[clamp(1.75rem,9vh,2.6rem)]"
         />
 
         <motion.p
-          className="mt-6 max-w-[40ch] font-display text-[clamp(1.1rem,0.95rem+0.6vw,1.5rem)] italic text-ouro-claro/90"
+          className="mt-6 max-w-[40ch] font-display text-[clamp(1.1rem,0.95rem+0.6vw,1.5rem)] italic text-ouro-claro/90 short:mt-2 short:text-base"
           {...fadeUp(0.75)}
         >
           {c.hero.subline}
         </motion.p>
 
-        <motion.div className="mt-10 flex flex-wrap items-center gap-x-9 gap-y-5" {...fadeUp(1)}>
+        <motion.div className="mt-10 flex flex-wrap items-center gap-x-9 gap-y-5 short:mt-4" {...fadeUp(1)}>
           <Button asChild size="lg">
             <SmartLink href={homeAnchor(lang, sectionIds.reservation)}>{c.hero.primary}</SmartLink>
           </Button>
@@ -121,9 +121,9 @@ export function Hero({ lang }: { lang: Locale }) {
         </motion.div>
       </motion.div>
 
-      {/* Selo Restaurant Guru */}
+      {/* Selo Restaurant Guru (some em telas baixas, onde encostaria no título) */}
       <motion.div
-        className="absolute left-[var(--spacing-gutter)] top-[calc(var(--header-h)+1.25rem)] z-10 text-ouro md:bottom-[clamp(5.5rem,12vh,9rem)] md:left-auto md:right-[var(--spacing-gutter)] md:top-auto"
+        className="absolute left-[var(--spacing-gutter)] top-[calc(var(--header-h)+1.25rem)] z-10 text-ouro md:bottom-[clamp(5.5rem,12vh,9rem)] md:left-auto md:right-[var(--spacing-gutter)] md:top-auto [@media(max-height:500px)]:hidden [@media(max-width:767px)_and_(max-height:740px)]:hidden"
         initial={{ opacity: 0 }}
         animate={ready ? { opacity: 1 } : undefined}
         transition={{ duration: 1.4, ease: EASE, delay: 1.1 }}
@@ -139,7 +139,7 @@ export function Hero({ lang }: { lang: Locale }) {
       <OffscreenPause targetId="inicio" />
 
       {/* Indicador de scroll */}
-      <div aria-hidden className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 sm:flex">
+      <div aria-hidden className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 sm:flex short:!hidden">
         <span className="font-sans text-[0.58rem] uppercase tracking-[0.36em] text-washi-mute">{c.hero.scroll}</span>
         <span className="relative block h-12 w-px overflow-hidden bg-line">
           <span className="mk-scroll-line absolute inset-0 bg-ouro" />

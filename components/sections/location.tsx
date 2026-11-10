@@ -35,7 +35,7 @@ export function Location({ lang }: { lang: Locale }) {
 
   return (
     <section id={sectionIds.location} className="relative border-t border-line py-[var(--spacing-section)]">
-      <div className="mx-auto grid max-w-[1600px] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12">
+      <div className="mx-auto grid max-w-[100rem] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12">
         <div className="lg:col-span-5">
           <SectionHeading index="09" eyebrow={c.location.eyebrow} title={c.location.title} />
           <Reveal>
@@ -64,7 +64,7 @@ export function Location({ lang }: { lang: Locale }) {
               <div>
                 <dt className="mk-eyebrow">{c.location.phone}</dt>
                 <dd className="mt-3">
-                  <a href={`tel:${site.phone.e164}`} className="font-display text-2xl text-washi transition-colors hover:text-ouro-claro">
+                  <a href={`tel:${site.phone.e164}`} className="-my-2 inline-block py-2 font-display text-2xl text-washi transition-colors hover:text-ouro-claro">
                     {site.phone.display}
                   </a>
                 </dd>

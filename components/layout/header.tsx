@@ -52,7 +52,7 @@ export function Header({ lang }: { lang: Locale }) {
       animate={{ y: hidden ? "-100%" : "0%" }}
       transition={{ duration: 0.9, ease: EASE }}
     >
-      <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between gap-6 px-[var(--spacing-gutter)]">
+      <div className="mx-auto flex h-full max-w-[100rem] items-center justify-between gap-6 px-[var(--spacing-gutter)]">
         <SmartLink href={localePath(lang, "/")} aria-label="MIKASA — Japanese Nikkei Cuisine" className="relative z-10 -my-2 py-2">
           <Logo />
         </SmartLink>

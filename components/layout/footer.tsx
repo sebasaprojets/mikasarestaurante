@@ -8,7 +8,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 import { homeAnchor, sectionIds } from "@/lib/nav";
 
 const linkCls =
-  "inline-flex min-h-10 items-center text-sm text-washi-dim transition-colors duration-500 hover:text-ouro-claro";
+  "inline-flex min-h-10 min-w-11 items-center text-sm text-washi-dim transition-colors duration-500 hover:text-ouro-claro";
 
 export function Footer({ lang }: { lang: Locale }) {
   const c = getCopy(lang);
@@ -16,10 +16,10 @@ export function Footer({ lang }: { lang: Locale }) {
 
   return (
     <footer className="relative border-t border-line bg-sumi">
-      <div className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)] pb-[calc(6rem+env(safe-area-inset-bottom))] pt-24 md:pb-16">
+      <div className="mx-auto max-w-[100rem] px-[var(--spacing-gutter)] pb-[calc(6rem+env(safe-area-inset-bottom))] pt-24 md:pb-16">
         <div className="grid gap-14 md:grid-cols-12">
           <div className="md:col-span-4">
-            <Link href={localePath(lang, "/")} aria-label="MIKASA">
+            <Link href={localePath(lang, "/")} aria-label="MIKASA" className="-my-3 inline-block py-3">
               <Logo withTagline />
             </Link>
             <p className="mt-8 max-w-xs text-sm leading-relaxed text-washi-mute">{site.address.full}</p>

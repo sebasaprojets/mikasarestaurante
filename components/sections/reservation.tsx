@@ -109,7 +109,7 @@ export function Reservation({ lang }: { lang: Locale }) {
 
   return (
     <section id={sectionIds.reservation} className="relative py-[var(--spacing-section)]">
-      <div className="mx-auto grid max-w-[1600px] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12">
+      <div className="mx-auto grid max-w-[100rem] gap-16 px-[var(--spacing-gutter)] lg:grid-cols-12">
         <div className="lg:col-span-4">
           <SectionHeading index="08" eyebrow={r.eyebrow} title={r.title} />
           <Reveal>

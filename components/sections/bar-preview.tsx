@@ -33,7 +33,7 @@ export function BarPreview({ lang }: { lang: Locale }) {
         className="pointer-events-none absolute right-[-10%] top-[10%] -z-10 size-[60vmax] rounded-full"
         style={{ background: "radial-gradient(closest-side, rgba(198,140,60,0.10), transparent 70%)" }}
       />
-      <div className="mx-auto max-w-[1600px] px-[var(--spacing-gutter)]">
+      <div className="mx-auto max-w-[100rem] px-[var(--spacing-gutter)]">
         <div className="grid gap-10 lg:grid-cols-12">
           <SectionHeading index="05" eyebrow={c.barPreview.eyebrow} title={c.barPreview.title} kanji="酒" className="lg:col-span-6" />
           <Reveal className="self-end lg:col-span-5 lg:col-start-8" delay={0.15}>

@@ -13,7 +13,7 @@ const buttonVariants = cva(
         outline:
           "border border-line-strong text-washi hover:border-ouro hover:text-ouro-claro rounded-[var(--radius-xs)]",
         ghost: "text-washi hover:text-ouro-claro",
-        link: "px-0 text-washi hover:text-ouro-claro after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:bg-ouro after:transition-transform after:duration-700 after:ease-[var(--ease-mikasa)] hover:after:scale-x-100 after:scale-x-[0.35]",
+        link: "px-0 text-washi before:absolute before:-inset-x-2 before:-inset-y-3 hover:text-ouro-claro after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:bg-ouro after:transition-transform after:duration-700 after:ease-[var(--ease-mikasa)] hover:after:scale-x-100 after:scale-x-[0.35]",
       },
       size: {
         sm: "h-10 px-5",
