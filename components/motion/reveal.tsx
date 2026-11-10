@@ -1,22 +1,28 @@
 "use client";
 
-import { motion, type HTMLMotionProps } from "motion/react";
-import { EASE, useReducedMotion } from "@/lib/motion";
+import { useRef } from "react";
+import { useInView } from "motion/react";
+import { cn } from "@/lib/utils";
 
-type Props = HTMLMotionProps<"div"> & { delay?: number; y?: number; amount?: number };
+type Props = React.HTMLAttributes<HTMLDivElement> & { delay?: number; y?: number; amount?: number };
 
-/** Fade + leve deslocamento vertical ao entrar na viewport. */
-export function Reveal({ delay = 0, y = 28, amount = 0.25, children, ...props }: Props) {
-  const reduce = useReducedMotion();
+/**
+ * Fade + leve deslocamento vertical ao entrar na viewport.
+ * A animação é uma transição CSS (opacity/transform, na GPU): o JS só marca
+ * `data-shown` uma vez — nada é recalculado por quadro durante a rolagem.
+ */
+export function Reveal({ delay = 0, y = 28, amount = 0.25, className, style, children, ...props }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const shown = useInView(ref, { once: true, amount });
   return (
-    <motion.div
-      initial={{ opacity: 0, y: reduce ? 0 : y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount }}
-      transition={{ duration: reduce ? 0.6 : 1.2, ease: EASE, delay }}
+    <div
+      ref={ref}
+      data-shown={shown ? "" : undefined}
+      className={cn("mk-reveal", className)}
+      style={{ ...style, ["--ry" as string]: `${y}px`, ["--rd" as string]: `${delay}s` }}
       {...props}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

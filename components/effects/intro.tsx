@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { animate, motion, useMotionValue } from "motion/react";
+import { animate, motion } from "motion/react";
 import { EMBLEM_ARC, GoldGradient } from "@/components/brand/logo";
 import { EMBLEM_VIEWBOX, KANJI_ID, LETTER_BOXES, letterId, WORDMARK_H, WORDMARK_VIEWBOX, WORDMARK_W } from "@/components/brand/logo-meta";
 import { Fire } from "@/components/effects/fire";
+import { isLowEndDevice } from "@/lib/device";
 import { signalIntroDone } from "@/lib/hooks/use-intro-ready";
 
 export const INTRO_FORCE_KEY = "mk-intro-force";
@@ -53,69 +54,129 @@ function Torii({ className }: { className?: string }) {
 /** Altura (y no viewBox do wordmark) da frente da queima para o progresso p (0–1). */
 const burnY = (p: number) => WORDMARK_H + 30 - p * (WORDMARK_H + 70);
 
-const REGION = { x: -60, y: -80, width: WORDMARK_W + 120, height: WORDMARK_H + 160 };
+/** Área do canvas da queima, em unidades do viewBox do wordmark (folga para as faíscas subirem). */
+const CANVAS_BOX = { x: -60, y: -230, w: WORDMARK_W + 120, h: WORDMARK_H + 300 };
+
+/** Borda irregular da queima (soma de senoides com fases fixas), em relação à frente. */
+const edgeAt = (x: number) =>
+  7 * Math.sin(x * 0.021 + 1.3) + 5 * Math.sin(x * 0.057 + 4.1) + 3.5 * Math.sin(x * 0.13 + 2.2) + 2 * Math.sin(x * 0.31 + 0.7);
 
 /**
- * Borda irregular da queima, calculada UMA vez (soma de senoides com fases fixas).
- * Antes era feTurbulence + displacement recalculados a cada quadro — pesado em celular.
+ * Queima das letras desenhada num único <canvas> 2D: um desenho por quadro, sem
+ * tocar no DOM (antes eram máscaras SVG + 16 círculos animados, ~800 mudanças de
+ * estilo durante a queima). Assume no mesmo quadro em que esconde as letras SVG.
  */
-const edge = (ph: number) => {
-  const pts: [number, number][] = [];
-  for (let x = REGION.x; x <= REGION.x + REGION.width; x += 6) {
-    const y =
-      7 * Math.sin(x * 0.021 + 1.3 + ph) + 5 * Math.sin(x * 0.057 + 4.1 + ph * 2) + 3.5 * Math.sin(x * 0.13 + 2.2 + ph * 3) + 2 * Math.sin(x * 0.31 + 0.7 + ph * 5);
-    pts.push([x, Math.round(y * 10) / 10]);
-  }
-  return pts;
-};
-const EDGE = edge(0);
-const EDGE_TOP = edge(2.4);
-const line = (e: [number, number][], dy: number) => e.map(([x, y], i) => `${i ? "L" : "M"}${x} ${y + dy}`).join("");
-const back = (e: [number, number][], dy: number) => e.slice().reverse().map(([x, y]) => `L${x} ${y + dy}`).join("");
-const BURN_PATHS = {
-  // tudo abaixo da frente (some)
-  gone: `${line(EDGE, 0)}L${REGION.x + REGION.width} ${WORDMARK_H + 400}L${REGION.x} ${WORDMARK_H + 400}Z`,
-  // carvão: topo com outra ondulação, base = a frente
-  char: `${line(EDGE_TOP, -58)}${back(EDGE, 0)}Z`,
-  // brasa: faixa na frente (o degradê dá o halo)
-  ember: `${line(EDGE, -15)}${back(EDGE, 2)}Z`,
-};
+function BurnCanvas({ playing, lite, hideRef }: { playing: boolean; lite: boolean; hideRef: React.RefObject<SVGGElement | null> }) {
+  const ref = useRef<HTMLCanvasElement>(null);
 
-/**
- * Máscaras da queima. Os desenhos são fixos e só deslizam para cima (transform):
- * `alive` = o que ainda existe, `char` = faixa carbonizada acima da frente,
- * `ember` = brasa na própria frente (com halo falso, sem desfoque).
- */
-function BurnDefs({ id, playing }: { id: string; playing: boolean }) {
-  const front = useMotionValue(burnY(0));
   useEffect(() => {
     if (!playing) return;
-    const c = animate(front, burnY(1), { duration: T.burnDur, delay: T.burnStart, ease: "linear" });
-    return () => c.stop();
-  }, [playing, front]);
+    const canvas = ref.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const letters = LETTER_BOXES.map((_, i) => document.getElementById(letterId(i))?.getAttribute("d")).filter(Boolean) as string[];
+    if (letters.length !== LETTER_BOXES.length) return;
+    const paths = letters.map((d) => new Path2D(d));
+
+    // região acima da frente (frente em y=0), calculada uma vez
+    const above = new Path2D();
+    above.moveTo(CANVAS_BOX.x, -2000);
+    for (let x = CANVAS_BOX.x; x <= CANVAS_BOX.x + CANVAS_BOX.w; x += 6) above.lineTo(x, edgeAt(x));
+    above.lineTo(CANVAS_BOX.x + CANVAS_BOX.w, -2000);
+    above.closePath();
+
+    const embers = lite ? EMBERS.slice(0, 7) : EMBERS;
+    let raf = 0;
+    let k = 1; // px por unidade do viewBox
+    const size = () => {
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2);
+      canvas.width = Math.max(1, Math.round(r.width * dpr));
+      canvas.height = Math.max(1, Math.round(r.height * dpr));
+      k = canvas.width / CANVAS_BOX.w;
+    };
+
+    const draw = (t: number) => {
+      const p = Math.min(1, Math.max(0, t / T.burnDur));
+      const front = burnY(p);
+      ctx.setTransform(k, 0, 0, k, -CANVAS_BOX.x * k, -CANVAS_BOX.y * k);
+      ctx.clearRect(CANVAS_BOX.x, CANVAS_BOX.y, CANVAS_BOX.w, CANVAS_BOX.h);
+
+      ctx.save();
+      // recorta tudo que já queimou (abaixo da frente irregular)
+      ctx.translate(0, front);
+      ctx.clip(above);
+      ctx.translate(0, -front);
+      const gold = ctx.createLinearGradient(0, 0, 0, WORDMARK_H);
+      gold.addColorStop(0, "#f0dca6");
+      gold.addColorStop(0.45, "#d4b06a");
+      gold.addColorStop(1, "#a8823f");
+      ctx.fillStyle = gold;
+      for (const path of paths) ctx.fill(path, "evenodd");
+      // carvão e brasa só sobre as letras (source-atop)
+      ctx.globalCompositeOperation = "source-atop";
+      const charG = ctx.createLinearGradient(0, front - 62, 0, front);
+      charG.addColorStop(0, "rgba(7,2,1,0)");
+      charG.addColorStop(0.45, "rgba(7,2,1,0.88)");
+      charG.addColorStop(1, "rgba(7,2,1,1)");
+      ctx.fillStyle = charG;
+      ctx.fillRect(CANVAS_BOX.x, front - 62, CANVAS_BOX.w, 80);
+      const emberG = ctx.createLinearGradient(0, front - 16, 0, front + 8);
+      emberG.addColorStop(0, "rgba(255,150,54,0)");
+      emberG.addColorStop(0.55, "rgba(255,150,54,0.75)");
+      emberG.addColorStop(1, "rgba(255,190,90,1)");
+      ctx.fillStyle = emberG;
+      ctx.fillRect(CANVAS_BOX.x, front - 16, CANVAS_BOX.w, 30);
+      ctx.restore();
+
+      // faíscas que se soltam da frente
+      ctx.globalCompositeOperation = "lighter";
+      for (const e of embers) {
+        const ep = 0.08 + e.t * 0.84;
+        const life = (t - ep * T.burnDur) / e.dur;
+        if (life <= 0 || life >= 1) continue;
+        const ease = 1 - (1 - life) * (1 - life);
+        ctx.globalAlpha = Math.sin(Math.PI * life);
+        ctx.fillStyle = "#ffc46b";
+        ctx.beginPath();
+        ctx.arc(e.x * WORDMARK_W + e.drift * ease, burnY(ep) - e.rise * ease, e.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over";
+    };
+
+    let t0 = 0;
+    const loop = (now: number) => {
+      if (!t0) {
+        t0 = now;
+        size();
+        // troca SVG → canvas no mesmo quadro
+        if (hideRef.current) hideRef.current.style.visibility = "hidden";
+      }
+      const t = (now - t0) / 1000;
+      draw(t);
+      if (t < T.burnDur + 2) raf = requestAnimationFrame(loop);
+    };
+    const timer = window.setTimeout(() => (raf = requestAnimationFrame(loop)), T.burnStart * 1000);
+    return () => {
+      window.clearTimeout(timer);
+      cancelAnimationFrame(raf);
+    };
+  }, [playing, lite, hideRef]);
+
   return (
-    <>
-      <linearGradient id={`${id}-charg`} x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0" stopColor="#fff" stopOpacity="0" />
-        <stop offset="0.4" stopColor="#fff" stopOpacity="0.9" />
-        <stop offset="1" stopColor="#fff" stopOpacity="1" />
-      </linearGradient>
-      <linearGradient id={`${id}-emberg`} x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0" stopColor="#fff" stopOpacity="0" />
-        <stop offset="0.55" stopColor="#fff" stopOpacity="0.55" />
-        <stop offset="1" stopColor="#fff" stopOpacity="1" />
-      </linearGradient>
-      <mask id={`${id}-alive`} maskUnits="userSpaceOnUse" {...REGION}>
-        <rect {...REGION} fill="#fff" />
-        <motion.path d={BURN_PATHS.gone} fill="#000" style={{ y: front }} />
-      </mask>
-      <mask id={`${id}-char`} maskUnits="userSpaceOnUse" {...REGION}>
-        <motion.path d={BURN_PATHS.char} fill={`url(#${id}-charg)`} style={{ y: front }} />
-      </mask>
-      <mask id={`${id}-ember`} maskUnits="userSpaceOnUse" {...REGION}>
-        <motion.path d={BURN_PATHS.ember} fill={`url(#${id}-emberg)`} style={{ y: front }} />
-      </mask>
-    </>
+    <canvas
+      ref={ref}
+      aria-hidden
+      className="pointer-events-none absolute"
+      style={{
+        left: `${(CANVAS_BOX.x / WORDMARK_W) * 100}%`,
+        top: `${(CANVAS_BOX.y / WORDMARK_H) * 100}%`,
+        width: `${(CANVAS_BOX.w / WORDMARK_W) * 100}%`,
+        height: `${(CANVAS_BOX.h / WORDMARK_H) * 100}%`,
+      }}
+    />
   );
 }
 
@@ -131,7 +192,8 @@ export function Intro() {
   const gid = useId();
   const sheenId = useId();
   const maskId = useId();
-  const burnId = useId();
+  const lettersRef = useRef<SVGGElement>(null);
+  const [lite, setLite] = useState(false);
 
   // inicia
   useEffect(() => {
@@ -141,7 +203,10 @@ export function Intro() {
       return () => cancelAnimationFrame(id);
     }
     window.scrollTo(0, 0);
-    const id = requestAnimationFrame(() => setPhase("play"));
+    const id = requestAnimationFrame(() => {
+      setLite(isLowEndDevice());
+      setPhase("play");
+    });
     return () => cancelAnimationFrame(id);
   }, []);
 
@@ -201,7 +266,7 @@ export function Intro() {
       {/* luz ambiente atrás do logo */}
       <motion.div
         aria-hidden
-        className="absolute left-1/2 top-[42%] size-[80vmax] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        className="absolute left-1/2 top-[42%] size-[80vmax] -translate-x-1/2 -translate-y-1/2 rounded-full will-change-[transform,opacity]"
         style={{ background: "radial-gradient(closest-side, rgba(198,161,91,0.16), rgba(168,50,42,0.05) 45%, transparent 70%)" }}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={playing ? { opacity: 1, scale: 1 } : {}}
@@ -230,7 +295,7 @@ export function Intro() {
       {/* câmera: dolly-out lento com leve inclinação */}
       <div className="absolute inset-0 grid place-items-center [perspective:1400px]">
         <motion.div
-          className="relative -mt-[12vh] flex flex-col items-center"
+          className="relative -mt-[12vh] flex flex-col items-center will-change-transform"
           initial={reduce ? { opacity: 0 } : { scale: 1.22, rotateX: 14, y: 30, opacity: 1 }}
           animate={
             exiting && !reduce
@@ -242,7 +307,7 @@ export function Intro() {
           transition={exiting ? { duration: 0.9, ease: EASE } : { duration: reduce ? 0.8 : 5.4, ease: CAM }}
         >
           {/* Emblema */}
-          <svg viewBox={EMBLEM_VIEWBOX} className="w-[clamp(104px,15vw,176px)] overflow-visible" aria-hidden>
+          <svg viewBox={EMBLEM_VIEWBOX} className="w-[clamp(104px,15vw,176px)] overflow-visible [transform:translateZ(0)]" aria-hidden>
             <defs>
               <GoldGradient id={gid} />
             </defs>
@@ -267,7 +332,8 @@ export function Intro() {
           </svg>
 
           {/* Wordmark letra a letra + brilho que atravessa */}
-          <svg viewBox={WORDMARK_VIEWBOX} className="mt-[clamp(1.5rem,4vh,2.75rem)] w-[clamp(240px,46vw,560px)] overflow-visible" aria-hidden>
+          <div className="relative mt-[clamp(1.5rem,4vh,2.75rem)] w-[clamp(240px,46vw,560px)]">
+          <svg viewBox={WORDMARK_VIEWBOX} className="block w-full overflow-visible" aria-hidden>
             <defs>
               <GoldGradient id={`${gid}w`} />
               <linearGradient id={sheenId} x1="0" x2="1" y1="0" y2="0">
@@ -283,12 +349,11 @@ export function Intro() {
                   fill={`url(#${sheenId})`}
                   initial={{ x: -WORDMARK_W * 0.4 }}
                   animate={playing && !reduce ? { x: WORDMARK_W * 1.1 } : {}}
-                  transition={{ duration: 1.3, ease: [0.45, 0, 0.2, 1], delay: 2.25 }}
+                  transition={{ duration: 1.3, ease: [0.45, 0, 0.2, 1], delay: 2.1 }}
                 />
               </mask>
-              <BurnDefs id={burnId} playing={playing} />
             </defs>
-            <g mask={`url(#${burnId}-alive)`}>
+            <g ref={lettersRef}>
             <g fill={`url(#${gid}w)`}>
               {LETTER_BOXES.map((l, i) => {
                 const fromCenter = l.x + l.w / 2 - WORDMARK_W / 2;
@@ -310,47 +375,16 @@ export function Intro() {
                 <use key={i} href={`#${letterId(i)}`} />
               ))}
             </g>
-            {/* carvão logo acima da frente da queima */}
-            <motion.g fill="#070201" mask={`url(#${burnId}-char)`} initial={{ opacity: 0 }} animate={playing ? { opacity: 1 } : {}} transition={{ duration: 0.4, delay: T.burnStart }}>
-              {LETTER_BOXES.map((_, i) => (
-                <use key={i} href={`#${letterId(i)}`} />
-              ))}
-            </motion.g>
             </g>
-            {/* brasa na frente da queima */}
-            <motion.g fill="#ff9636" mask={`url(#${burnId}-ember)`} initial={{ opacity: 0 }} animate={playing ? { opacity: 1 } : {}} transition={{ duration: 0.4, delay: T.burnStart }}>
-              {LETTER_BOXES.map((_, i) => (
-                <use key={i} href={`#${letterId(i)}`} />
-              ))}
-            </motion.g>
-            {/* faíscas que se soltam das letras */}
-            {playing ? (
-              <g>
-                {EMBERS.map((e, i) => {
-                  const p = 0.08 + e.t * 0.84;
-                  const y0 = burnY(p);
-                  return (
-                    <motion.circle
-                      key={i}
-                      cx={e.x * WORDMARK_W}
-                      r={e.size}
-                      fill="#ffc46b"
-                      cy={y0}
-                      initial={{ opacity: 0, x: 0, y: 0 }}
-                      animate={{ opacity: [0, 1, 0], x: e.drift, y: -e.rise }}
-                      transition={{ duration: e.dur, delay: T.burnStart + p * T.burnDur, ease: "easeOut" }}
-                    />
-                  );
-                })}
-              </g>
-            ) : null}
           </svg>
+          <BurnCanvas playing={playing} lite={lite} hideRef={lettersRef} />
+          </div>
 
           {/* Tagline */}
           <motion.p
-            className="mt-5 whitespace-nowrap font-sans text-[clamp(0.55rem,1.1vw,0.8rem)] uppercase text-ouro-claro"
-            initial={{ opacity: 0, letterSpacing: reduce ? "0.42em" : "0.85em" }}
-            animate={playing ? { opacity: 1, letterSpacing: "0.42em" } : {}}
+            className="mt-5 whitespace-nowrap font-sans text-[clamp(0.55rem,1.1vw,0.8rem)] uppercase tracking-[0.42em] text-ouro-claro"
+            initial={{ opacity: 0, scaleX: reduce ? 1 : 1.35 }}
+            animate={playing ? { opacity: 1, scaleX: 1 } : {}}
             transition={{ duration: 1.8, ease: EASE, delay: at(2.4) }}
           >
             Japanese Nikkei Cuisine
