@@ -79,7 +79,7 @@ Acessibilidade: não usar `aria-label` em `<p>`/`<div>` sem role; texto animado 
 
 ## Deploy
 
-- **Vercel** (produção): build normal, com `proxy.ts` (ES sem prefixo) e Cache Components.
+- **Vercel** (produção): https://mikasarestaurante.com — build normal, com `proxy.ts` (ES sem prefixo) e Cache Components.
 - **GitHub Pages** (preview): `.github/workflows/pages.yml` roda `scripts/build-pages.sh` a cada push na `main`
   → export estático em `/<repo>/es/` e `/<repo>/en/` (`STATIC_EXPORT=true`, sem proxy, sitemap/robots estáticos).
   Use `withBasePath()` em `<a>`, `<video>` e `next/image` com caminhos internos.
@@ -97,4 +97,4 @@ Nunca commitar `.env*`, chaves, tokens ou segredos. Nunca commitar vídeos pesad
 
 ## Pendências conhecidas
 
-Ver `site.pending` em `data/site.ts` (logo oficial, domínio, mídia, transcrição dos menus, avaliações).
+Ver `site.pending` em `data/site.ts` (logo oficial, mídia, transcrição dos menus, avaliações).

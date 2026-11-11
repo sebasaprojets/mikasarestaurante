@@ -30,12 +30,18 @@ export const site = {
   fullName: "MIKASA — Japanese Nikkei Cuisine",
   tagline: "Japanese Nikkei Cuisine",
 
-  /** URL de produção. Defina NEXT_PUBLIC_SITE_URL na Vercel quando o domínio estiver confirmado. */
+  /** Domínio oficial (registrado na GoDaddy, servido pela Vercel). */
+  domain: "mikasarestaurante.com",
+
+  /**
+   * URL canônica (canonical, sitemap, robots, Open Graph, JSON-LD).
+   * Em produção é sempre o domínio oficial, inclusive nos previews da Vercel
+   * (cópias apontam para o original). NEXT_PUBLIC_SITE_URL sobrescreve
+   * (ex.: o preview estático do GitHub Pages).
+   */
   url:
     process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : "http://localhost:3000"),
+    (process.env.NODE_ENV === "production" ? "https://mikasarestaurante.com" : "http://localhost:3000"),
 
   address: {
     street: "Playa Dorada Mall",
@@ -131,7 +137,6 @@ export const site = {
   /** Itens que ainda precisam ser fornecidos pelo restaurante. */
   pending: [
     "Logo oficial em SVG (o kanji dourado da capa do menu)",
-    "Domínio de produção (NEXT_PUBLIC_SITE_URL)",
     "Fotos ainda faltando: sake/coquetéis, ambiente, chef e vídeo do hero (ver data/media.ts)",
     "Manter as promoções do bar atualizadas (data/bar.ts → barPromos)",
     "Tags dos pratos (vegetariano / picante / signature) a validar com o restaurante",
