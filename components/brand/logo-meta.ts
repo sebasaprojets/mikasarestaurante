@@ -4,6 +4,8 @@
  * evitando repetir ~40 KB de paths no HTML e no JavaScript.
  */
 export const EMBLEM_VIEWBOX = "0 0 280 280";
+/** Arco do emblema: círculo quase completo, com a abertura do traço de pincel embaixo à esquerda. */
+export const EMBLEM_ARC = "M 92.7 255.8 A 126 126 0 1 1 187.3 255.8";
 export const WORDMARK_VIEWBOX = "0 0 903.4 171.5";
 export const WORDMARK_W = 903.4;
 export const WORDMARK_H = 171.5;
