@@ -7,7 +7,6 @@ import { LogoSprite } from "@/components/brand/logo-sprite";
 import { Intro, introScript } from "@/components/effects/intro";
 import { Footer } from "@/components/layout/footer";
 import { FloatingReserve } from "@/components/layout/floating-reserve";
-import { NorenNav } from "@/components/layout/noren";
 import { Header } from "@/components/layout/header";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
@@ -75,7 +74,6 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
             <main id="contenido">{children}</main>
             <Footer lang={lang} />
             <FloatingReserve href={homeAnchor(lang, sectionIds.reservation)} label={c.nav.reserve} />
-            <NorenNav />
           </SmoothScroll>
           <Cursor />
           <Grain />

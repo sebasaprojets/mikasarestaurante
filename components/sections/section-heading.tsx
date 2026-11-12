@@ -30,7 +30,7 @@ export function SectionHeading({
           </span>
         ) : null}
       </Reveal>
-      <SplitText as="h2" inView brush text={title} className="font-display text-display-lg font-light text-washi" />
+      <SplitText as="h2" inView text={title} className="font-display text-display-lg font-light text-washi" />
     </div>
   );
 }

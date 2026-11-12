@@ -1,14 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useInView } from "motion/react";
+import { motion } from "motion/react";
+import { EASE, useReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
- * Revelação com traço de pincel sumi: a foto surge atrás de uma pincelada que varre
- * da esquerda para a direita (borda com cerdas — `.mk-brush-reveal` no globals.css)
- * e assenta com leve zoom-out. Animação CSS disparada uma vez; ao terminar a máscara
- * é removida (`data-done`). O wrapper externo (sem recorte) é quem observa a viewport.
+ * Revelação por máscara — como um noren se abrindo:
+ * a imagem abre do centro para as laterais e assenta com leve zoom-out.
+ * O wrapper externo (sem recorte) é quem observa a viewport.
  */
 export function MaskReveal({
   children,
@@ -19,21 +18,27 @@ export function MaskReveal({
   className?: string;
   delay?: number;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const shown = useInView(ref, { once: true, amount: 0.2 });
-  const [done, setDone] = useState(false);
+  const reduce = useReducedMotion();
+  if (reduce) return <div className={className}>{children}</div>;
   return (
-    <div ref={ref} className={className} data-shown={shown ? "" : undefined}>
-      <div
-        className={cn("mk-brush-reveal size-full overflow-hidden")}
-        data-done={done ? "" : undefined}
-        style={{ ["--rd" as string]: `${delay}s` }}
-        onAnimationEnd={(e) => {
-          if (e.target === e.currentTarget) setDone(true);
+    <motion.div className={className} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
+      <motion.div
+        className={cn("size-full overflow-hidden")}
+        variants={{
+          hidden: { clipPath: "inset(0% 50% 0% 50%)" },
+          show: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.4, ease: EASE, delay } },
         }}
       >
-        <div className="mk-brush-zoom size-full">{children}</div>
-      </div>
-    </div>
+        <motion.div
+          className="size-full"
+          variants={{
+            hidden: { scale: 1.18 },
+            show: { scale: 1, transition: { duration: 2.2, ease: EASE, delay } },
+          }}
+        >
+          {children}
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
