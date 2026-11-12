@@ -189,7 +189,10 @@ void main(){
  * Devolve null sem WebGL.
  */
 function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: number; h: number }, lettersOnly: boolean) {
-  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false, powerPreference: "high-performance" });
+  // sem powerPreference "high-performance": em notebooks com duas placas de vídeo, pedir
+  // a placa potente faz o navegador TROCAR de placa — e a tela inteira pisca em branco
+  // (ao criar e ao liberar o WebGL). O efeito é leve; a placa padrão dá conta.
+  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
   if (!gl) return null;
   // Canvas com WebGL perdido vira um retângulo branco no Safari do iPhone: se o
   // sistema derrubar o contexto (falta de memória etc.), o canvas some na hora
