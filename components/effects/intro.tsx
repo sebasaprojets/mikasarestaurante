@@ -191,6 +191,9 @@ void main(){
 function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: number; h: number }, lettersOnly: boolean) {
   const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false, powerPreference: "high-performance" });
   if (!gl) return null;
+  // Canvas com WebGL perdido vira um retângulo branco no Safari do iPhone: se o
+  // sistema derrubar o contexto (falta de memória etc.), o canvas some na hora
+  canvas.addEventListener("webglcontextlost", () => (canvas.style.visibility = "hidden"));
   const sh = (type: number, src: string) => {
     const s = gl.createShader(type)!;
     gl.shaderSource(s, src);
@@ -257,7 +260,9 @@ function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: n
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     },
     render,
+    /** libera a GPU — escondendo o canvas ANTES (senão o Safari mostra um retângulo branco) */
     dispose() {
+      canvas.style.visibility = "hidden";
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     },
   };
