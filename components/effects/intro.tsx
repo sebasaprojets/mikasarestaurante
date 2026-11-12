@@ -189,11 +189,14 @@ void main(){
  * Devolve null sem WebGL.
  */
 function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: number; h: number }, lettersOnly: boolean) {
-  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false, powerPreference: "high-performance" });
+  // sem powerPreference "high-performance": em notebooks com duas placas de vídeo, pedir
+  // a placa potente faz o navegador TROCAR de placa — e a tela inteira pisca em branco
+  // (ao criar e ao liberar o WebGL). O efeito é leve; a placa padrão dá conta.
+  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
   if (!gl) return null;
   // Canvas com WebGL perdido vira um retângulo branco no Safari do iPhone: se o
   // sistema derrubar o contexto (falta de memória etc.), o canvas some na hora
-  canvas.addEventListener("webglcontextlost", () => (canvas.style.visibility = "hidden"));
+  canvas.addEventListener("webglcontextlost", () => (canvas.style.display = "none"));
   const sh = (type: number, src: string) => {
     const s = gl.createShader(type)!;
     gl.shaderSource(s, src);
@@ -262,7 +265,7 @@ function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: n
     render,
     /** libera a GPU — escondendo o canvas ANTES (senão o Safari mostra um retângulo branco) */
     dispose() {
-      canvas.style.visibility = "hidden";
+      canvas.style.display = "none";
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     },
   };
@@ -589,6 +592,8 @@ function IntroCanvas({
         preparePaper();
         if (burnGL && paper) {
           burnGL.render(0, 0);
+          // só aparece agora, já com a "foto" desenhada (antes ficava na tela vazio)
+          if (glRef.current) glRef.current.style.visibility = "visible";
           paper.style.visibility = "hidden";
           onPaperCb.current?.();
           mode = "gl";
@@ -807,7 +812,8 @@ function IntroCanvas({
 
   return (
     <>
-      <canvas ref={glRef} aria-hidden className="pointer-events-none absolute inset-0 size-full" />
+      {/* invisível até o 1º quadro da queima do papel */}
+      <canvas ref={glRef} aria-hidden className="pointer-events-none invisible absolute inset-0 size-full" />
       <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-0 size-full" />
     </>
   );
@@ -915,7 +921,6 @@ function LetterBurn({
     const box = canvas.getBoundingClientRect();
     let raf = 0;
     let t0 = 0;
-    let done = false;
     const loop = (now: number) => {
       if (!t0) {
         t0 = now;
@@ -942,17 +947,15 @@ function LetterBurn({
       }
       if (p < 1 && document.documentElement.hasAttribute("data-intro")) raf = requestAnimationFrame(loop);
       else {
-        // letras consumidas: libera a GPU já (o canvas fica vazio)
-        done = true;
+        // letras consumidas: o canvas sai da tela de vez. O WebGL NÃO é desligado aqui —
+        // no Safari do iPhone, canvas com WebGL desligado aparece como um quadro branco;
+        // ele é liberado só quando a intro inteira sai da página
         canvas.dataset.done = "1";
-        burn.dispose();
+        canvas.style.display = "none";
       }
     };
     raf = requestAnimationFrame(loop);
-    return () => {
-      cancelAnimationFrame(raf);
-      if (!done) burn.dispose();
-    };
+    return () => cancelAnimationFrame(raf);
     // prepare lê só refs
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [start, lite, hideRef]);

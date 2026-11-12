@@ -72,7 +72,7 @@ export function Fire({
     const gl = canvas?.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
     if (!canvas || !gl) return;
     // WebGL perdido vira um retângulo branco no Safari do iPhone: some na hora
-    const onLost = () => (canvas.style.visibility = "hidden");
+    const onLost = () => (canvas.style.display = "none");
     canvas.addEventListener("webglcontextlost", onLost);
 
     const sh = (type: number, src: string) => {
@@ -140,7 +140,7 @@ export function Fire({
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       canvas.removeEventListener("webglcontextlost", onLost);
-      canvas.style.visibility = "hidden";
+      canvas.style.display = "none";
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, [intensityRef, activeRef, scale]);
