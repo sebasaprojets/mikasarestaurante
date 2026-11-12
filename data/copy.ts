@@ -205,9 +205,7 @@ const es = {
     barFlipbook: "Bar (flipbook)",
     rights: "Todos los derechos reservados.",
     credit: "Desarrollado por",
-    creditAria: "Hablar por WhatsApp con Sebastian Andrade, quien desarrolló este sitio",
-    creditMessage:
-      "Hola Sebastian, vi el sitio que desarrollaste para MIKASA (mikasarestaurante.com) y me interesa un sitio así para mi negocio.",
+    creditAria: "Instagram de Sebastian Andrade, quien desarrolló este sitio (se abre en una nueva pestaña)",
   },
   menuPage: {
     eyebrow: "MIKASA Menu",
@@ -456,9 +454,7 @@ const en: Copy = {
     barFlipbook: "Bar (flipbook)",
     rights: "All rights reserved.",
     credit: "Developed by",
-    creditAria: "Chat on WhatsApp with Sebastian Andrade, who developed this website",
-    creditMessage:
-      "Hi Sebastian, I saw the website you built for MIKASA (mikasarestaurante.com) and I'm interested in one like it for my business.",
+    creditAria: "Instagram of Sebastian Andrade, who developed this website (opens in a new tab)",
   },
   menuPage: {
     eyebrow: "MIKASA Menu",

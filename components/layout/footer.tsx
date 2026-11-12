@@ -109,13 +109,13 @@ export function Footer({ lang }: { lang: Locale }) {
         {/* MIKASA gigante revelado letra a letra no fim da página */}
         <FooterWordmark />
 
-        {/* Crédito de quem desenvolveu o site → WhatsApp dele com mensagem pronta */}
+        {/* Crédito de quem desenvolveu o site → Instagram dele */}
         <div className="mt-10 flex justify-center md:justify-end">
           <a
-            href={`${site.developer.whatsapp}?text=${encodeURIComponent(c.footer.creditMessage)}`}
+            href={site.developer.instagram}
             {...ext}
             aria-label={c.footer.creditAria}
-            data-cursor="WhatsApp"
+            data-cursor="Instagram"
             className="group -mx-2 flex flex-col items-center gap-3 px-2 py-2 sm:flex-row sm:gap-5"
           >
             <span className="font-sans text-[0.62rem] uppercase tracking-[0.32em] text-washi-mute transition-colors duration-500 group-hover:text-washi-dim">
@@ -135,7 +135,7 @@ export function Footer({ lang }: { lang: Locale }) {
                 aria-hidden
                 className="grid size-9 shrink-0 place-items-center rounded-full border border-ouro/40 text-ouro transition-all duration-500 ease-[var(--ease-mikasa)] group-hover:border-ouro group-hover:bg-ouro group-hover:text-sumi"
               >
-                <WhatsAppIcon className="size-4" />
+                <InstagramIcon className="size-4" />
               </span>
             </span>
           </a>

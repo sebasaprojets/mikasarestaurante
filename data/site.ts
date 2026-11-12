@@ -61,10 +61,10 @@ export const site = {
     url: "https://wa.me/18492147479",
   },
 
-  /** Crédito do site (rodapé): quem desenvolveu — leva ao WhatsApp dele com mensagem pronta. */
+  /** Crédito do site (rodapé): quem desenvolveu — leva ao Instagram dele. */
   developer: {
     name: "Sebastian Andrade",
-    whatsapp: "https://wa.me/5541996173375",
+    instagram: "https://www.instagram.com/safdigitalsolutions/",
   },
 
   maps: {
