@@ -108,6 +108,38 @@ export function Footer({ lang }: { lang: Locale }) {
 
         {/* MIKASA gigante revelado letra a letra no fim da página */}
         <FooterWordmark />
+
+        {/* Crédito de quem desenvolveu o site → Instagram dele */}
+        <div className="mt-10 flex justify-center md:justify-end">
+          <a
+            href={site.developer.instagram}
+            {...ext}
+            aria-label={c.footer.creditAria}
+            data-cursor="Instagram"
+            className="group -mx-2 flex flex-col items-center gap-3 px-2 py-2 sm:flex-row sm:gap-5"
+          >
+            <span className="font-sans text-[0.62rem] uppercase tracking-[0.32em] text-washi-mute transition-colors duration-500 group-hover:text-washi-dim">
+              {c.footer.credit}
+            </span>
+            <span className="inline-flex min-h-11 items-center gap-4">
+              <span className="relative">
+                <span className="mk-credit whitespace-nowrap font-display text-[clamp(1.05rem,0.8rem+1.2vw,1.85rem)] uppercase leading-none tracking-[0.14em]">
+                  {site.developer.name}
+                </span>
+                <span
+                  aria-hidden
+                  className="absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-gradient-to-r from-ouro via-ouro-claro to-transparent transition-transform duration-700 ease-[var(--ease-mikasa)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                />
+              </span>
+              <span
+                aria-hidden
+                className="grid size-9 shrink-0 place-items-center rounded-full border border-ouro/40 text-ouro transition-all duration-500 ease-[var(--ease-mikasa)] group-hover:border-ouro group-hover:bg-ouro group-hover:text-sumi"
+              >
+                <InstagramIcon className="size-4" />
+              </span>
+            </span>
+          </a>
+        </div>
       </div>
     </footer>
   );

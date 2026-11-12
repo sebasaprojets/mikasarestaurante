@@ -61,6 +61,12 @@ export const site = {
     url: "https://wa.me/18492147479",
   },
 
+  /** Crédito do site (rodapé): quem desenvolveu — leva ao Instagram dele. */
+  developer: {
+    name: "Sebastian Andrade",
+    instagram: "https://www.instagram.com/safdigitalsolutions/",
+  },
+
   maps: {
     url: "https://maps.app.goo.gl/6CRf6DKWHppymi7HA",
     /** Embed sem chave de API, centralizado no endereço público. */

@@ -204,6 +204,8 @@ const es = {
     menuFlipbook: "Menú (flipbook)",
     barFlipbook: "Bar (flipbook)",
     rights: "Todos los derechos reservados.",
+    credit: "Desarrollado por",
+    creditAria: "Instagram de Sebastian Andrade, quien desarrolló este sitio (se abre en una nueva pestaña)",
   },
   menuPage: {
     eyebrow: "MIKASA Menu",
@@ -451,6 +453,8 @@ const en: Copy = {
     menuFlipbook: "Menu (flipbook)",
     barFlipbook: "Bar (flipbook)",
     rights: "All rights reserved.",
+    credit: "Developed by",
+    creditAria: "Instagram of Sebastian Andrade, who developed this website (opens in a new tab)",
   },
   menuPage: {
     eyebrow: "MIKASA Menu",
