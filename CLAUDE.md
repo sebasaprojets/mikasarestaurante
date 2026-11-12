@@ -70,6 +70,10 @@ visual SaaS, excesso de animação ou de elementos simultâneos.
 5. `npm run lint` e `npm run build` · 6. Com erro: não commitar, corrigir ·
 7. `git add` · `git commit -m "tipo(escopo): descrição"` · `git push origin <branch>` ·
 8. Reportar: alterações, arquivos, lint, build, hash, push, preview.
+9. **Toda atualização pedida pelo cliente termina em produção**: PR → CI verde → merge na `main`
+   (a Vercel publica a `main` sozinha) → conferir que o deploy de produção da Vercel ficou `READY`
+   com o commit novo e que **https://mikasarestaurante.com** (o mais importante) já serve essa
+   versão → enviar os links (domínio, Vercel e GitHub Pages).
 
 Testar sempre em **375px, 768px e 1440px** (sem overflow horizontal).
 Metas: Lighthouse ≥ 90, LCP < 2.5s, WCAG AA, foco dourado visível.
