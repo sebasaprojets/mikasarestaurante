@@ -29,7 +29,7 @@ export function Philosophy({ lang }: { lang: Locale }) {
         <div className="relative lg:col-span-5 lg:col-start-8">
           <Reveal y={40}>
             <Parallax className="aspect-[4/5] w-full" distance={60}>
-              <MediaFrame asset={media.philosophy} lang={lang} kanji="匠" sizes="(min-width:1024px) 40vw, 100vw" />
+              <MediaFrame asset={media.philosophy} lang={lang} kanji="匠" sizes="(min-width:1024px) 40vw, 90vw" />
             </Parallax>
           </Reveal>
           <div className="mt-5 flex items-baseline justify-between border-t border-line pt-4">

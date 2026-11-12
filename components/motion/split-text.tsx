@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useInView } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,8 @@ type Props = {
   inView?: boolean;
   /** Mostra sem animação (ex.: hero já revelado por baixo da intro). */
   instant?: boolean;
+  /** Em vez de subir palavra a palavra, o título é "pintado" por um traço de pincel. */
+  brush?: boolean;
 };
 
 /**
@@ -32,11 +34,13 @@ export function SplitText({
   stagger = 0.07,
   inView = false,
   instant = false,
+  brush = false,
 }: Props) {
   const Tag = as;
   const ref = useRef<HTMLHeadingElement>(null);
   const seen = useInView(ref, { once: true, amount: 0.5 });
   const shown = inView ? seen : play;
+  const [done, setDone] = useState(false);
   const lines = text.split("\n");
   let i = 0;
 
@@ -45,8 +49,16 @@ export function SplitText({
       ref={ref}
       data-shown={shown ? "" : undefined}
       data-instant={instant ? "" : undefined}
-      className={cn(className)}
-      style={{ ["--sd" as string]: `${delay}s`, ["--ss" as string]: `${stagger}s` }}
+      data-done={brush && done ? "" : undefined}
+      className={cn(brush && "mk-brush-reveal", className)}
+      style={{ ["--sd" as string]: `${delay}s`, ["--rd" as string]: `${delay}s`, ["--ss" as string]: `${stagger}s` }}
+      onAnimationEnd={
+        brush
+          ? (e) => {
+              if (e.target === e.currentTarget) setDone(true);
+            }
+          : undefined
+      }
     >
       <span className="sr-only">{text.replace(/\n/g, " ")}</span>
       {lines.map((line, li) => (

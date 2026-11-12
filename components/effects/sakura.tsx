@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { preload } from "react-dom";
 import { motion } from "motion/react";
 import { canvasDpr, isLowEndDevice } from "@/lib/device";
 import { useIntroReady } from "@/lib/hooks/use-intro-ready";
@@ -178,16 +179,24 @@ export function SakuraTree({ className }: { className?: string }) {
     };
   }, [introDone, mode]);
 
-  const src = (n: string) => withBasePath(`/hero/sakura-${n}.webp`);
-  // versão leve para telas pequenas (menos memória de GPU)
-  // galhos + flores numa única imagem (movem-se juntos); 3 tamanhos para cada tela
-  const treeSet = [
-    `${withBasePath("/hero/sakura-tree-sm.webp")} 520w`,
-    `${withBasePath("/hero/sakura-tree-md.webp")} 800w`,
-    `${withBasePath("/hero/sakura-tree.webp")} 1200w`,
-  ].join(", ");
+  // galhos + flores numa única imagem (movem-se juntos); 3 tamanhos para cada tela,
+  // em AVIF (~35% menor) com WebP de reserva para navegadores antigos
+  const set = (base: string, widths: [string, number][], ext: string) =>
+    widths.map(([suffix, w]) => `${withBasePath(`/hero/${base}${suffix}.${ext}`)} ${w}w`).join(", ");
+  const TREE: [string, number][] = [["-sm", 520], ["-md", 800], ["", 1200]];
+  const BACK: [string, number][] = [["-sm", 360], ["", 560]];
   // largura real ocupada pela árvore em cada faixa de tela
   const treeSizes = "(max-width: 639px) 280px, (max-width: 1023px) 460px, 52vw";
+  // A árvore é o maior elemento do topo (o que o Google mede como LCP): começa a baixar
+  // já no <head>, junto com o CSS, e chega antes da primeira pintura — sem isso ela
+  // esperava o JS e só aparecia uns 3 s depois no celular.
+  preload(withBasePath("/hero/sakura-tree-md.avif"), {
+    as: "image",
+    type: "image/avif",
+    imageSrcSet: set("sakura-tree", TREE, "avif"),
+    imageSizes: treeSizes,
+    fetchPriority: "high",
+  });
 
   return (
     <>
@@ -200,14 +209,18 @@ export function SakuraTree({ className }: { className?: string }) {
         // degradê do topo vem embutido nas imagens (mask-image forçava repaint a cada quadro)
         style={{ transformOrigin: "100% 60%" }}
       >
-        {/* eslint-disable @next/next/no-img-element -- camadas decorativas animadas, já otimizadas (webp) */}
         {/* fundo desfocado: profundidade / névoa */}
-        <img src={src("back")} fetchPriority="low" loading="lazy" alt="" decoding="async" className="mk-sway-slow absolute inset-0 size-full object-contain object-right-top" />
+        <picture>
+          <source type="image/avif" srcSet={set("sakura-back", BACK, "avif")} sizes={treeSizes} />
+          <img src={withBasePath("/hero/sakura-back.webp")} srcSet={set("sakura-back", BACK, "webp")} sizes={treeSizes} alt="" decoding="async" className="mk-sway-slow absolute inset-0 size-full object-contain object-right-top" />
+        </picture>
         {/* galhos + flores nítidas balançam juntos a partir do tronco */}
         <div className="mk-sway absolute inset-0" style={{ transformOrigin: "100% 80%" }}>
-          <img src={src("tree-md")} srcSet={treeSet} sizes={treeSizes} fetchPriority="high" alt="" decoding="async" className="absolute inset-0 size-full object-contain object-right-top" />
+          <picture>
+            <source type="image/avif" srcSet={set("sakura-tree", TREE, "avif")} sizes={treeSizes} />
+            <img src={withBasePath("/hero/sakura-tree-md.webp")} srcSet={set("sakura-tree", TREE, "webp")} sizes={treeSizes} fetchPriority="high" alt="" className="absolute inset-0 size-full object-contain object-right-top" />
+          </picture>
         </div>
-        {/* eslint-enable @next/next/no-img-element */}
       </motion.div>
       {petals ? <Petals /> : null}
     </>

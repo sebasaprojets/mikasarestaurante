@@ -135,6 +135,7 @@
 }
 
 :root {
+  --mk-brush-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 100' preserveAspectRatio='none'><filter id='b' x='-5%25' y='0' width='110%25' height='100%25'><feGaussianBlur stdDeviation='3 0.12'/></filter><g fill='%23fff' filter='url(%23b)'><path d='M0 0.0 L437 0.0 L441 2.0 L445 4.0 L444 6.0 L444 8.0 L443 10.0 L439 12.0 L439 14.0 L438 16.0 L438 18.0 L436 20.0 L438 22.0 L440 24.0 L446 26.0 L449 28.0 L449 30.0 L455 32.0 L456 34.0 L455 36.0 L453 38.0 L448 40.0 L444 42.0 L441 44.0 L434 46.0 L429 48.0 L425 50.0 L421 52.0 L420 54.0 L419 56.0 L421 58.0 L421 60.0 L423 62.0 L424 64.0 L425 66.0 L425 68.0 L423 70.0 L424 72.0 L421 74.0 L417 76.0 L413 78.0 L408 80.0 L405 82.0 L403 84.0 L402 86.0 L406 88.0 L408 90.0 L413 92.0 L416 94.0 L423 96.0 L428 98.0 L429 100.0 L0 100.0Z'/><rect x='399' y='0.00' width='207' height='0.35' opacity='0.85'/><rect x='397' y='0.34' width='117' height='0.53' opacity='1'/><rect x='400' y='0.84' width='51' height='0.73' opacity='1'/><rect x='400' y='1.46' width='96' height='0.48' opacity='0.7'/><rect x='399' y='1.89' width='86' height='0.62' opacity='0.85'/><rect x='403' y='2.57' width='153' height='0.25' opacity='1'/><rect x='403' y='2.80' width='84' height='0.45' opacity='1'/><rect x='403' y='3.20' width='111' height='0.38' opacity='1'/><rect x='403' y='3.53' width='54' height='0.35' opacity='0.7'/><rect x='403' y='3.87' width='191' height='0.73' opacity='1'/><rect x='402' y='4.60' width='172' height='0.41' opacity='1'/><rect x='402' y='5.02' width='194' height='0.72' opacity='0.7'/><rect x='402' y='5.65' width='106' height='0.27' opacity='0.55'/><rect x='405' y='5.93' width='111' height='0.38' opacity='1'/><rect x='402' y='6.34' width='161' height='0.74' opacity='0.7'/><rect x='405' y='7.08' width='72' height='0.39' opacity='1'/><rect x='402' y='7.45' width='144' height='0.37' opacity='1'/><rect x='403' y='7.78' width='173' height='0.32' opacity='0.7'/><rect x='402' y='8.10' width='68' height='0.32' opacity='0.55'/><rect x='404' y='8.40' width='47' height='0.27' opacity='1'/><rect x='401' y='8.64' width='173' height='0.75' opacity='0.55'/><rect x='405' y='9.42' width='82' height='0.31' opacity='0.85'/><rect x='402' y='9.76' width='191' height='0.69' opacity='0.7'/><rect x='402' y='10.34' width='47' height='0.58' opacity='1'/><rect x='403' y='10.93' width='124' height='0.75' opacity='0.55'/><rect x='401' y='11.69' width='143' height='0.48' opacity='0.7'/><rect x='400' y='12.10' width='168' height='0.55' opacity='0.85'/><rect x='400' y='12.68' width='122' height='0.58' opacity='1'/><rect x='398' y='13.27' width='162' height='0.35' opacity='0.85'/><rect x='399' y='13.61' width='159' height='0.37' opacity='1'/><rect x='399' y='14.01' width='89' height='0.44' opacity='0.85'/><rect x='397' y='14.43' width='70' height='0.70' opacity='1'/><rect x='400' y='15.04' width='124' height='0.49' opacity='0.7'/><rect x='399' y='15.51' width='133' height='0.41' opacity='1'/><rect x='398' y='15.94' width='109' height='0.39' opacity='1'/><rect x='396' y='16.30' width='134' height='0.65' opacity='1'/><rect x='398' y='16.98' width='208' height='0.38' opacity='1'/><rect x='398' y='17.34' width='204' height='0.56' opacity='0.55'/><rect x='396' y='17.85' width='176' height='0.66' opacity='0.7'/><rect x='396' y='18.53' width='168' height='0.34' opacity='0.7'/><rect x='396' y='18.86' width='168' height='0.75' opacity='1'/><rect x='398' y='19.52' width='133' height='0.72' opacity='0.55'/><rect x='398' y='20.28' width='140' height='0.25' opacity='1'/><rect x='397' y='20.53' width='185' height='0.58' opacity='0.55'/><rect x='397' y='21.15' width='82' height='0.31' opacity='1'/><rect x='398' y='21.46' width='190' height='0.65' opacity='1'/><rect x='399' y='22.09' width='109' height='0.27' opacity='1'/><rect x='399' y='22.33' width='58' height='0.68' opacity='0.55'/><rect x='399' y='23.05' width='171' height='0.32' opacity='0.55'/><rect x='401' y='23.37' width='82' height='0.72' opacity='1'/><rect x='403' y='24.07' width='93' height='0.53' opacity='0.7'/><rect x='402' y='24.63' width='188' height='0.53' opacity='0.7'/><rect x='405' y='25.11' width='150' height='0.68' opacity='1'/><rect x='402' y='25.75' width='145' height='0.31' opacity='1'/><rect x='406' y='26.05' width='139' height='0.45' opacity='0.55'/><rect x='405' y='26.45' width='182' height='0.72' opacity='0.85'/><rect x='405' y='27.11' width='184' height='0.49' opacity='0.85'/><rect x='407' y='27.59' width='52' height='0.30' opacity='0.55'/><rect x='407' y='27.91' width='166' height='0.26' opacity='1'/><rect x='408' y='28.18' width='152' height='0.37' opacity='0.7'/><rect x='410' y='28.55' width='73' height='0.61' opacity='0.55'/><rect x='408' y='29.13' width='158' height='0.51' opacity='0.55'/><rect x='411' y='29.60' width='89' height='0.36' opacity='0.55'/><rect x='410' y='29.96' width='195' height='0.42' opacity='1'/><rect x='413' y='30.34' width='104' height='0.75' opacity='0.55'/><rect x='412' y='30.99' width='146' height='0.44' opacity='0.55'/><rect x='413' y='31.38' width='50' height='0.45' opacity='0.55'/><rect x='413' y='31.81' width='159' height='0.66' opacity='1'/><rect x='412' y='32.45' width='48' height='0.59' opacity='1'/><rect x='416' y='33.07' width='97' height='0.56' opacity='1'/><rect x='416' y='33.57' width='83' height='0.67' opacity='1'/><rect x='413' y='34.16' width='55' height='0.59' opacity='0.85'/><rect x='415' y='34.74' width='63' height='0.47' opacity='1'/><rect x='416' y='35.16' width='97' height='0.48' opacity='1'/><rect x='414' y='35.57' width='66' height='0.65' opacity='0.55'/><rect x='413' y='36.28' width='118' height='0.53' opacity='1'/><rect x='415' y='36.77' width='201' height='0.31' opacity='1'/><rect x='414' y='37.10' width='177' height='0.69' opacity='0.85'/><rect x='414' y='37.72' width='84' height='0.34' opacity='1'/><rect x='411' y='38.10' width='205' height='0.70' opacity='1'/><rect x='412' y='38.75' width='125' height='0.58' opacity='0.85'/><rect x='412' y='39.34' width='73' height='0.60' opacity='0.7'/><rect x='410' y='39.86' width='177' height='0.37' opacity='0.55'/><rect x='408' y='40.21' width='147' height='0.30' opacity='0.7'/><rect x='410' y='40.50' width='56' height='0.51' opacity='0.55'/><rect x='409' y='40.94' width='68' height='0.55' opacity='1'/><rect x='408' y='41.46' width='154' height='0.74' opacity='0.85'/><rect x='405' y='42.26' width='121' height='0.46' opacity='1'/><rect x='406' y='42.71' width='175' height='0.38' opacity='1'/><rect x='401' y='43.03' width='176' height='0.37' opacity='0.85'/><rect x='402' y='43.36' width='171' height='0.41' opacity='1'/><rect x='401' y='43.71' width='206' height='0.70' opacity='1'/><rect x='401' y='44.32' width='90' height='0.30' opacity='1'/><rect x='399' y='44.61' width='99' height='0.31' opacity='1'/><rect x='398' y='44.90' width='128' height='0.33' opacity='0.7'/><rect x='397' y='45.20' width='144' height='0.54' opacity='1'/><rect x='395' y='45.79' width='67' height='0.62' opacity='0.7'/><rect x='393' y='46.41' width='149' height='0.43' opacity='0.7'/><rect x='392' y='46.80' width='140' height='0.39' opacity='0.55'/><rect x='390' y='47.22' width='52' height='0.69' opacity='0.85'/><rect x='390' y='47.81' width='176' height='0.27' opacity='0.55'/><rect x='392' y='48.05' width='120' height='0.37' opacity='1'/><rect x='391' y='48.39' width='48' height='0.62' opacity='0.7'/><rect x='388' y='49.05' width='125' height='0.63' opacity='1'/><rect x='389' y='49.65' width='147' height='0.58' opacity='0.55'/><rect x='386' y='50.26' width='135' height='0.34' opacity='1'/><rect x='385' y='50.56' width='166' height='0.29' opacity='1'/><rect x='384' y='50.86' width='155' height='0.25' opacity='0.55'/><rect x='385' y='51.10' width='90' height='0.61' opacity='1'/><rect x='385' y='51.72' width='132' height='0.41' opacity='0.7'/><rect x='384' y='52.17' width='182' height='0.72' opacity='1'/><rect x='383' y='52.86' width='142' height='0.36' opacity='1'/><rect x='381' y='53.20' width='124' height='0.43' opacity='1'/><rect x='380' y='53.65' width='153' height='0.43' opacity='1'/><rect x='382' y='54.04' width='73' height='0.63' opacity='0.7'/><rect x='379' y='54.58' width='66' height='0.33' opacity='0.85'/><rect x='381' y='54.87' width='47' height='0.52' opacity='0.55'/><rect x='378' y='55.33' width='84' height='0.41' opacity='0.55'/><rect x='380' y='55.71' width='117' height='0.61' opacity='0.85'/><rect x='382' y='56.29' width='139' height='0.42' opacity='0.7'/><rect x='380' y='56.73' width='64' height='0.29' opacity='0.55'/><rect x='379' y='57.00' width='57' height='0.25' opacity='0.7'/><rect x='381' y='57.25' width='129' height='0.51' opacity='0.85'/><rect x='379' y='57.80' width='166' height='0.37' opacity='1'/><rect x='379' y='58.14' width='78' height='0.46' opacity='1'/><rect x='379' y='58.62' width='198' height='0.40' opacity='0.85'/><rect x='382' y='58.96' width='98' height='0.49' opacity='1'/><rect x='381' y='59.41' width='101' height='0.37' opacity='1'/><rect x='383' y='59.80' width='158' height='0.45' opacity='0.7'/><rect x='383' y='60.24' width='118' height='0.38' opacity='0.7'/><rect x='383' y='60.63' width='100' height='0.30' opacity='1'/><rect x='382' y='60.95' width='108' height='0.44' opacity='1'/><rect x='380' y='61.39' width='122' height='0.37' opacity='1'/><rect x='381' y='61.77' width='115' height='0.55' opacity='1'/><rect x='381' y='62.37' width='157' height='0.66' opacity='0.7'/><rect x='384' y='63.01' width='66' height='0.33' opacity='1'/><rect x='383' y='63.36' width='84' height='0.29' opacity='0.85'/><rect x='385' y='63.65' width='141' height='0.29' opacity='1'/><rect x='386' y='63.96' width='66' height='0.46' opacity='1'/><rect x='384' y='64.35' width='205' height='0.46' opacity='1'/><rect x='384' y='64.78' width='170' height='0.29' opacity='1'/><rect x='385' y='65.03' width='175' height='0.32' opacity='1'/><rect x='384' y='65.35' width='103' height='0.26' opacity='0.7'/><rect x='386' y='65.58' width='171' height='0.64' opacity='0.7'/><rect x='387' y='66.14' width='204' height='0.56' opacity='0.85'/><rect x='384' y='66.70' width='85' height='0.29' opacity='1'/><rect x='386' y='67.02' width='186' height='0.53' opacity='1'/><rect x='384' y='67.48' width='95' height='0.56' opacity='1'/><rect x='385' y='68.02' width='51' height='0.67' opacity='1'/><rect x='386' y='68.75' width='185' height='0.47' opacity='0.7'/><rect x='383' y='69.16' width='138' height='0.35' opacity='0.85'/><rect x='385' y='69.52' width='180' height='0.61' opacity='1'/><rect x='382' y='70.14' width='118' height='0.55' opacity='0.55'/><rect x='382' y='70.67' width='111' height='0.53' opacity='1'/><rect x='384' y='71.20' width='147' height='0.33' opacity='1'/><rect x='383' y='71.53' width='201' height='0.51' opacity='0.55'/><rect x='382' y='72.05' width='61' height='0.72' opacity='1'/><rect x='381' y='72.69' width='83' height='0.49' opacity='1'/><rect x='380' y='73.14' width='103' height='0.69' opacity='0.7'/><rect x='380' y='73.82' width='197' height='0.53' opacity='1'/><rect x='380' y='74.35' width='196' height='0.31' opacity='1'/><rect x='377' y='74.67' width='184' height='0.43' opacity='0.85'/><rect x='379' y='75.04' width='162' height='0.34' opacity='1'/><rect x='378' y='75.40' width='160' height='0.67' opacity='1'/><rect x='374' y='76.00' width='87' height='0.46' opacity='0.85'/><rect x='374' y='76.40' width='116' height='0.51' opacity='0.55'/><rect x='375' y='76.94' width='140' height='0.61' opacity='1'/><rect x='373' y='77.53' width='176' height='0.46' opacity='1'/><rect x='373' y='77.97' width='127' height='0.75' opacity='0.85'/><rect x='373' y='78.63' width='143' height='0.31' opacity='0.85'/><rect x='369' y='78.96' width='196' height='0.41' opacity='0.55'/><rect x='371' y='79.34' width='193' height='0.41' opacity='1'/><rect x='369' y='79.71' width='77' height='0.47' opacity='0.55'/><rect x='369' y='80.12' width='202' height='0.70' opacity='1'/><rect x='369' y='80.90' width='146' height='0.62' opacity='0.7'/><rect x='367' y='81.54' width='196' height='0.36' opacity='1'/><rect x='368' y='81.90' width='133' height='0.31' opacity='1'/><rect x='365' y='82.18' width='67' height='0.40' opacity='0.7'/><rect x='366' y='82.56' width='46' height='0.43' opacity='1'/><rect x='367' y='82.96' width='136' height='0.50' opacity='1'/><rect x='365' y='83.41' width='53' height='0.68' opacity='1'/><rect x='365' y='84.14' width='148' height='0.26' opacity='0.7'/><rect x='366' y='84.40' width='48' height='0.35' opacity='0.55'/><rect x='363' y='84.77' width='193' height='0.73' opacity='1'/><rect x='364' y='85.51' width='51' height='0.72' opacity='1'/><rect x='363' y='86.15' width='140' height='0.60' opacity='1'/><rect x='365' y='86.77' width='153' height='0.44' opacity='1'/><rect x='363' y='87.25' width='89' height='0.70' opacity='0.55'/><rect x='365' y='87.86' width='144' height='0.74' opacity='1'/><rect x='366' y='88.49' width='150' height='0.54' opacity='1'/><rect x='366' y='88.99' width='147' height='0.63' opacity='1'/><rect x='369' y='89.65' width='198' height='0.33' opacity='0.7'/><rect x='368' y='89.95' width='148' height='0.71' opacity='0.55'/><rect x='369' y='90.72' width='52' height='0.41' opacity='0.55'/><rect x='372' y='91.14' width='179' height='0.51' opacity='1'/><rect x='372' y='91.59' width='106' height='0.47' opacity='0.55'/><rect x='372' y='92.08' width='151' height='0.37' opacity='0.85'/><rect x='375' y='92.42' width='56' height='0.35' opacity='1'/><rect x='374' y='92.75' width='141' height='0.55' opacity='0.55'/><rect x='373' y='93.25' width='150' height='0.65' opacity='0.7'/><rect x='377' y='93.90' width='56' height='0.61' opacity='0.55'/><rect x='378' y='94.47' width='152' height='0.56' opacity='1'/><rect x='379' y='95.03' width='140' height='0.51' opacity='0.55'/><rect x='379' y='95.57' width='121' height='0.64' opacity='1'/><rect x='381' y='96.23' width='154' height='0.73' opacity='1'/><rect x='385' y='96.87' width='51' height='0.48' opacity='0.7'/><rect x='384' y='97.30' width='81' height='0.45' opacity='1'/><rect x='388' y='97.75' width='111' height='0.61' opacity='1'/><rect x='387' y='98.35' width='121' height='0.37' opacity='1'/><rect x='387' y='98.76' width='152' height='0.71' opacity='1'/><rect x='391' y='99.49' width='199' height='0.53' opacity='1'/></g></svg>");
   --header-h: 76px;
   --header-offset: 76px; /* atualizado pelo header (0 quando oculto) */
   color-scheme: dark;
@@ -209,6 +210,11 @@ html[data-intro] #inicio .mk-early {
     opacity: 0;
     visibility: hidden;
   }
+}
+
+/* Troca de página conduzida pelo NorenNav: o noren do template fica de fora */
+html[data-noren] .mk-noren-template {
+  display: none;
 }
 
 /* Grão de filme muito sutil */
@@ -311,6 +317,64 @@ html[data-intro] #inicio .mk-early {
   40% {
     opacity: 0.08;
   }
+}
+
+/* Revelação com traço de pincel sumi: a borda (com cerdas e falhas de pincel seco,
+   máscara gerada uma vez) varre da esquerda para a direita. Ao terminar, o JS marca
+   data-done e a máscara sai — depois disso não custa nada. */
+.mk-brush-reveal {
+  -webkit-mask-image: var(--mk-brush-mask);
+  mask-image: var(--mk-brush-mask);
+  -webkit-mask-size: 260% 100%;
+  mask-size: 260% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+}
+[data-shown] > .mk-brush-reveal,
+.mk-brush-reveal[data-shown] {
+  animation: mk-brush-sweep var(--bsd, 1.6s) cubic-bezier(0.55, 0, 0.2, 1) var(--rd, 0s) both;
+}
+.mk-brush-reveal[data-done] {
+  -webkit-mask-image: none;
+  mask-image: none;
+  animation: none;
+}
+@keyframes mk-brush-sweep {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  to {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
+}
+.mk-brush-zoom {
+  transform: scale(1.14);
+  transition: transform 2.2s var(--ease-mikasa) var(--rd, 0s);
+}
+[data-shown] .mk-brush-zoom {
+  transform: none;
+}
+/* título pintado pelo pincel: as palavras já estão no lugar (sem o "sobe" do SplitText) */
+.mk-brush-reveal .mk-split-word {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+/* aparelho modesto: sem máscara animada, só um fade */
+html[data-perf="lite"] .mk-brush-reveal {
+  -webkit-mask-image: none;
+  mask-image: none;
+  animation: none;
+  opacity: 0;
+  transition: opacity 1s var(--ease-mikasa) var(--rd, 0s);
+}
+html[data-perf="lite"] [data-shown] > .mk-brush-reveal,
+html[data-perf="lite"] .mk-brush-reveal[data-shown] {
+  opacity: 1;
 }
 
 .mk-breathe {

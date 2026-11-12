@@ -43,7 +43,7 @@ export function PageHero({
           <span aria-hidden className="h-px w-10 bg-ouro/70" />
           <span className="mk-eyebrow">{eyebrow}</span>
         </Reveal>
-        <SplitText as="h1" text={title} className="max-w-[18ch] font-display text-display-xl font-light text-washi" />
+        <SplitText as="h1" brush delay={0.55} text={title} className="max-w-[18ch] font-display text-display-xl font-light text-washi" />
         <Reveal delay={0.3} className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <p className="max-w-[44ch] text-[0.95rem] leading-relaxed text-washi-dim">{intro}</p>
           <Button asChild variant="outline">
