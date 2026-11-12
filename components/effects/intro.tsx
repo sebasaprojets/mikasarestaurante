@@ -107,31 +107,44 @@ const fbm2 = (x: number, y: number) => {
   }
   return v;
 };
+/**
+ * Escala da queima para telas em pé (celular). O desenho foi feito para o PC (largo):
+ * ~5 línguas de fogo de lado a lado e uma frente irregular. Numa tela estreita, com a
+ * mesma escala, cabia só UMA língua larga e a queima virava uma linha subindo. Aqui o
+ * ruído fica proporcional à LARGURA: o celular queima igual ao PC, em miniatura.
+ * No PC (e nas letras, que são largas) vale 1 — nada muda.
+ */
+const burnScale = (aspect: number) => Math.max(1, 1.6 / aspect);
 /** Campo de queima (igual ao shader): <0 ainda inteiro; >0 já queimou. */
 const burnField = (u: number, v: number, aspect: number, t: number) => {
-  const f = (1 - v) * 0.85 + fbm2(u * aspect * 3.2, v * 3.2) * 0.62;
-  return t * 1.62 - 0.06 - f;
+  const k = burnScale(aspect);
+  // amplitude cai um pouco menos que a escala: frente bem irregular, com buracos à frente
+  const A = 0.62 / Math.pow(k, 0.8);
+  const f = (1 - v) * 0.85 + fbm2(u * aspect * 3.2 * k, v * 3.2 * k) * A;
+  return t * (0.85 + A + 0.15 / k) - 0.06 / k - f;
 };
 
 /** Campo de ruído da queima, calculado uma vez em baixa resolução (≈1/4 da tela). */
 function buildField(w: number, h: number) {
-  const fw = Math.max(64, Math.round(w / 4));
-  const fh = Math.max(36, Math.round(h / 4));
   const aspect = w / h;
+  const k = burnScale(aspect);
+  // ruído mais fino no celular → um pouco mais de amostras (só no celular)
+  const fw = Math.max(64, Math.round((w / 4) * Math.sqrt(k)));
+  const fh = Math.max(36, Math.round((h / 4) * Math.sqrt(k)));
   const data = new Uint8Array(fw * fh);
   for (let y = 0; y < fh; y++) {
     const v = (y + 0.5) / fh;
     for (let x = 0; x < fw; x++) {
       const u = (x + 0.5) / fw;
-      data[y * fw + x] = Math.min(255, Math.round(fbm2(u * aspect * 3.2, v * 3.2) * 255));
+      data[y * fw + x] = Math.min(255, Math.round(fbm2(u * aspect * 3.2 * k, v * 3.2 * k) * 255));
     }
   }
-  return { data, w: fw, h: fh };
+  return { data, w: fw, h: fh, k };
 }
 
 const VERT = `attribute vec2 a;varying vec2 v_uv;void main(){v_uv=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}`;
 const FRAG = `precision highp float;
-varying vec2 v_uv;uniform sampler2D u_tex;uniform sampler2D u_field;uniform float u_t;uniform float u_time;uniform float u_aspect;
+varying vec2 v_uv;uniform sampler2D u_tex;uniform sampler2D u_field;uniform float u_t;uniform float u_time;uniform float u_aspect;uniform float u_k; // escala (burnScale)
 uniform float u_alpha; // 0: papel opaco (tela inteira) · 1: só as letras, sobre fundo transparente
 float h(vec2 p){return fract(sin(p.x*127.1+p.y*311.7)*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);
@@ -143,8 +156,9 @@ void main(){
   // material onde pode haver brasa/chamas (no papel: tudo; nas letras: só o ouro)
   float mat=mix(1.,paper.a,u_alpha);
   // campo de queima pré-calculado (estático) + um serrilhado fino por pixel
-  float f=(1.-uv.y)*.85+texture2D(u_field,uv).r*.62+(n(p*44.)-.5)*.01;
-  float d=u_t*1.62-.06-f;            // >0: já queimou
+  float A=.62/pow(u_k,.8);
+  float f=(1.-uv.y)*.85+texture2D(u_field,uv).r*A+(n(p*44.)-.5)*.01;
+  float d=u_t*(.85+A+.15/u_k)-.06/u_k-f; // >0: já queimou
   if(d>0.){                          // buraco, com a borda de carvão se desfazendo
     // nas letras, uma faixa de carvão mais larga que se esfarela aos poucos
     float rw=mix(.022,.075,u_alpha);
@@ -188,7 +202,7 @@ void main(){
  * fundo transparente, ou do papel inteiro na saída) entra depois, em `setImage`.
  * Devolve null sem WebGL.
  */
-function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: number; h: number }, lettersOnly: boolean) {
+function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: number; h: number; k: number }, lettersOnly: boolean) {
   // sem powerPreference "high-performance": em notebooks com duas placas de vídeo, pedir
   // a placa potente faz o navegador TROCAR de placa — e a tela inteira pisca em branco
   // (ao criar e ao liberar o WebGL). O efeito é leve; a placa padrão dá conta.
@@ -240,6 +254,7 @@ function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: n
   gl.uniform1i(gl.getUniformLocation(prog, "u_tex"), 0);
   gl.uniform1i(gl.getUniformLocation(prog, "u_field"), 1);
   gl.uniform1f(gl.getUniformLocation(prog, "u_alpha"), lettersOnly ? 1 : 0);
+  gl.uniform1f(gl.getUniformLocation(prog, "u_k"), field.k);
   const uT = gl.getUniformLocation(prog, "u_t");
   const uTime = gl.getUniformLocation(prog, "u_time");
   const uAsp = gl.getUniformLocation(prog, "u_aspect");
@@ -263,10 +278,13 @@ function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: n
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     },
     render,
-    /** libera a GPU — escondendo o canvas ANTES (senão o Safari mostra um retângulo branco) */
+    /**
+     * Some com o canvas. Sem `loseContext()`: ele espera a placa de vídeo terminar tudo
+     * (síncrono) e travava a tela justo quando o site aparecia; o navegador libera o
+     * WebGL sozinho quando o canvas sai da página.
+     */
     dispose() {
       canvas.style.display = "none";
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
     },
   };
 }
@@ -275,7 +293,11 @@ function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: n
 function createPaperGL(glc: HTMLCanvasElement, lite: boolean) {
   const w = glc.clientWidth || window.innerWidth;
   const h = glc.clientHeight || window.innerHeight;
-  const dpr = lite ? 1 : Math.min(window.devicePixelRatio || 1, 1.25);
+  // aparelho modesto: nitidez por orçamento de pixels — num celular (tela pequena) cabe
+  // ~1,3x; a 1x a borda da queima ficava borrada perto do PC
+  const dpr = lite
+    ? Math.max(1, Math.min(window.devicePixelRatio || 1, Math.sqrt(0.7e6 / (w * h))))
+    : Math.min(window.devicePixelRatio || 1, 1.25);
   glc.width = Math.round(w * dpr);
   glc.height = Math.round(h * dpr);
   const burn = createBurnGL(glc, buildField(w, h), false);

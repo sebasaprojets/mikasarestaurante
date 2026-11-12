@@ -140,8 +140,9 @@ export function Fire({
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       canvas.removeEventListener("webglcontextlost", onLost);
+      // sem loseContext(): é síncrono (espera a placa de vídeo) e travava a tela na saída
+      // da intro; o navegador libera o WebGL quando o canvas sai da página
       canvas.style.display = "none";
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, [intensityRef, activeRef, scale]);
 
