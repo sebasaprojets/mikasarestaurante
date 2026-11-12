@@ -87,6 +87,10 @@ Acessibilidade: não usar `aria-label` em `<p>`/`<div>` sem role; texto animado 
 - **GitHub Pages** (preview): `.github/workflows/pages.yml` roda `scripts/build-pages.sh` a cada push na `main`
   → export estático em `/<repo>/es/` e `/<repo>/en/` (`STATIC_EXPORT=true`, sem proxy, sitemap/robots estáticos).
   Use `withBasePath()` em `<a>`, `<video>` e `next/image` com caminhos internos.
+- **QR code** (`public/qr/`, publicado em `/qr/…`): cartaz escuro e claro (`mikasa-cartaz*.png|pdf`),
+  QR da marca (`mikasa-qr.svg|png`) e QR simples (`mikasa-qr-pb`). Aponta para o domínio (`site.domain`),
+  então o QR impresso sempre abre a versão mais nova, sem regenerar. Só se domínio, logo ou textos
+  mudarem: `npm run qr` (`scripts/generate-qr.mjs`).
 
 ## Segurança
 

@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { EMBLEM_VIEWBOX, KANJI_ID, LETTER_BOXES, letterId, WORDMARK_VIEWBOX } from "@/components/brand/logo-meta";
+import { EMBLEM_ARC, EMBLEM_VIEWBOX, KANJI_ID, LETTER_BOXES, letterId, WORDMARK_VIEWBOX } from "@/components/brand/logo-meta";
 import { cn } from "@/lib/utils";
 
 /** Gradiente dourado do logo (luz no alto, ouro profundo embaixo). */
@@ -13,8 +13,7 @@ export function GoldGradient({ id, vertical = true }: { id: string; vertical?: b
   );
 }
 
-/** Arco do emblema: círculo quase completo, com a abertura do traço de pincel embaixo à esquerda. */
-export const EMBLEM_ARC = "M 92.7 255.8 A 126 126 0 1 1 187.3 255.8";
+export { EMBLEM_ARC };
 
 /** Emblema oficial: kanji dentro do círculo dourado. */
 export function Emblem({ className, title }: { className?: string; title?: string }) {
