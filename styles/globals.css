@@ -190,7 +190,7 @@ html.lenis body {
 html[data-intro] .mk-intro {
   display: block;
   /* fallback sem JS: some sozinha */
-  animation: mk-intro-failsafe 0.6s ease 9s forwards;
+  animation: mk-intro-failsafe 0.6s ease 15s forwards;
 }
 html[data-intro],
 html[data-intro] body {

@@ -30,13 +30,16 @@ void main(){
   float n=fbm(vec2(p.x*2.6,p.y*1.7-t*1.15));
   float n2=fbm(vec2(p.x*5.2+n*1.6,p.y*3.4-t*2.1));
   float center=1.-smoothstep(.0,.62,abs(uv.x-.5));
-  float h=(.22+.62*center)*k;
+  // a área do fogo é mais alta que as chamas (58% → 76% da tela): mesmo tamanho de
+  // chama, com espaço para passar acima de onde antes era cortada numa linha reta
+  float h=(.22+.62*center)*k*.765;
   float f=(h-uv.y)/max(h,.001);
   f+=(n2-.5)*1.05+(n-.5)*.35;
   f=clamp(f,0.,1.);
   f=pow(f,1.25);
   vec3 col=ramp(f);
-  float a=smoothstep(.0,.35,f);
+  // e, se ainda chegar perto do topo, some suave (nunca uma linha reta)
+  float a=smoothstep(.0,.35,f)*smoothstep(1.,.86,uv.y);
   // faíscas subindo
   vec2 sp=vec2(p.x*14.,p.y*7.-t*1.7);
   vec2 id=floor(sp);vec2 fr=fract(sp)-.5;
