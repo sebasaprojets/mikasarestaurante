@@ -42,11 +42,11 @@ const T = {
   sheen: 2.95,
   tag: 2.8,
   /** o fogo sobe e queima as letras de MIKASA de baixo para cima */
-  lburn: 4.0,
+  lburn: 3.9,
   /** devagar: dá para ver o ouro tostar, virar brasa e se desfazer */
   lburnDur: 3.6,
   /** saída: a tela inteira queima como papel e revela o site */
-  exit: 7.65,
+  exit: 7.95,
   burnDur: 1.9,
 };
 
@@ -180,17 +180,13 @@ void main(){
 }`;
 
 /**
- * Prepara a queima em WebGL sobre uma "foto": das letras (fundo transparente) ou do
- * papel inteiro na saída (fundo + logo nas posições reais). Devolve null sem WebGL.
+ * Prepara a queima em WebGL: contexto, shader e campo de ruído — feito com folga, num
+ * momento ocioso, para não travar quando a queima começa. A "foto" (das letras, sobre
+ * fundo transparente, ou do papel inteiro na saída) entra depois, em `setImage`.
+ * Devolve null sem WebGL.
  */
-function createBurnGL(
-  canvas: HTMLCanvasElement,
-  snapshot: HTMLCanvasElement,
-  field: { data: Uint8Array; w: number; h: number },
-  lettersOnly: boolean,
-) {
-  // preserveDrawingBuffer nas letras: o que sobrou delas entra na "foto" do papel na saída
-  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false, preserveDrawingBuffer: lettersOnly });
+function createBurnGL(canvas: HTMLCanvasElement, field: { data: Uint8Array; w: number; h: number }, lettersOnly: boolean) {
+  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false, powerPreference: "high-performance" });
   if (!gl) return null;
   const sh = (type: number, src: string) => {
     const s = gl.createShader(type)!;
@@ -216,8 +212,7 @@ function createBurnGL(
   const tex = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, snapshot);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -239,18 +234,41 @@ function createBurnGL(
   const uT = gl.getUniformLocation(prog, "u_t");
   const uTime = gl.getUniformLocation(prog, "u_time");
   const uAsp = gl.getUniformLocation(prog, "u_aspect");
+  const render = (t: number, time: number) => {
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform1f(uT, t);
+    gl.uniform1f(uTime, time);
+    gl.uniform1f(uAsp, canvas.width / canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  };
+  // desenha uma vez e limpa: o driver só compila o shader de verdade no 1º desenho
+  render(0, 0);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
   return {
-    render(t: number, time: number) {
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform1f(uT, t);
-      gl.uniform1f(uTime, time);
-      gl.uniform1f(uAsp, canvas.width / canvas.height);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    /** envia a "foto" (das letras ou do papel) */
+    setImage(img: HTMLCanvasElement) {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     },
+    render,
     dispose() {
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     },
   };
+}
+
+/** WebGL da queima do papel no tamanho real da camada (resolução moderada: o fogo é macio). */
+function createPaperGL(glc: HTMLCanvasElement, lite: boolean) {
+  const w = glc.clientWidth || window.innerWidth;
+  const h = glc.clientHeight || window.innerHeight;
+  const dpr = lite ? 1 : Math.min(window.devicePixelRatio || 1, 1.25);
+  glc.width = Math.round(w * dpr);
+  glc.height = Math.round(h * dpr);
+  const burn = createBurnGL(glc, buildField(w, h), false);
+  return burn ? { burn, w, h, dpr } : null;
 }
 
 type Ember = { x: number; y: number; vx: number; vy: number; life: number; max: number; r: number; hot: boolean };
@@ -332,12 +350,11 @@ function snapshotPaper(paper: HTMLElement, w: number, h: number, dpr: number) {
     g.fill(new Path2D(kanji), "evenodd");
     g.restore();
   }
-  // letras: o que sobrou da queima (canvas WebGL); sem ele, as letras inteiras
+  // letras: se a queima delas rodou, já viraram cinza; sem WebGL, ainda estão inteiras
   const burntLetters = paper.querySelector<HTMLCanvasElement>('canvas[data-snap="letters"]');
   const word = paper.querySelector<SVGSVGElement>('[data-snap="wordmark"]');
   if (burntLetters && burntLetters.dataset.burning) {
-    const r = burntLetters.getBoundingClientRect();
-    g.drawImage(burntLetters, r.left, r.top, r.width, r.height);
+    // já queimaram por inteiro antes da saída: nada a desenhar
   } else if (word) {
     const r = word.getBoundingClientRect();
     const k = r.width / WORDMARK_W;
@@ -407,7 +424,10 @@ function IntroCanvas({
   paperRef,
   onBurnt,
   onPaper,
+  prep,
 }: {
+  /** hora de preparar a queima do papel (num momento ocioso, antes da saída) */
+  prep: boolean;
   playing: boolean;
   exiting: boolean;
   lite: boolean;
@@ -419,6 +439,11 @@ function IntroCanvas({
   const ref = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<HTMLCanvasElement>(null);
   const exitAt = useRef(0);
+  const prepRef = useRef(false);
+  const paperGL = useRef<ReturnType<typeof createPaperGL>>(null);
+  useEffect(() => {
+    prepRef.current = prep;
+  }, [prep]);
   const burntCb = useRef(onBurnt);
   const onPaperCb = useRef(onPaper);
   useEffect(() => {
@@ -479,9 +504,8 @@ function IntroCanvas({
     const smoke: Smoke[] = [];
 
     const embers: Ember[] = [];
-    const MAX = lite ? 70 : 180;
     const spawn = (x: number, y: number, hot: boolean, speed: number) => {
-      if (embers.length >= MAX) return;
+      if (embers.length >= (slow ? 60 : 180)) return;
       const max = hot ? 0.7 + Math.random() * 0.9 : 2.6 + Math.random() * 2.4;
       embers.push({
         x,
@@ -503,15 +527,29 @@ function IntroCanvas({
     let burnt = false;
     let mode: "none" | "gl" | "2d" = "none";
     let burnGL: ReturnType<typeof createBurnGL> = null;
-    // o campo da queima é calculado com folga, num momento ocioso durante a intro
-    let field: ReturnType<typeof buildField> | null = null;
-    const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
-    const prep = () => (field ??= buildField(w, h));
-    const idle = ric ? ric(prep, { timeout: 2500 }) : window.setTimeout(prep, 1500);
+    let prepped = false;
+    // qualidade adaptativa: se os quadros começarem a demorar (celular mais fraco),
+    // menos fagulhas e queima do papel em resolução 1x
+    let ema = 1 / 60;
+    let slow = lite;
+    // passo 2 (leve), perto da saída: a "foto" do papel (o WebGL já existe desde o início)
+    const preparePaper = () => {
+      if (prepped) return;
+      prepped = true;
+      const paper = paperRef.current;
+      const glc = glRef.current;
+      if (!paper || !glc) return;
+      const P = paperGL.current ?? createPaperGL(glc, lite);
+      paperGL.current = P;
+      burnGL = P?.burn ?? null;
+      if (P) burnGL?.setImage(snapshotPaper(paper, P.w, P.h, P.dpr));
+    };
 
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      ema = ema * 0.92 + dt * 0.08;
+      if (!slow && ema > 0.027) slow = true;
       ctx.clearRect(0, 0, w, h);
 
       // fagulhas pedidas pela queima das letras
@@ -522,7 +560,7 @@ function IntroCanvas({
 
       // fagulhas de fundo enquanto a intro toca
       if (!exitAt.current) {
-        ambientAcc += dt * (lite ? 5 : 11);
+        ambientAcc += dt * (slow ? 5 : 11);
         while (ambientAcc > 1) {
           ambientAcc -= 1;
           spawn(w * (0.15 + Math.random() * 0.7), h + 6, false, 26 + Math.random() * 34);
@@ -531,16 +569,16 @@ function IntroCanvas({
 
       // queima do papel — 1º quadro da saída: tira a "foto" do papel e passa a queimá-lo
       // em WebGL (o DOM do papel some no mesmo quadro); sem WebGL, recorte 2D
+      // preparo com folga, num momento ocioso (antes travava ~170 ms no início da queima)
+      if (prepRef.current && !prepped && !exitAt.current) {
+        const ricP = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+        if (ricP) ricP(preparePaper, { timeout: 300 });
+        else window.setTimeout(preparePaper, 0);
+        prepRef.current = false;
+      }
       if (exitAt.current && !burnt && mode === "none") {
         const paper = paperRef.current;
-        const glc = glRef.current;
-        if (paper && glc) {
-          // resolução moderada: o fogo é macio por natureza (aparelho modesto: 1x)
-          const dpr = lite ? 1 : Math.min(window.devicePixelRatio || 1, 1.25);
-          glc.width = Math.round(w * dpr);
-          glc.height = Math.round(h * dpr);
-          burnGL = createBurnGL(glc, snapshotPaper(paper, w, h, dpr), field ?? buildField(w, h), false);
-        }
+        preparePaper();
         if (burnGL && paper) {
           burnGL.render(0, 0);
           paper.style.visibility = "hidden";
@@ -556,7 +594,7 @@ function IntroCanvas({
         burnGL.render(tb, sec);
         // fagulhas e fumaça saem de onde o papel está queimando agora
         const aspect = w / h;
-        const tries = 46;
+        const tries = slow ? 20 : 46;
         for (let k = 0; k < tries; k++) {
           const u = Math.random();
           const v = Math.random();
@@ -683,7 +721,7 @@ function IntroCanvas({
         }
 
         // fagulhas que se soltam da borda
-        const n = lite ? 2 : 6;
+        const n = slow ? 2 : 6;
         for (let k = 0; k < n; k++) {
           const i = Math.floor(Math.random() * STEPS);
           spawn((i / STEPS) * w, edge[i] - 2, true, 90 + Math.random() * 120);
@@ -741,11 +779,23 @@ function IntroCanvas({
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", size);
-      burnGL?.dispose();
-      if (ric) window.cancelIdleCallback(idle);
-      else window.clearTimeout(idle);
     };
   }, [playing, lite, paperRef]);
+
+  // passo 1 (pesado), com a tela ainda preta: WebGL do papel, shader compilado e campo de ruído
+  useEffect(() => {
+    const glc = glRef.current;
+    if (!glc) return;
+    const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+    const make = () => (paperGL.current ??= createPaperGL(glc, lite));
+    const id = ric ? ric(make, { timeout: 500 }) : window.setTimeout(make, 0);
+    return () => {
+      if (ric) window.cancelIdleCallback(id);
+      else window.clearTimeout(id);
+      paperGL.current?.burn.dispose();
+      paperGL.current = null;
+    };
+  }, [lite]);
 
   return (
     <>
@@ -763,22 +813,53 @@ const LBOX = { x: -60, y: -WORDMARK_H * 0.62, w: WORDMARK_W + 120, h: WORDMARK_H
  * o ouro tosta, carboniza, vira brasa e abre buracos de baixo para cima, com chamas
  * saindo das próprias letras. Assume no quadro em que esconde as letras SVG.
  */
-function LetterBurn({ start, lite, hideRef }: { start: boolean; lite: boolean; hideRef: React.RefObject<SVGGElement | null> }) {
+function LetterBurn({
+  prep,
+  start,
+  lite,
+  hideRef,
+}: {
+  /** hora de preparar (num momento ocioso, antes de começar) */
+  prep: boolean;
+  start: boolean;
+  lite: boolean;
+  hideRef: React.RefObject<SVGGElement | null>;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    if (!start) return;
+  type Ready = { burn: NonNullable<ReturnType<typeof createBurnGL>>; alpha: Uint8ClampedArray; sw: number; sh: number; aspect: number };
+  const ready = useRef<Ready | null>(null);
+  const failed = useRef(false);
+
+  const gl = useRef<{ burn: NonNullable<ReturnType<typeof createBurnGL>>; aspect: number } | null>(null);
+
+  // passo 1 (pesado), com a tela ainda preta: WebGL, shader compilado e campo de ruído
+  const prepareGL = () => {
+    if (gl.current || failed.current) return gl.current;
     const canvas = ref.current;
-    if (!canvas) return;
+    if (!canvas) return null;
     const r = canvas.getBoundingClientRect();
     const dpr = lite ? 1 : Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.max(1, Math.round(r.width * dpr));
     canvas.height = Math.max(1, Math.round(r.height * dpr));
-    // "foto" das letras em ouro, no mesmo enquadramento do canvas
+    const burn = createBurnGL(canvas, buildField(r.width, r.height), true);
+    if (!burn) {
+      failed.current = true; // sem WebGL: as letras ficam e queimam junto com o papel na saída
+      return null;
+    }
+    gl.current = { burn, aspect: r.width / r.height };
+    return gl.current;
+  };
+  // passo 2 (leve), pouco antes da queima: a "foto" das letras em ouro
+  const prepare = () => {
+    if (ready.current) return ready.current;
+    const G = prepareGL();
+    const canvas = ref.current;
+    if (!G || !canvas) return null;
     const snap = document.createElement("canvas");
     snap.width = canvas.width;
     snap.height = canvas.height;
     const g = snap.getContext("2d", { willReadFrequently: true });
-    if (!g) return;
+    if (!g) return null;
     const k = snap.width / LBOX.w;
     g.setTransform(k, 0, 0, k, -LBOX.x * k, -LBOX.y * k);
     const gr = g.createLinearGradient(0, 0, 0, WORDMARK_H);
@@ -790,12 +871,43 @@ function LetterBurn({ start, lite, hideRef }: { start: boolean; lite: boolean; h
       const d = document.getElementById(letterId(i))?.getAttribute("d");
       if (d) g.fill(new Path2D(d), "evenodd");
     });
-    const burn = createBurnGL(canvas, snap, buildField(r.width, r.height), true);
-    if (!burn) return; // sem WebGL: as letras ficam e queimam junto com o papel na saída
-    const alpha = g.getImageData(0, 0, snap.width, snap.height).data;
-    const aspect = r.width / r.height;
+    G.burn.setImage(snap);
+    ready.current = { burn: G.burn, alpha: g.getImageData(0, 0, snap.width, snap.height).data, sw: snap.width, sh: snap.height, aspect: G.aspect };
+    return ready.current;
+  };
+
+  useEffect(() => {
+    const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+    const id = ric ? ric(() => prepareGL(), { timeout: 400 }) : window.setTimeout(() => prepareGL(), 0);
+    return () => {
+      if (ric) window.cancelIdleCallback(id);
+      else window.clearTimeout(id);
+      gl.current?.burn.dispose();
+    };
+    // prepareGL lê só refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!prep) return;
+    const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+    const id = ric ? ric(() => prepare(), { timeout: 600 }) : window.setTimeout(() => prepare(), 50);
+    return () => (ric ? window.cancelIdleCallback(id) : window.clearTimeout(id));
+    // prepare lê só refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prep]);
+
+  useEffect(() => {
+    if (!start) return;
+    const canvas = ref.current;
+    const R = prepare();
+    if (!canvas || !R) return;
+    const { burn, alpha, sw, sh, aspect } = R;
+    // posição na tela medida uma vez (sem ler layout a cada quadro)
+    const box = canvas.getBoundingClientRect();
     let raf = 0;
     let t0 = 0;
+    let done = false;
     const loop = (now: number) => {
       if (!t0) {
         t0 = now;
@@ -809,25 +921,32 @@ function LetterBurn({ start, lite, hideRef }: { start: boolean; lite: boolean; h
       const t = 0.13 + p * 0.62;
       burn.render(t, sec);
       // fagulhas só onde há ouro queimando agora
-      const box = canvas.getBoundingClientRect();
-      for (let i = 0; i < (lite ? 10 : 26); i++) {
+      for (let i = 0; i < (lite ? 8 : 22); i++) {
         const u = Math.random();
         const v = Math.random();
         const d = burnField(u, v, aspect, t);
         if (d >= 0 || d < -0.016) continue;
-        const px = Math.floor(u * snap.width);
-        const py = Math.floor(v * snap.height);
-        if (alpha[(py * snap.width + px) * 4 + 3] > 120 && Math.random() < 0.6) {
+        const px = Math.floor(u * sw);
+        const py = Math.floor(v * sh);
+        if (alpha[(py * sw + px) * 4 + 3] > 120 && Math.random() < 0.6) {
           emberQueue.push({ x: box.left + u * box.width, y: box.top + v * box.height });
         }
       }
       if (p < 1 && document.documentElement.hasAttribute("data-intro")) raf = requestAnimationFrame(loop);
+      else {
+        // letras consumidas: libera a GPU já (o canvas fica vazio)
+        done = true;
+        canvas.dataset.done = "1";
+        burn.dispose();
+      }
     };
     raf = requestAnimationFrame(loop);
     return () => {
       cancelAnimationFrame(raf);
-      burn.dispose();
+      if (!done) burn.dispose();
     };
+    // prepare lê só refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [start, lite, hideRef]);
 
   return (
@@ -851,7 +970,7 @@ function LetterBurn({ start, lite, hideRef }: { start: boolean; lite: boolean; h
  * inline marca <html data-intro>; sem JS, um fallback CSS a esconde.
  */
 export function Intro() {
-  const [phase, setPhase] = useState<"idle" | "play" | "exit" | "done">("idle");
+  const [phase, setPhase] = useState<"idle" | "prep" | "play" | "exit" | "done">("idle");
   const [lite, setLite] = useState(false);
   const arcRef = useRef<SVGPathElement>(null);
   const lettersRef = useRef<SVGGElement>(null);
@@ -859,12 +978,15 @@ export function Intro() {
   const fireK = useRef(0);
   const fireOn = useRef(true);
   const [lburn, setLburn] = useState(false);
+  const [lprep, setLprep] = useState(false);
+  const [pprep, setPprep] = useState(false);
   const uid = useId().replace(/:/g, "");
   const gold = `g${uid}`;
   const hot = `h${uid}`;
   const sheen = `s${uid}`;
   const sheenMask = `sm${uid}`;
   const brushMask = `bm${uid}`;
+  const sparkG = `sp${uid}`;
 
   // ensō: um único progresso move o traço e a brasa na ponta dele
   const arc = useMotionValue(0);
@@ -889,11 +1011,24 @@ export function Intro() {
       return () => cancelAnimationFrame(id);
     }
     window.scrollTo(0, 0);
+    // 1) prepara (monta o fogo WebGL, ainda apagado, e compila o shader) com a tela preta;
+    // 2) só começa quando o navegador termina de carregar a página — antes, a brasa
+    //    subia justo durante o carregamento e engasgava nos celulares
+    let idle = 0;
+    let late = 0;
     const id = requestAnimationFrame(() => {
       setLite(isLowEndDevice());
-      setPhase("play");
+      setPhase("prep");
+      const go = () => requestAnimationFrame(() => setPhase("play"));
+      const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+      if (ric) idle = ric(go, { timeout: 900 });
+      else late = window.setTimeout(go, 350);
     });
-    return () => cancelAnimationFrame(id);
+    return () => {
+      cancelAnimationFrame(id);
+      window.clearTimeout(late);
+      if (idle) window.cancelIdleCallback(idle);
+    };
   }, []);
 
   // linha do tempo
@@ -909,10 +1044,13 @@ export function Intro() {
       animate(0.7, 1.12, { duration: T.lburnDur, delay: T.lburn, ease: [0.4, 0, 0.6, 1], onUpdate: (v) => (fireK.current = v) }),
       animate(1.12, 1.25, { duration: 0.5, delay: T.exit - 0.2, ease: EASE, onUpdate: (v) => (fireK.current = v) }),
     ];
+    // cada queima é preparada com folga (num momento ocioso) antes de começar
+    const lp = window.setTimeout(() => setLprep(true), (T.lburn - 0.8) * 1000);
     const lb = window.setTimeout(() => setLburn(true), T.lburn * 1000);
+    const pp = window.setTimeout(() => setPprep(true), (T.lburn + T.lburnDur + 0.12) * 1000);
     const t = window.setTimeout(() => setPhase("exit"), T.exit * 1000);
     return () => {
-      window.clearTimeout(lb);
+      [lp, lb, pp].forEach((x) => window.clearTimeout(x));
       window.clearTimeout(t);
       ctrls.forEach((c) => c.stop());
     };
@@ -944,7 +1082,8 @@ export function Intro() {
     if (!el) return;
     el.style.visibility = "visible";
     el.style.zIndex = "5";
-    el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1300, delay: 250, easing: "ease-in", fill: "forwards" });
+    const fade = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1300, delay: 250, easing: "ease-in", fill: "forwards" });
+    fade.onfinish = () => (fireOn.current = false); // libera a GPU para a queima do papel
   };
 
   if (phase === "done") return null;
@@ -956,7 +1095,7 @@ export function Intro() {
       {/* o "papel": fundo, torii e logo — é o que queima na saída */}
       <div ref={paperRef} className="absolute inset-0 overflow-hidden bg-sumi">
         {/* fogo subindo por baixo (o da intro antiga) */}
-        {playing ? (
+        {playing || phase === "prep" ? (
           <div ref={fireBox} aria-hidden className="absolute inset-x-0 bottom-0 h-[58%] mix-blend-screen">
             <Fire intensityRef={fireK} activeRef={fireOn} className="h-full w-full" />
           </div>
@@ -985,15 +1124,24 @@ export function Intro() {
         {/* câmera: aproximação lenta e contínua */}
         <div className="absolute inset-0 grid place-items-center">
           <motion.div
-            className="-mt-[12vh] flex flex-col items-center"
+            className="-mt-[12vh] flex flex-col items-center will-change-transform"
             initial={{ scale: 1.08 }}
             animate={playing ? { scale: 1 } : {}}
-            transition={{ duration: T.exit + T.burnDur, ease: [0.25, 0.1, 0.25, 1] }}
+            // termina antes da "foto" do papel (preparada com folga, antes da saída)
+            transition={{ duration: T.lburn + T.lburnDur, ease: [0.25, 0.1, 0.25, 1] }}
           >
             {/* Emblema: ensō em fogo + kanji em pinceladas */}
             <svg data-snap="emblem" viewBox={EMBLEM_VIEWBOX} className="w-[clamp(118px,16vw,190px)] overflow-visible" aria-hidden>
               <defs>
                 <GoldGradient id={gold} />
+                {/* brasa com brilho em degradê radial (sem filtro de sombra) */}
+                <radialGradient id={sparkG}>
+                  <stop offset="0" stopColor="#fffbe8" />
+                  <stop offset="0.18" stopColor="#ffe0a0" />
+                  <stop offset="0.38" stopColor="#ff8a2a" stopOpacity="0.75" />
+                  <stop offset="0.7" stopColor="#ff5a00" stopOpacity="0.18" />
+                  <stop offset="1" stopColor="#ff5a00" stopOpacity="0" />
+                </radialGradient>
                 <linearGradient id={hot} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="#ffe0a0" />
                   <stop offset="0.5" stopColor="#ff9a3c" />
@@ -1018,10 +1166,13 @@ export function Intro() {
                 style={{ pathLength: arc, opacity: arcOpacity }}
               />
               <motion.g
-                className="[filter:drop-shadow(0_0_6px_#ff6a10)]"
                 animate={playing ? { opacity: [1, 1, 0] } : {}}
                 transition={{ duration: T.cool + 0.9, times: [0, T.cool / (T.cool + 0.9), 1], ease: "easeOut" }}
               >
+                {/* halo do traço: um traço largo e translúcido (filtro CSS de sombra pesava no Safari) */}
+                <g opacity="0.3">
+                  <motion.path d={EMBLEM_ARC} fill="none" stroke="#ff6a10" strokeWidth="16" strokeLinecap="round" style={{ pathLength: arc, opacity: arcOpacity }} />
+                </g>
                 <motion.path
                   d={EMBLEM_ARC}
                   fill="none"
@@ -1033,9 +1184,8 @@ export function Intro() {
               </motion.g>
               {/* a brasa: sobe do escuro e conduz o traço */}
               <motion.circle
-                r="5"
-                fill="#fff1c8"
-                className="[filter:drop-shadow(0_0_8px_#ff7a1a)_drop-shadow(0_0_18px_#ff5a00)]"
+                r="20"
+                fill={`url(#${sparkG})`}
                 cx={tipX}
                 cy={tipYRise}
                 initial={{ opacity: 0 }}
@@ -1098,15 +1248,15 @@ export function Intro() {
               </g>
               </g>
             </svg>
-            <LetterBurn start={lburn} lite={lite} hideRef={lettersRef} />
+            <LetterBurn prep={lprep} start={lburn} lite={lite} hideRef={lettersRef} />
             </div>
 
-            {/* legenda: o espaçamento fecha devagar até assentar */}
+            {/* legenda: entra larga e assenta (escala na GPU — animar letter-spacing refazia o texto a cada quadro) */}
             <motion.p
               data-snap="tagline"
-              className="mt-6 whitespace-nowrap font-sans text-[clamp(0.68rem,1.05vw,0.8rem)] uppercase text-ouro-claro"
-              initial={{ opacity: 0, letterSpacing: "0.9em" }}
-              animate={playing ? { opacity: 1, letterSpacing: "0.42em" } : {}}
+              className="mt-6 whitespace-nowrap font-sans text-[clamp(0.68rem,1.05vw,0.8rem)] uppercase tracking-[0.42em] text-ouro-claro"
+              initial={{ opacity: 0, scaleX: 1.3 }}
+              animate={playing ? { opacity: 1, scaleX: 1 } : {}}
               transition={{ duration: 1.6, ease: EASE, delay: T.tag }}
             >
               Japanese Nikkei Cuisine
@@ -1124,7 +1274,7 @@ export function Intro() {
       </div>
 
       {/* fagulhas + queima do papel (fora do papel, por cima do site sendo revelado) */}
-      <IntroCanvas playing={playing} exiting={exiting} lite={lite} paperRef={paperRef} onBurnt={burnt} onPaper={paperShot} />
+      <IntroCanvas prep={pprep} playing={playing} exiting={exiting} lite={lite} paperRef={paperRef} onBurnt={burnt} onPaper={paperShot} />
 
       <span className="sr-only" role="status">
         MIKASA — Japanese Nikkei Cuisine
