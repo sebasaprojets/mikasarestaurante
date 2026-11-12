@@ -16,4 +16,5 @@ npm run build
 ## Deploy (Vercel)
 
 Importar o repositório na Vercel (framework Next.js, sem configuração extra).
-Variável recomendada: `NEXT_PUBLIC_SITE_URL=https://<domínio-oficial>` (canonical, sitemap, Open Graph).
+Domínio oficial: **https://mikasarestaurante.com** (registrado na GoDaddy, DNS apontando para a Vercel).
+Canonical, sitemap e Open Graph usam esse domínio em produção (`data/site.ts`); `NEXT_PUBLIC_SITE_URL` sobrescreve.

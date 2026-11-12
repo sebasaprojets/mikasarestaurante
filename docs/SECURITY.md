@@ -85,8 +85,9 @@ nos bundles e em `/public`, e ausência de source maps.
    - Ativar *Deployment Protection* nos previews (para não indexar nem expor branches).
    - Ativar *Firewall/WAF* com as regras gerenciadas e o *Attack Challenge Mode* em caso de ataque.
    - Ativar 2FA na conta.
-4. **Domínio oficial** (quando definido):
-   - Configurar `NEXT_PUBLIC_SITE_URL`.
+4. **Domínio oficial** `mikasarestaurante.com` (GoDaddy):
+   - Já é a URL canônica no código (`data/site.ts`).
+   - Ativar 2FA na conta da GoDaddy e o bloqueio de transferência (*Domain lock*), que costuma vir ativo.
    - Depois de confirmar HTTPS em todos os subdomínios, avaliar HSTS com `includeSubDomains; preload`.
    - DNS: CAA restringindo CAs e DNSSEC, se o registrador suportar.
 5. **GitHub Pages** é preview público sem cabeçalhos de segurança. Para produção, use só a Vercel.
@@ -137,5 +138,5 @@ Logs: o site não gera logs de aplicação próprios. A Vercel retém os logs de
 - [ ] Nenhum `dangerouslySetInnerHTML` com dado externo/usuário
 - [ ] Links externos com `rel="noopener noreferrer"`
 - [ ] Novos domínios externos (scripts, imagens, iframes) adicionados conscientemente à CSP em `config/security-headers.ts`
-- [ ] Depois do deploy: `curl -sI https://<domínio>/ | grep -iE 'content-security|strict-transport'`
+- [ ] Depois do deploy: `curl -sI https://mikasarestaurante.com/ | grep -iE 'content-security|strict-transport'`
 - [ ] Itens da §5 conferidos
