@@ -1002,6 +1002,10 @@ export function Intro() {
   const tipYRise = useTransform([tipY, rise], ([y, r]) => (y as number) + (r as number));
   const brush = useMotionValue(0);
   const arcOpacity = useTransform(arc, [0, 0.02], [0, 1]);
+  // pincel do kanji invisível até começar a pintar: um traço de comprimento zero com
+  // ponta arredondada ainda desenha um ponto — e revelava um pedaço do kanji em brasa
+  const brushOn = useTransform(brush, [0, 0.002], [0, 1]);
+  const brushOnSoft = useTransform(brush, [0, 0.002], [0, 0.85]);
 
   // inicia
   useEffect(() => {
@@ -1149,9 +1153,9 @@ export function Intro() {
                 </linearGradient>
                 <mask id={brushMask} maskUnits="userSpaceOnUse" x="-20" y="-20" width="320" height="320">
                   <g transform="translate(46 34) scale(1.88 2.12)" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round">
-                    <motion.path d={BRUSH} strokeWidth="24" style={{ pathLength: brush }} />
+                    <motion.path d={BRUSH} strokeWidth="24" style={{ pathLength: brush, opacity: brushOn }} />
                     {/* cerdas */}
-                    <motion.path d={BRUSH} strokeWidth="5" transform="translate(-3 7)" opacity="0.85" style={{ pathLength: brush }} />
+                    <motion.path d={BRUSH} strokeWidth="5" transform="translate(-3 7)" style={{ pathLength: brush, opacity: brushOnSoft }} />
                   </g>
                 </mask>
               </defs>
