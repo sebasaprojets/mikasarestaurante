@@ -36,7 +36,9 @@ void main(){
   f=clamp(f,0.,1.);
   f=pow(f,1.25);
   vec3 col=ramp(f);
-  float a=smoothstep(.0,.35,f);
+  // some suave antes do topo da área: com o fogo no máximo, as chamas passavam do
+  // limite e eram cortadas numa linha reta (aparecia logo abaixo do logo)
+  float a=smoothstep(.0,.35,f)*smoothstep(1.,.78,uv.y);
   // faíscas subindo
   vec2 sp=vec2(p.x*14.,p.y*7.-t*1.7);
   vec2 id=floor(sp);vec2 fr=fract(sp)-.5;

@@ -173,7 +173,10 @@ void main(){
   float fl=exp(-e/(.035+.07*tq))*smoothstep(.32,.78,tq)*smoothstep(.2,.12,e);
   float fmat=max(mat,max(texture2D(u_tex,uv+vec2(0.,.05)).a,texture2D(u_tex,uv+vec2(0.,.11)).a*.6)*u_alpha);
   vec3 flame=mix(vec3(.85,.16,.02),vec3(1.,.72,.28),fl);
-  vec3 emit=(hot*glow*mix(1.7,2.1,u_alpha)+vec3(1.,.45,.12)*speck)*mat+flame*fl*mix(1.05,1.75,u_alpha)*fmat;
+  // nas letras, as chamas somem suavemente antes das bordas da área de desenho
+  // (sem isso, o topo da área aparecia como uma linha logo abaixo do emblema)
+  float edgeFade=mix(1.,smoothstep(0.,.3,uv.y)*smoothstep(0.,.07,uv.x)*smoothstep(1.,.93,uv.x),u_alpha);
+  vec3 emit=(hot*glow*mix(1.7,2.1,u_alpha)+vec3(1.,.45,.12)*speck)*mat+flame*fl*mix(1.05,1.75,u_alpha)*fmat*edgeFade;
   col+=emit;
   float al=mix(1.,max(paper.a,clamp(max(emit.r,max(emit.g,emit.b)),0.,1.)),u_alpha);
   gl_FragColor=vec4(col,al);
