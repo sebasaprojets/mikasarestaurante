@@ -1103,7 +1103,7 @@ export function Intro() {
       <div ref={paperRef} className="absolute inset-0 overflow-hidden bg-sumi">
         {/* fogo subindo por baixo (o da intro antiga) */}
         {playing || phase === "prep" ? (
-          <div ref={fireBox} aria-hidden className="absolute inset-x-0 bottom-0 h-[58%] mix-blend-screen">
+          <div ref={fireBox} aria-hidden className="absolute inset-x-0 bottom-0 h-[76%] mix-blend-screen">
             <Fire intensityRef={fireK} activeRef={fireOn} className="h-full w-full" />
           </div>
         ) : null}
