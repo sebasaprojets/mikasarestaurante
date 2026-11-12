@@ -51,12 +51,33 @@ const schemaDay: Record<string, string> = {
   sunday: "Sunday",
 };
 
+/** Outras formas como as pessoas procuram o restaurante no Google. */
+const alternateNames = [site.name, `${site.name} Restaurante`, `${site.name} Restaurant`, `${site.name} ${site.address.city}`];
+
+/**
+ * WebSite: é daqui que o Google tira o nome do site mostrado em cima do resultado
+ * ("MIKASA" em vez do domínio).
+ */
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
+    name: site.name,
+    alternateName: [site.fullName, `${site.name} Restaurante`],
+    url: `${siteUrl}/`,
+    inLanguage: ["es", "en"],
+    publisher: { "@id": `${siteUrl}/#restaurant` },
+  };
+}
+
 export function restaurantJsonLd(lang: Locale) {
   return {
     "@context": "https://schema.org",
     "@type": "Restaurant",
     "@id": `${siteUrl}/#restaurant`,
     name: site.fullName,
+    alternateName: alternateNames,
     url: `${siteUrl}${localePath(lang, "/")}`,
     image: `${siteUrl}/opengraph-image`,
     telephone: site.phone.e164,
