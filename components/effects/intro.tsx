@@ -39,7 +39,7 @@ const T = {
   sheen: 3.35,
   tag: 3.2,
   exit: 4.6,
-  burnDur: 2.0,
+  burnDur: 2.2,
 };
 
 /** Zigue-zague largo do pincel que revela o kanji (de cima para baixo), em 0–100. */
@@ -59,13 +59,265 @@ const vnoise = (x: number) => {
 /** 0–1, com línguas largas e um serrilhado fino por cima. */
 const fbm = (x: number) => vnoise(x) * 0.55 + vnoise(x * 2.3 + 7.1) * 0.27 + vnoise(x * 5.7 + 3.3) * 0.12 + vnoise(x * 13 + 1.7) * 0.06;
 
+/* ───────────── queima realista do papel (WebGL) ───────────── */
+
+/** Mesmo ruído do shader, em JS: para soltar fagulhas e fumaça onde o papel está queimando. */
+const h2 = (x: number, y: number) => {
+  const v = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return v - Math.floor(v);
+};
+const n2 = (x: number, y: number) => {
+  const ix = Math.floor(x);
+  const iy = Math.floor(y);
+  const fx = x - ix;
+  const fy = y - iy;
+  const ux = fx * fx * (3 - 2 * fx);
+  const uy = fy * fy * (3 - 2 * fy);
+  const a = h2(ix, iy) + (h2(ix + 1, iy) - h2(ix, iy)) * ux;
+  const b = h2(ix, iy + 1) + (h2(ix + 1, iy + 1) - h2(ix, iy + 1)) * ux;
+  return a + (b - a) * uy;
+};
+const fbm2 = (x: number, y: number) => {
+  let v = 0;
+  let a = 0.5;
+  for (let i = 0; i < 5; i++) {
+    v += a * n2(x, y);
+    x *= 2.03;
+    y *= 2.03;
+    a *= 0.5;
+  }
+  return v;
+};
+/** Campo de queima (igual ao shader): <0 ainda é papel; >0 já queimou. */
+const burnField = (u: number, v: number, aspect: number, t: number) => {
+  const f = (1 - v) * 0.85 + fbm2(u * aspect * 3.2, v * 3.2) * 0.62;
+  return t * 1.62 - 0.06 - f;
+};
+
+/** Campo de ruído da queima, calculado uma vez em baixa resolução (≈1/4 da tela). */
+function buildField(w: number, h: number) {
+  const fw = Math.max(64, Math.round(w / 4));
+  const fh = Math.max(36, Math.round(h / 4));
+  const aspect = w / h;
+  const data = new Uint8Array(fw * fh);
+  for (let y = 0; y < fh; y++) {
+    const v = (y + 0.5) / fh;
+    for (let x = 0; x < fw; x++) {
+      const u = (x + 0.5) / fw;
+      data[y * fw + x] = Math.min(255, Math.round(fbm2(u * aspect * 3.2, v * 3.2) * 255));
+    }
+  }
+  return { data, w: fw, h: fh };
+}
+
+const VERT = `attribute vec2 a;varying vec2 v_uv;void main(){v_uv=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}`;
+const FRAG = `precision highp float;
+varying vec2 v_uv;uniform sampler2D u_tex;uniform sampler2D u_field;uniform float u_t;uniform float u_time;uniform float u_aspect;
+float h(vec2 p){return fract(sin(p.x*127.1+p.y*311.7)*43758.5453);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);
+  return mix(mix(h(i),h(i+vec2(1.,0.)),u.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),u.x),u.y);}
+float fbm3(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p*=2.03;a*=.5;}return v/.875;}
+void main(){
+  vec2 uv=v_uv;vec2 p=vec2(uv.x*u_aspect,uv.y);
+  // campo de queima pré-calculado (estático) + um serrilhado fino por pixel
+  float f=(1.-uv.y)*.85+texture2D(u_field,uv).r*.62+(n(p*44.)-.5)*.01;
+  float d=u_t*1.62-.06-f;            // >0: já queimou
+  if(d>0.){                          // buraco, com a borda de cinza preta se desfazendo
+    float rim=1.-smoothstep(0.,.022,d+ (n(p*60.)-.5)*.01);
+    gl_FragColor=vec4(vec3(.018,.011,.007)*rim,rim*.96);return;}
+  float e=-d;                        // distância (no campo) até a borda, do lado do papel
+  vec4 paper=texture2D(u_tex,uv);
+  if(e>.2){gl_FragColor=paper;return;}
+  vec3 col=paper.rgb;
+  // papel chamuscado: tosta, escurece e ganha um marrom quente antes de pegar fogo
+  float scorch=smoothstep(.11,.0,e);
+  col=mix(col,col*.18+vec3(.085,.032,.012),scorch*.9);
+  float charB=smoothstep(.035,.0,e);
+  col=mix(col,vec3(.03,.014,.008),charB*.85);
+  // brasa: linha incandescente que tremula (branco-amarelado no fio, vermelho ao esfriar)
+  float flick=.6+.4*n(p*26.+vec2(0.,-u_time*7.));
+  float glow=exp(-e/.0105)*flick;
+  vec3 hot=mix(vec3(.95,.22,.03),vec3(1.,.93,.72),exp(-e/.0042));
+  // pontos de brasa espalhados na faixa chamuscada
+  float speck=smoothstep(.78,.95,n(p*90.+u_time*.6))*smoothstep(.06,.0,e)*.8;
+  // chamas: línguas turbulentas subindo da borda
+  float tq=fbm3(vec2(p.x*6.5,p.y*3.4+u_time*2.6));
+  float fl=exp(-e/(.035+.07*tq))*smoothstep(.32,.78,tq);
+  vec3 flame=mix(vec3(.85,.16,.02),vec3(1.,.72,.28),fl);
+  col+=hot*glow*1.7+vec3(1.,.45,.12)*speck+flame*fl*1.05;
+  gl_FragColor=vec4(col,1.);
+}`;
+
+/**
+ * Prepara a queima em WebGL sobre uma "foto" do papel (fundo + logo exatamente onde
+ * estão na tela). Devolve null sem WebGL — aí fica o recorte 2D.
+ */
+function createBurnGL(canvas: HTMLCanvasElement, snapshot: HTMLCanvasElement, field: { data: Uint8Array; w: number; h: number }) {
+  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
+  if (!gl) return null;
+  const sh = (type: number, src: string) => {
+    const s = gl.createShader(type)!;
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+  };
+  const vs = sh(gl.VERTEX_SHADER, VERT);
+  const fs = sh(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return null;
+  const prog = gl.createProgram()!;
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "a");
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const tex = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, snapshot);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  // campo de queima (ruído estático) numa textura de baixa resolução, interpolada
+  const ftex = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, ftex);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, field.w, field.h, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, field.data);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.uniform1i(gl.getUniformLocation(prog, "u_tex"), 0);
+  gl.uniform1i(gl.getUniformLocation(prog, "u_field"), 1);
+  const uT = gl.getUniformLocation(prog, "u_t");
+  const uTime = gl.getUniformLocation(prog, "u_time");
+  const uAsp = gl.getUniformLocation(prog, "u_aspect");
+  return {
+    render(t: number, time: number) {
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform1f(uT, t);
+      gl.uniform1f(uTime, time);
+      gl.uniform1f(uAsp, canvas.width / canvas.height);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    },
+    dispose() {
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    },
+  };
+}
+
+/** "Foto" do papel no instante da saída: fundo, luzes e logo, nas posições reais da tela. */
+function snapshotPaper(paper: HTMLElement, w: number, h: number, dpr: number) {
+  const c = document.createElement("canvas");
+  c.width = Math.round(w * dpr);
+  c.height = Math.round(h * dpr);
+  const g = c.getContext("2d");
+  if (!g) return c;
+  g.scale(dpr, dpr);
+  g.fillStyle = "#0a0a0b";
+  g.fillRect(0, 0, w, h);
+  // brasa ao pé da tela e luz quente atrás do emblema (as mesmas do DOM)
+  g.save();
+  g.translate(w / 2, h);
+  g.scale(0.6 * w, 0.7 * 0.55 * h);
+  let rg = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+  rg.addColorStop(0, "rgba(168,50,42,0.22)");
+  rg.addColorStop(0.45, "rgba(120,40,20,0.08)");
+  rg.addColorStop(0.75, "rgba(0,0,0,0)");
+  g.fillStyle = rg;
+  g.fillRect(-1, -1, 2, 2);
+  g.restore();
+  const vmax = Math.max(w, h);
+  rg = g.createRadialGradient(w / 2, h * 0.4, 0, w / 2, h * 0.4, 0.35 * vmax);
+  rg.addColorStop(0, "rgba(198,161,91,0.16)");
+  rg.addColorStop(0.5, "rgba(168,50,42,0.05)");
+  rg.addColorStop(0.72, "rgba(0,0,0,0)");
+  g.fillStyle = rg;
+  g.fillRect(0, 0, w, h);
+
+  const goldFor = (top: number, bottom: number) => {
+    const gr = g.createLinearGradient(0, top, 0, bottom);
+    gr.addColorStop(0, "#f0dca6");
+    gr.addColorStop(0.45, "#d4b06a");
+    gr.addColorStop(1, "#a8823f");
+    return gr;
+  };
+  const kanji = document.getElementById(KANJI_ID)?.getAttribute("d");
+  const emblem = paper.querySelector<SVGSVGElement>('[data-snap="emblem"]');
+  if (emblem && kanji) {
+    const r = emblem.getBoundingClientRect();
+    const k = r.width / 280;
+    g.save();
+    g.translate(r.left, r.top);
+    g.scale(k, k);
+    const gr = goldFor(0, 280);
+    g.strokeStyle = gr;
+    g.fillStyle = gr;
+    g.lineWidth = 5;
+    g.lineCap = "round";
+    g.stroke(new Path2D(EMBLEM_ARC));
+    g.fill(new Path2D(kanji), "evenodd");
+    g.restore();
+  }
+  const word = paper.querySelector<SVGSVGElement>('[data-snap="wordmark"]');
+  if (word) {
+    const r = word.getBoundingClientRect();
+    const k = r.width / WORDMARK_W;
+    g.save();
+    g.translate(r.left, r.top);
+    g.scale(k, k);
+    g.fillStyle = goldFor(0, WORDMARK_H);
+    LETTER_BOXES.forEach((_, i) => {
+      const d = document.getElementById(letterId(i))?.getAttribute("d");
+      if (d) g.fill(new Path2D(d), "evenodd");
+    });
+    g.restore();
+  }
+  const tag = paper.querySelector<HTMLElement>('[data-snap="tagline"]');
+  if (tag) {
+    const r = tag.getBoundingClientRect();
+    const cs = getComputedStyle(tag);
+    g.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    g.fillStyle = cs.color;
+    g.textBaseline = "middle";
+    const ls = parseFloat(cs.letterSpacing) || 0;
+    let x = r.left;
+    for (const ch of (tag.textContent ?? "").toUpperCase()) {
+      g.fillText(ch, x, r.top + r.height / 2);
+      x += g.measureText(ch).width + ls;
+    }
+  }
+  const line = paper.querySelector<HTMLElement>('[data-snap="line"]');
+  if (line) {
+    const r = line.getBoundingClientRect();
+    const lg = g.createLinearGradient(r.left, 0, r.right, 0);
+    lg.addColorStop(0, "rgba(198,161,91,0)");
+    lg.addColorStop(0.5, "rgba(198,161,91,0.7)");
+    lg.addColorStop(1, "rgba(198,161,91,0)");
+    g.fillStyle = lg;
+    g.fillRect(r.left, r.top, r.width, Math.max(1, r.height));
+  }
+  return c;
+}
+
 type Ember = { x: number; y: number; vx: number; vy: number; life: number; max: number; r: number; hot: boolean };
 
 /**
  * Um único <canvas> por cima de tudo, num único rAF:
  *  - durante a intro: fagulhas lentas subindo do pé da tela (atmosfera de robata);
- *  - na saída: calcula a borda queimando, aplica o recorte (clip-path) na camada
- *    da intro e desenha a brasa da borda + as fagulhas que se soltam dela.
+ *  - na saída: o papel (fundo + logo) passa a ser desenhado em WebGL e queima de
+ *    verdade — chamusca, carboniza, vira brasa e abre buracos irregulares, com
+ *    chamas, fagulhas e fumaça saindo de onde está queimando. Sem WebGL (ou em
+ *    aparelho modesto), recorte 2D com a borda em brasa.
  */
 function IntroCanvas({
   playing,
@@ -81,6 +333,7 @@ function IntroCanvas({
   onBurnt: () => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const glRef = useRef<HTMLCanvasElement>(null);
   const exitAt = useRef(0);
   const burntCb = useRef(onBurnt);
   useEffect(() => {
@@ -161,6 +414,13 @@ function IntroCanvas({
     let last = performance.now();
     let ambientAcc = 0;
     let burnt = false;
+    let mode: "none" | "gl" | "2d" = "none";
+    let burnGL: ReturnType<typeof createBurnGL> = null;
+    // o campo da queima é calculado com folga, num momento ocioso durante a intro
+    let field: ReturnType<typeof buildField> | null = null;
+    const ric = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+    const prep = () => (field ??= buildField(w, h));
+    const idle = ric ? ric(prep, { timeout: 2500 }) : window.setTimeout(prep, 1500);
 
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
@@ -176,8 +436,48 @@ function IntroCanvas({
         }
       }
 
-      // queima do papel
-      if (exitAt.current && !burnt) {
+      // queima do papel — 1º quadro da saída: tira a "foto" do papel e passa a queimá-lo
+      // em WebGL (o DOM do papel some no mesmo quadro); sem WebGL, recorte 2D
+      if (exitAt.current && !burnt && mode === "none") {
+        const paper = paperRef.current;
+        const glc = glRef.current;
+        if (paper && glc) {
+          // resolução moderada: o fogo é macio por natureza (aparelho modesto: 1x)
+          const dpr = lite ? 1 : Math.min(window.devicePixelRatio || 1, 1.25);
+          glc.width = Math.round(w * dpr);
+          glc.height = Math.round(h * dpr);
+          burnGL = createBurnGL(glc, snapshotPaper(paper, w, h, dpr), field ?? buildField(w, h));
+        }
+        if (burnGL && paper) {
+          burnGL.render(0, 0);
+          paper.style.visibility = "hidden";
+          mode = "gl";
+        } else mode = "2d";
+      }
+      if (exitAt.current && !burnt && mode === "gl" && burnGL) {
+        const sec = (now - exitAt.current) / 1000;
+        const p = Math.min(1, sec / T.burnDur);
+        // pega devagar e vai ganhando força
+        const tb = Math.pow(p, 1.25);
+        burnGL.render(tb, sec);
+        // fagulhas e fumaça saem de onde o papel está queimando agora
+        const aspect = w / h;
+        const tries = 46;
+        for (let k = 0; k < tries; k++) {
+          const u = Math.random();
+          const v = Math.random();
+          const d = burnField(u, v, aspect, tb);
+          if (d < 0 && d > -0.014 && Math.random() < 0.55) spawn(u * w, v * h, true, 80 + Math.random() * 130);
+          else if (d < -0.02 && d > -0.07 && Math.random() < 0.05) {
+            smoke.push({ x: u * w, y: v * h, vx: (Math.random() - 0.5) * 16, vy: -(26 + Math.random() * 34), life: 0, max: 1.4 + Math.random() * 1.2, r: 16 + Math.random() * 16 });
+          }
+        }
+        if (p >= 1) {
+          burnt = true;
+          burntCb.current();
+        }
+      }
+      if (exitAt.current && !burnt && mode === "2d") {
         const t = (now - exitAt.current) / 1000 / T.burnDur;
         const p = Math.min(1, t);
         // começa devagar, pega fogo e acelera, assenta no topo
@@ -347,10 +647,18 @@ function IntroCanvas({
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", size);
+      burnGL?.dispose();
+      if (ric) window.cancelIdleCallback(idle);
+      else window.clearTimeout(idle);
     };
   }, [playing, lite, paperRef]);
 
-  return <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-0 size-full" />;
+  return (
+    <>
+      <canvas ref={glRef} aria-hidden className="pointer-events-none absolute inset-0 size-full" />
+      <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-0 size-full" />
+    </>
+  );
 }
 
 /**
@@ -467,7 +775,7 @@ export function Intro() {
             transition={{ duration: T.exit + T.burnDur, ease: [0.25, 0.1, 0.25, 1] }}
           >
             {/* Emblema: ensō em fogo + kanji em pinceladas */}
-            <svg viewBox={EMBLEM_VIEWBOX} className="w-[clamp(118px,16vw,190px)] overflow-visible" aria-hidden>
+            <svg data-snap="emblem" viewBox={EMBLEM_VIEWBOX} className="w-[clamp(118px,16vw,190px)] overflow-visible" aria-hidden>
               <defs>
                 <GoldGradient id={gold} />
                 <linearGradient id={hot} x1="0" y1="0" x2="0" y2="1">
@@ -532,7 +840,7 @@ export function Intro() {
             </svg>
 
             {/* MIKASA: sobe letra a letra; um reflexo de luz corre pelo ouro */}
-            <svg viewBox={WORDMARK_VIEWBOX} className="mt-[clamp(1.6rem,4.2vh,2.9rem)] block w-[clamp(240px,44vw,540px)] overflow-visible" aria-hidden>
+            <svg data-snap="wordmark" viewBox={WORDMARK_VIEWBOX} className="mt-[clamp(1.6rem,4.2vh,2.9rem)] block w-[clamp(240px,44vw,540px)] overflow-visible" aria-hidden>
               <defs>
                 <GoldGradient id={`${gold}w`} />
                 <linearGradient id={sheen} x1="0" x2="1" y1="0" y2="0">
@@ -574,6 +882,7 @@ export function Intro() {
 
             {/* legenda: o espaçamento fecha devagar até assentar */}
             <motion.p
+              data-snap="tagline"
               className="mt-6 whitespace-nowrap font-sans text-[clamp(0.68rem,1.05vw,0.8rem)] uppercase text-ouro-claro"
               initial={{ opacity: 0, letterSpacing: "0.9em" }}
               animate={playing ? { opacity: 1, letterSpacing: "0.42em" } : {}}
@@ -583,6 +892,7 @@ export function Intro() {
             </motion.p>
             <motion.span
               aria-hidden
+              data-snap="line"
               className="mt-5 block h-px w-[clamp(120px,18vw,220px)] bg-gradient-to-r from-transparent via-ouro/70 to-transparent"
               initial={{ scaleX: 0, opacity: 0 }}
               animate={playing ? { scaleX: 1, opacity: 1 } : {}}
