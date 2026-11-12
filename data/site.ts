@@ -61,6 +61,12 @@ export const site = {
     url: "https://wa.me/18492147479",
   },
 
+  /** Crédito do site (rodapé): quem desenvolveu — leva ao WhatsApp dele com mensagem pronta. */
+  developer: {
+    name: "Sebastian Andrade",
+    whatsapp: "https://wa.me/5541996173375",
+  },
+
   maps: {
     url: "https://maps.app.goo.gl/6CRf6DKWHppymi7HA",
     /** Embed sem chave de API, centralizado no endereço público. */
