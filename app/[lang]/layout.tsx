@@ -16,7 +16,7 @@ import { site } from "@/data/site";
 import { cormorant, manrope, shippori } from "@/lib/fonts";
 import { hasLocale, htmlLang, locales } from "@/lib/i18n";
 import { homeAnchor, sectionIds } from "@/lib/nav";
-import { buildMetadata, restaurantJsonLd, siteUrl } from "@/lib/seo";
+import { buildMetadata, restaurantJsonLd, siteUrl, websiteJsonLd } from "@/lib/seo";
 
 export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -32,6 +32,9 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
     applicationName: site.fullName,
     keywords: ["MIKASA", "Nikkei", "sushi", "omakase", "robata", "Puerto Plata", "Playa Dorada", "restaurante japonés", "Japanese restaurant"],
     formatDetection: { telephone: false },
+    // A cópia de prévia no GitHub Pages não deve aparecer no Google (concorreria com o
+    // domínio oficial); a canônica dela também aponta para mikasarestaurante.com.
+    ...(process.env.STATIC_EXPORT === "true" ? { robots: { index: false, follow: true } } : {}),
     ...buildMetadata({ lang, path: "/", title: c.meta.title, description: c.meta.description }),
   };
 }
@@ -78,6 +81,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           <Cursor />
           <Grain />
         </MotionProvider>
+        <JsonLd data={websiteJsonLd()} />
         <JsonLd data={restaurantJsonLd(lang)} />
       </body>
     </html>

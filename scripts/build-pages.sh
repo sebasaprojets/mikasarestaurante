@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Build estático para GitHub Pages: gera out/ com o site em <base>/es e <base>/en.
-# Uso: NEXT_PUBLIC_BASE_PATH=/mikasarestaurante NEXT_PUBLIC_SITE_URL=https://<user>.github.io/mikasarestaurante bash scripts/build-pages.sh
+# Uso: NEXT_PUBLIC_BASE_PATH=/mikasarestaurante NEXT_PUBLIC_SITE_URL=https://mikasarestaurante.com bash scripts/build-pages.sh
+# (a prévia sai com noindex e canônica no domínio oficial: só o mikasarestaurante.com aparece no Google)
 set -euo pipefail
 
 export STATIC_EXPORT=true
@@ -26,7 +27,8 @@ cat > out/index.html <<HTML
 <meta name="theme-color" content="#0a0a0b">
 <script>try{sessionStorage.setItem("mk-intro-force","1")}catch(e){}location.replace("${BASE}/es/"+location.search+location.hash)</script>
 <noscript><meta http-equiv="refresh" content="0; url=${BASE}/es/"></noscript>
-<link rel="canonical" href="${SITE}/es/">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="${SITE}/">
 <style>html,body{margin:0;height:100%;background:#0a0a0b}</style>
 </head><body><noscript><a href="${BASE}/es/" style="color:#c6a15b">MIKASA</a></noscript></body></html>
 HTML
